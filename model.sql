@@ -104,12 +104,18 @@ CREATE TABLE sessions (
     expire_date timestamp with time zone NOT NULL DEFAULT epoch
 );
 
--- keeps track of which releases a user has read/owns
-CREATE TABLE user_releases (
+-- keeps track of which chapters a user has read/owns
+CREATE TABLE user_chapters (
     user_id    integer                  NOT NULL REFERENCES users,
-    release_id integer                  NOT NULL REFERENCES releases,
+    chapter_id integer                  NOT NULL REFERENCES chapters,
     status     integer                  NOT NULL, -- enumeration
     date_read  timestamp with time zone
+);
+
+-- keeps track of which releases a user owns
+CREATE TABLE user_releases (
+    user_id    integer NOT NULL REFERENCES users,
+    release_id integer NOT NULL REFERENCES releases,
 );
 
 -- keeps track of users belonging to translator groups
@@ -341,27 +347,52 @@ CREATE TRIGGER update_project_average_rating
 
 -- update the tags whenever a vote occurs
 CREATE FUNCTION do_update_tags() RETURNS trigger AS $$
-  BEGIN
-    IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
-        r := NEW;
-    ELSE IF (TG_OP = 'DELETE') THEN
-        r := OLD;
-    END IF;
-    weight := (SELECT AVG(vote) FROM tag_consensus c
-        WHERE c.book_tag_id = r.book_tag_id);
-    IF (weight < 1) THEN
-        DELETE FROM tag_consensus
-            WHERE book_tag_id = r.book_tag_id;
-        DELETE FROM book_tags
-            WHERE id = r.book_tag_id;
-    ELSE
-        UPDATE book_tags AS t SET t.weight = weight
-            WHERE t.id = r.book_tag_id;
-    END IF;
-    RETURN r;
-  END
+    BEGIN
+        IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
+            r := NEW;
+        ELSE IF (TG_OP = 'DELETE') THEN
+            r := OLD;
+        END IF;
+
+        weight := (SELECT AVG(vote) FROM tag_consensus c
+            WHERE c.book_tag_id = r.book_tag_id);
+
+        IF (weight < 1) THEN
+            DELETE FROM tag_consensus
+                WHERE book_tag_id = r.book_tag_id;
+            DELETE FROM book_tags
+                WHERE id = r.book_tag_id;
+        ELSE
+            UPDATE book_tags AS t SET t.weight = weight
+                WHERE t.id = r.book_tag_id;
+        END IF;
+
+        RETURN r;
+    END
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_tags
     AFTER INSERT OR UPDATE OR DELETE ON tag_consensus
     EXECUTE PROCEDURE do_update_tags();
+
+-- update the chapters a user owns when he gets a release
+CREATE FUNCTION do_update_user_chapters() RETURNS trigger AS $$
+    BEGIN
+        FOR c IN SELECT chapters_ids FROM releases r
+            WHERE r.id = NEW.release_id
+        LOOP
+            INSERT INTO user_chapters (user_id, chapter_id, status)
+                VALUES (NEW.user_id, c.id, 0); -- assuming status=0 is what we want
+        END LOOP;
+    END
+$$ LANGUAGE plpgsql;
+
+CREATE RULE user_chapters_ignore_duplicates_on_insert AS
+    ON INSERT TO user_chapters
+    WHERE (EXISTS (SELECT 1
+        FROM user_chapters
+        WHERE user_chapters.chapter_id = NEW.chapter_id)) DO INSTEAD NOTHING;
+
+CREATE TRIGGER update_user_chapters
+    AFTER INSERT ON user_releases
+    EXECUTE PROCEDURE do_update_user_chapters();
