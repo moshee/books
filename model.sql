@@ -58,7 +58,7 @@ CREATE TABLE translation_groups (
 );
 
 CREATE TABLE chapters (
-    id serial  PRIMARY KEY NOT NULL,
+    id         serial      PRIMARY KEY NOT NULL,
     volume     integer,
     num        integer,
     title      text,
@@ -66,16 +66,15 @@ CREATE TABLE chapters (
 );
 
 CREATE TABLE releases (
-    id              serial  PRIMARY KEY NOT NULL,
-    book_series_id  integer NOT NULL REFERENCES book_series,
-    translator_id   integer NOT NULL REFERENCES translator_groups,
-    project_id      integer NOT NULL REFERENCES translation_projects,
-    lang            integer NOT NULL,
+    id              serial    PRIMARY KEY NOT NULL,
+    book_series_id  integer   NOT NULL REFERENCES book_series,
+    translator_id   integer   NOT NULL REFERENCES translator_groups,
+    project_id      integer   NOT NULL REFERENCES translation_projects,
+    lang            integer   NOT NULL,
     release_date    timestamp with time zone NOT NULL,
     notes           text,
-    is_last_release boolean NOT NULL DEFAULT false,
-    first_chapter   integer NOT NULL REFERENCES chapters,
-    last_chapter    integer          REFERENCES chapters
+    is_last_release boolean   NOT NULL DEFAULT false,
+    chapters_ids    integer[] NOT NULL REFERENCES chapters,
 );
 
 CREATE TABLE translation_projects (
@@ -268,18 +267,18 @@ CREATE TABLE project_reviews (
 -- TODO: ratings may have to be cached and updates executed in batch somehow eventually
 CREATE FUNCTION do_update_book_average_rating() RETURNS trigger AS $$
   BEGIN
-    IF (TG_OP = &#39;INSERT&#39;) THEN
+    IF (TG_OP = 'INSERT') THEN
         UPDATE book_series SET avg_rating = (
             SELECT AVG(rating) FROM book_ratings r
                 WHERE r.series_id = NEW.series_id ),
             rating_count = rating_count + 1;
         RETURN NEW;
-    ELSE IF (TG_OP = &#39;UPDATE&#39;) THEN
+    ELSE IF (TG_OP = 'UPDATE') THEN
         UPDATE book_series SET avg_rating = (
             SELECT AVG(rating) FROM book_ratings r
                 WHERE r.series_id = NEW.series_id );
         RETURN NEW;
-    ELSE IF (TG_OP = &#39;DELETE&#39;) THEN
+    ELSE IF (TG_OP = 'DELETE') THEN
         UPDATE book_series SET avg_rating = (
             SELECT AVG(rating) FROM book_ratings r
                 WHERE r.series_id = OLD.series_id ),
@@ -296,12 +295,12 @@ CREATE TRIGGER update_book_average_rating
 
 CREATE FUNCTION do_update_translator_average_rating() RETURNS trigger AS $$
   BEGIN
-    IF (TG_OP = &#39;INSERT&#39; OR TG_OP = &#39;UPDATE&#39;) THEN
+    IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
         UPDATE translation_groups SET avg_rating = (
             SELECT AVG(rating) FROM translator_ratings r
                 WHERE r.translator_id = NEW.translator_id );
         RETURN NEW;
-    ELSE IF (TG_OP = &#39;DELETE&#39;) THEN
+    ELSE IF (TG_OP = 'DELETE') THEN
         UPDATE translation_groups SET avg_rating = (
             SELECT AVG(rating) FROM translator_ratings r
                 WHERE r.translator_id = OLD.translator_id );
@@ -317,14 +316,14 @@ CREATE TRIGGER update_translator_average_rating
 
 CREATE FUNCTION do_update_project_average_rating() RETURNS trigger AS $$
   BEGIN
-    IF (TG_OP = &#39;INSERT&#39; OR TG_OP = &#39;UPDATE&#39;) THEN
+    IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
         UPDATE translation_groups SET avg_project_rating = (
             SELECT AVG(r.rating)
 		FROM project_ratings r, translation_projects p
                 WHERE r.project_id = p.id
 		AND r.project_id = NEW.project_id );
         RETURN NEW;
-    ELSE IF (TG_OP = &#39;DELETE&#39;) THEN
+    ELSE IF (TG_OP = 'DELETE') THEN
         UPDATE translation_groups SET avg_project_rating = (
             SELECT AVG(r.rating)
 		FROM project_ratings r, translation_projects p
@@ -343,14 +342,14 @@ CREATE TRIGGER update_project_average_rating
 -- update the tags whenever a vote occurs
 CREATE FUNCTION do_update_tags() RETURNS trigger AS $$
   BEGIN
-    IF (TG_OP = &#39;INSERT&#39; OR TG_OP = &#39;UPDATE&#39;) THEN
+    IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
         r := NEW;
-    ELSE IF (TG_OP = &#39;DELETE&#39;) THEN
+    ELSE IF (TG_OP = 'DELETE') THEN
         r := OLD;
     END IF;
     weight := (SELECT AVG(vote) FROM tag_consensus c
         WHERE c.book_tag_id = r.book_tag_id);
-    IF (weight &lt; 1) THEN
+    IF (weight < 1) THEN
         DELETE FROM tag_consensus
             WHERE book_tag_id = r.book_tag_id;
         DELETE FROM book_tags
