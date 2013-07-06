@@ -8,10 +8,6 @@ import (
 	"time"
 )
 
-type PictureLinker interface {
-	PictureLink() string
-}
-
 type (
 	SeriesKind  int
 	Demographic int
@@ -91,8 +87,10 @@ type BookSeries struct {
 	RatingCount int
 	Demographic
 	*Magazine
+}
 
-	Related []RelatedSeries
+func (self *BookSeries) Related() []RelatedSeries {
+	return nil
 }
 
 type Author struct {
@@ -171,7 +169,7 @@ type User struct {
 	Avatar       bool
 }
 
-func (self *User) PictureLink() string {
+func (self *User) AvatarFile() string {
 	if self.Avatar {
 		return "u" + strconv.Itoa(self.Id) + ".jpg"
 	} else {
