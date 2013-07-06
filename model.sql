@@ -6,6 +6,10 @@ BEGIN;
 
 SET CONSTRAINTS ALL DEFERRED;
 
+CREATE SCHEMA books;
+
+SET search_path TO books,public;
+
 -- schema version (increment whenever it changes)
 CREATE TABLE schema_version ( revision integer NOT NULL );
 
