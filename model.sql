@@ -216,6 +216,25 @@ CREATE TABLE favorite_magazines (
     magazine_id integer NOT NULL REFERENCES magazines
 );
 
+CREATE TABLE favorite_tags (
+    user_id integer NOT NULL REFERENCES users,
+    tag_id  integer NOT NULL REFERENCES tags
+);
+
+--
+-- Filters
+--
+
+CREATE TABLE filtered_groups (
+    user_id  integer NOT NULL REFERENCES users,
+    group_id integer NOT NULL REFERENCES translation_groups
+);
+
+CREATE TABLE filtered_tags (
+    user_id integer NOT NULL REFERENCES users,
+    tag_id  integer NOT NULL REFERENCES tags
+);
+
 --
 -- Ratings and reviews
 --
@@ -273,7 +292,9 @@ ALTER TABLE book_ratings       ADD review_id integer REFERENCES book_reviews;
 ALTER TABLE translator_ratings ADD review_id integer REFERENCES translator_reviews;
 ALTER TABLE project_ratings    ADD review_id integer REFERENCES project_reviews;
 
+--
 -- Triggers
+--
 
 -- update the average rating whenever a rating occurs
 -- TODO: ratings may have to be cached and updates executed in batch somehow eventually
@@ -403,7 +424,8 @@ CREATE RULE user_chapters_ignore_duplicates_on_insert AS
     ON INSERT TO user_chapters
     WHERE (EXISTS (SELECT 1
         FROM user_chapters
-        WHERE user_chapters.chapter_id = NEW.chapter_id)) DO INSTEAD NOTHING;
+        WHERE user_chapters.chapter_id = NEW.chapter_id))
+        DO INSTEAD NOTHING;
 
 CREATE TRIGGER update_user_chapters
     AFTER INSERT ON user_releases
