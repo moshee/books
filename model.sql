@@ -19,7 +19,7 @@ CREATE TABLE book_series (
     avg_rating   real, -- NULL means not rated (as opposed to a zero rating)
     rating_count integer                  NOT NULL DEFAULT 0,
     demographic  integer                  NOT NULL, -- enumerated, could be enum type
-    magazine     integer                  REFERENCES serializations
+    magazine_id  integer                  REFERENCES magazines
 );
 
 CREATE TABLE authors (
