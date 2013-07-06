@@ -2,8 +2,27 @@
 -- Schema for book release tracker
 --
 
+BEGIN;
+
+SET CONSTRAINTS ALL DEFERRED;
+
 -- schema version (increment whenever it changes)
 CREATE TABLE schema_version ( revision integer NOT NULL );
+
+CREATE TABLE publishers (
+    id         serial PRIMARY KEY NOT NULL,
+    name       text   NOT NULL,
+    date_added timestamp with time zone NOT NULL,
+    summary    text
+);
+
+CREATE TABLE magazines (
+    id         serial  PRIMARY KEY NOT NULL,
+    title      text    NOT NULL,
+    publisher  integer NOT NULL REFERENCES publishers,
+    date_added timestamp with time zone NOT NULL,
+    summary    text
+);
 
 CREATE TABLE book_series (
     id           serial                   PRIMARY KEY NOT NULL,
@@ -54,6 +73,14 @@ CREATE TABLE translation_groups (
     avg_release_rate   bigint -- seconds
 );
 
+CREATE TABLE translation_projects (
+    id            serial  PRIMARY KEY NOT NULL,
+    series_id     integer NOT NULL REFERENCES book_series,
+    translator_id integer NOT NULL REFERENCES translation_groups,
+    start_date    timestamp with time zone NOT NULL,
+    end_date      timestamp with time zone
+);
+
 CREATE TABLE chapters (
     id           serial  PRIMARY KEY NOT NULL,
     volume       integer,
@@ -65,7 +92,7 @@ CREATE TABLE chapters (
 CREATE TABLE releases (
     id              serial    PRIMARY KEY NOT NULL,
     series_id       integer   NOT NULL REFERENCES book_series,
-    translator_id   integer   NOT NULL REFERENCES translator_groups,
+    translator_id   integer   NOT NULL REFERENCES translation_groups,
     project_id      integer   NOT NULL REFERENCES translation_projects,
     lang            integer   NOT NULL,
     release_date    timestamp with time zone NOT NULL,
@@ -73,14 +100,6 @@ CREATE TABLE releases (
     is_last_release boolean   NOT NULL DEFAULT false,
     chapters_ids    integer[] NOT NULL
 );
-
-CREATE TABLE translation_projects (
-    id            serial  PRIMARY KEY NOT NULL,
-    series_id     integer NOT NULL REFERENCES book_series,
-    translator_id integer NOT NULL REFERENCES translator_groups,
-    start_date    timestamp with time zone NOT NULL,
-    end_date      timestamp with time zone
-)
 
 CREATE TABLE users (
     id            serial  PRIMARY KEY NOT NULL,
@@ -98,7 +117,7 @@ CREATE TABLE users (
 CREATE TABLE sessions (
     id          bytea   NOT NULL,
     user_id     integer NOT NULL REFERENCES users,
-    expire_date timestamp with time zone NOT NULL DEFAULT epoch
+    expire_date timestamp with time zone NOT NULL DEFAULT 'epoch'::timestamp with time zone
 );
 
 -- keeps track of which chapters a user has read/owns
@@ -112,28 +131,13 @@ CREATE TABLE user_chapters (
 -- keeps track of which releases a user owns
 CREATE TABLE user_releases (
     user_id    integer NOT NULL REFERENCES users,
-    release_id integer NOT NULL REFERENCES releases,
+    release_id integer NOT NULL REFERENCES releases
 );
 
 -- keeps track of users belonging to translator groups
 CREATE TABLE translator_members (
     user_id       integer NOT NULL REFERENCES users,
     translator_id integer NOT NULL REFERENCES translation_groups
-);
-
-CREATE TABLE magazines (
-    id         serial  PRIMARY KEY NOT NULL,
-    title      text    NOT NULL,
-    publisher  integer NOT NULL REFERENCES publishers,
-    date_added timestamp with time zone NOT NULL,
-    summary    text
-);
-
-CREATE TABLE publishers (
-    id         serial PRIMARY KEY NOT NULL,
-    name       text   NOT NULL,
-    date_added timestamp with time zone NOT NULL,
-    summary    text
 );
 
 --
@@ -218,7 +222,6 @@ CREATE TABLE book_ratings (
     id        serial  PRIMARY KEY NOT NULL,
     user_id   integer NOT NULL REFERENCES users,
     series_id integer NOT NULL REFERENCES book_series,
-    review_id integer REFERENCES book_reviews,
     rating    integer NOT NULL,
     rate_date timestamp with time zone NOT NULL
 );
@@ -227,7 +230,6 @@ CREATE TABLE translator_ratings (
     id            serial  PRIMARY KEY NOT NULL,
     user_id       integer NOT NULL REFERENCES users,
     translator_id integer NOT NULL REFERENCES translation_groups,
-    review_id     integer REFERENCES translator_reviews,
     rating        integer NOT NULL,
     rate_date     timestamp with time zone NOT NULL
 );
@@ -236,7 +238,6 @@ CREATE TABLE project_ratings (
     id         serial  PRIMARY KEY NOT NULL,
     user_id    integer NOT NULL REFERENCES users,
     project_id integer NOT NULL REFERENCES translation_projects,
-    review_id  integer REFERENCES project_reviews,
     rating     integer NOT NULL,
     rate_date  timestamp with time zone NOT NULL
 );
@@ -264,6 +265,10 @@ CREATE TABLE project_reviews (
     body        text    NOT NULL
 );
 
+ALTER TABLE book_ratings       ADD review_id integer REFERENCES book_reviews;
+ALTER TABLE translator_ratings ADD review_id integer REFERENCES translator_reviews;
+ALTER TABLE project_ratings    ADD review_id integer REFERENCES project_reviews;
+
 -- Triggers
 
 -- update the average rating whenever a rating occurs
@@ -276,12 +281,12 @@ CREATE FUNCTION do_update_book_average_rating() RETURNS trigger AS $$
                 WHERE r.series_id = NEW.series_id ),
             rating_count = rating_count + 1;
         RETURN NEW;
-    ELSE IF (TG_OP = 'UPDATE') THEN
+    ELSIF (TG_OP = 'UPDATE') THEN
         UPDATE book_series SET avg_rating = (
             SELECT AVG(rating) FROM book_ratings r
                 WHERE r.series_id = NEW.series_id );
         RETURN NEW;
-    ELSE IF (TG_OP = 'DELETE') THEN
+    ELSIF (TG_OP = 'DELETE') THEN
         UPDATE book_series SET avg_rating = (
             SELECT AVG(rating) FROM book_ratings r
                 WHERE r.series_id = OLD.series_id ),
@@ -289,7 +294,7 @@ CREATE FUNCTION do_update_book_average_rating() RETURNS trigger AS $$
         RETURN OLD;
     END IF;
     RETURN NULL;
-  END
+  END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_book_average_rating
@@ -303,14 +308,14 @@ CREATE FUNCTION do_update_translator_average_rating() RETURNS trigger AS $$
             SELECT AVG(rating) FROM translator_ratings r
                 WHERE r.translator_id = NEW.translator_id );
         RETURN NEW;
-    ELSE IF (TG_OP = 'DELETE') THEN
+    ELSIF (TG_OP = 'DELETE') THEN
         UPDATE translation_groups SET avg_rating = (
             SELECT AVG(rating) FROM translator_ratings r
                 WHERE r.translator_id = OLD.translator_id );
         RETURN OLD;
     END IF;
     RETURN NULL;
-  END
+  END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_translator_average_rating
@@ -318,24 +323,24 @@ CREATE TRIGGER update_translator_average_rating
     EXECUTE PROCEDURE do_update_translator_average_rating();
 
 CREATE FUNCTION do_update_project_average_rating() RETURNS trigger AS $$
-  BEGIN
-    IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
-        UPDATE translation_groups SET avg_project_rating = (
-            SELECT AVG(r.rating)
-		FROM project_ratings r, translation_projects p
-                WHERE r.project_id = p.id
-		AND r.project_id = NEW.project_id );
-        RETURN NEW;
-    ELSE IF (TG_OP = 'DELETE') THEN
-        UPDATE translation_groups SET avg_project_rating = (
-            SELECT AVG(r.rating)
-		FROM project_ratings r, translation_projects p
-                WHERE r.project_id = p.id
-		AND r.project_id = OLD.project_id );
-        RETURN NEW;
-    END IF;
-    RETURN NULL;
-  END
+	BEGIN
+		IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
+			UPDATE translation_groups SET avg_project_rating = (
+				SELECT AVG(r.rating)
+			FROM project_ratings r, translation_projects p
+					WHERE r.project_id = p.id
+			AND r.project_id = NEW.project_id );
+			RETURN NEW;
+		ELSIF (TG_OP = 'DELETE') THEN
+			UPDATE translation_groups SET avg_project_rating = (
+				SELECT AVG(r.rating)
+					FROM project_ratings r, translation_projects p
+					WHERE r.project_id = p.id
+					AND r.project_id = OLD.project_id );
+			RETURN NEW;
+		END IF;
+		RETURN NULL;
+	END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_project_average_rating
@@ -344,10 +349,13 @@ CREATE TRIGGER update_project_average_rating
 
 -- update the tags whenever a vote occurs
 CREATE FUNCTION do_update_tags() RETURNS trigger AS $$
+	DECLARE
+		r      RECORD;
+		weight real;
     BEGIN
         IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
             r := NEW;
-        ELSE IF (TG_OP = 'DELETE') THEN
+        ELSIF (TG_OP = 'DELETE') THEN
             r := OLD;
         END IF;
 
@@ -365,7 +373,7 @@ CREATE FUNCTION do_update_tags() RETURNS trigger AS $$
         END IF;
 
         RETURN r;
-    END
+    END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_tags
@@ -375,7 +383,8 @@ CREATE TRIGGER update_tags
 -- update the chapters a user owns when he gets a release
 CREATE FUNCTION do_update_user_chapters() RETURNS trigger AS $$
     DECLARE
-        id integer;
+		ids integer[];
+        id  integer;
     BEGIN
         ids := (SELECT chapters_ids FROM releases r WHERE r.id = NEW.release_id);
         FOREACH id IN ARRAY ids
@@ -383,7 +392,7 @@ CREATE FUNCTION do_update_user_chapters() RETURNS trigger AS $$
             INSERT INTO user_chapters (user_id, chapter_id, status)
                 VALUES (NEW.user_id, id, 0); -- assuming status=0 is what we want
         END LOOP;
-    END
+    END;
 $$ LANGUAGE plpgsql;
 
 CREATE RULE user_chapters_ignore_duplicates_on_insert AS
@@ -395,3 +404,5 @@ CREATE RULE user_chapters_ignore_duplicates_on_insert AS
 CREATE TRIGGER update_user_chapters
     AFTER INSERT ON user_releases
     EXECUTE PROCEDURE do_update_user_chapters();
+
+END;
