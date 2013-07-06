@@ -16,13 +16,10 @@ CREATE TABLE book_series (
     last_updated timestamp with time zone NOT NULL,
     finished     boolean                  NOT NULL DEFAULT false,
     nsfw         boolean                  NOT NULL DEFAULT false,
-
-    -- NULL means not rated (as opposed to a zero rating)
-    avg_rating   real,
-    rating_count integer NOT NULL DEFAULT 0,
-
-    demographic   integer NOT NULL, -- enumerated, could be enum type
-    magazine      integer REFERENCES serializations
+    avg_rating   real, -- NULL means not rated (as opposed to a zero rating)
+    rating_count integer                  NOT NULL DEFAULT 0,
+    demographic  integer                  NOT NULL, -- enumerated, could be enum type
+    magazine     integer                  REFERENCES serializations
 );
 
 CREATE TABLE authors (
@@ -37,13 +34,13 @@ CREATE TABLE authors (
 );
 
 CREATE TABLE production_credits (
-    book_series_id integer NOT NULL REFERENCES book_series,
-    author_id      integer NOT NULL REFERENCES authors,
-    credit         integer NOT NULL -- enumerated
+    series_id integer NOT NULL REFERENCES book_series,
+    author_id integer NOT NULL REFERENCES authors,
+    credit    integer NOT NULL -- enumerated
 );
 
 CREATE TABLE related_series (
-    book_series_id    integer NOT NULL REFERENCES book_series,
+    series_id         integer NOT NULL REFERENCES book_series,
     related_series_id integer NOT NULL REFERENCES book_series,
     relation          integer NOT NULL -- enumerated
 );
@@ -58,23 +55,23 @@ CREATE TABLE translation_groups (
 );
 
 CREATE TABLE chapters (
-    id         serial      PRIMARY KEY NOT NULL,
-    volume     integer,
-    num        integer,
-    title      text,
-    actual_num integer     NOT NULL
+    id           serial  PRIMARY KEY NOT NULL,
+    volume       integer,
+	display_name text    NOT NULL,
+    sort_num     integer NOT NULL,
+    title        text
 );
 
 CREATE TABLE releases (
     id              serial    PRIMARY KEY NOT NULL,
-    book_series_id  integer   NOT NULL REFERENCES book_series,
+    series_id       integer   NOT NULL REFERENCES book_series,
     translator_id   integer   NOT NULL REFERENCES translator_groups,
     project_id      integer   NOT NULL REFERENCES translation_projects,
     lang            integer   NOT NULL,
     release_date    timestamp with time zone NOT NULL,
     notes           text,
     is_last_release boolean   NOT NULL DEFAULT false,
-    chapters_ids    integer[] NOT NULL REFERENCES chapters,
+    chapters_ids    integer[] NOT NULL
 );
 
 CREATE TABLE translation_projects (
@@ -171,19 +168,19 @@ CREATE TABLE tags (
 );
 
 CREATE TABLE book_tags (
-    id             serial PRIMARY KEY NOT NULL,
-    book_series_id integer            NOT NULL REFERENCES book_series,
-    tag_id         integer            NOT NULL REFERENCES tags,
-    spoiler        boolean            NOT NULL,
-    weight         real               NOT NULL
+    id        serial  PRIMARY KEY NOT NULL,
+    series_id integer NOT NULL REFERENCES book_series,
+    tag_id    integer NOT NULL REFERENCES tags,
+    spoiler   boolean NOT NULL,
+    weight    real    NOT NULL
 );
 
 -- Use a left join to find which tags, if any, a User has voted on
 -- for a given Series.
 CREATE TABLE tag_consensus (
-    user_id     integer                  NOT NULL REFERENCES users,
-    book_tag_id integer                  NOT NULL REFERENCES book_tags,
-    vote        integer                  NOT NULL,
+    user_id     integer NOT NULL REFERENCES users,
+    book_tag_id integer NOT NULL REFERENCES book_tags,
+    vote        integer NOT NULL,
     vote_date   timestamp with time zone NOT NULL
 );
 
