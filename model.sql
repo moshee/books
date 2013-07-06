@@ -57,7 +57,7 @@ CREATE TABLE translation_groups (
 CREATE TABLE chapters (
     id           serial  PRIMARY KEY NOT NULL,
     volume       integer,
-	display_name text    NOT NULL,
+    display_name text    NOT NULL,
     sort_num     integer NOT NULL,
     title        text
 );
@@ -374,12 +374,14 @@ CREATE TRIGGER update_tags
 
 -- update the chapters a user owns when he gets a release
 CREATE FUNCTION do_update_user_chapters() RETURNS trigger AS $$
+    DECLARE
+        id integer;
     BEGIN
-        FOR c IN SELECT chapters_ids FROM releases r
-            WHERE r.id = NEW.release_id
+        ids := (SELECT chapters_ids FROM releases r WHERE r.id = NEW.release_id);
+        FOREACH id IN ARRAY ids
         LOOP
             INSERT INTO user_chapters (user_id, chapter_id, status)
-                VALUES (NEW.user_id, c.id, 0); -- assuming status=0 is what we want
+                VALUES (NEW.user_id, id, 0); -- assuming status=0 is what we want
         END LOOP;
     END
 $$ LANGUAGE plpgsql;
