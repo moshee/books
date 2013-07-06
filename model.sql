@@ -14,14 +14,14 @@ SET search_path TO books,public;
 CREATE TABLE schema_version ( revision integer NOT NULL );
 
 CREATE TABLE publishers (
-    id         serial PRIMARY KEY NOT NULL,
+    id         serial PRIMARY KEY,
     name       text   NOT NULL,
     date_added timestamp with time zone NOT NULL,
     summary    text
 );
 
 CREATE TABLE magazines (
-    id         serial  PRIMARY KEY NOT NULL,
+    id         serial  PRIMARY KEY,
     title      text    NOT NULL,
     publisher  integer NOT NULL REFERENCES publishers,
     date_added timestamp with time zone NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE magazines (
 );
 
 CREATE TABLE book_series (
-    id           serial                   PRIMARY KEY NOT NULL,
+    id           serial                   PRIMARY KEY,
     kind         integer                  NOT NULL, -- enumerated
     title        text                     NOT NULL,
     other_titles text[],
@@ -46,7 +46,7 @@ CREATE TABLE book_series (
 );
 
 CREATE TABLE authors (
-    id          serial  PRIMARY KEY NOT NULL,
+    id          serial  PRIMARY KEY,
     name        text    NOT NULL,
     native_name text,
     aliases     text[],
@@ -69,7 +69,7 @@ CREATE TABLE related_series (
 );
 
 CREATE TABLE translation_groups (
-    id                 serial PRIMARY KEY NOT NULL,
+    id                 serial PRIMARY KEY,
     name               text   NOT NULL,
     summary            text,
     avg_rating         real,
@@ -78,7 +78,7 @@ CREATE TABLE translation_groups (
 );
 
 CREATE TABLE translation_projects (
-    id            serial  PRIMARY KEY NOT NULL,
+    id            serial  PRIMARY KEY,
     series_id     integer NOT NULL REFERENCES book_series,
     translator_id integer NOT NULL REFERENCES translation_groups,
     start_date    timestamp with time zone NOT NULL,
@@ -86,7 +86,7 @@ CREATE TABLE translation_projects (
 );
 
 CREATE TABLE chapters (
-    id           serial  PRIMARY KEY NOT NULL,
+    id           serial  PRIMARY KEY,
     volume       integer,
     display_name text    NOT NULL,
     sort_num     integer NOT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE chapters (
 );
 
 CREATE TABLE releases (
-    id              serial    PRIMARY KEY NOT NULL,
+    id              serial    PRIMARY KEY,
     series_id       integer   NOT NULL REFERENCES book_series,
     translator_id   integer   NOT NULL REFERENCES translation_groups,
     project_id      integer   NOT NULL REFERENCES translation_projects,
@@ -106,7 +106,7 @@ CREATE TABLE releases (
 );
 
 CREATE TABLE users (
-    id            serial  PRIMARY KEY NOT NULL,
+    id            serial  PRIMARY KEY,
     name          text    NOT NULL,
     pass          bytea   NOT NULL,
     salt          bytea   NOT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE translator_members (
 
 -- Website, Twitter, Blog, Facebook, etc.
 CREATE TABLE link_kinds (
-    id   serial PRIMARY KEY NOT NULL,
+    id   serial PRIMARY KEY,
     name text   NOT NULL
 );
 
@@ -171,12 +171,12 @@ CREATE TABLE translator_links (
 --
 
 CREATE TABLE tags (
-    id   serial PRIMARY KEY NOT NULL,
+    id   serial PRIMARY KEY,
     name text   NOT NULL
 );
 
 CREATE TABLE book_tags (
-    id        serial  PRIMARY KEY NOT NULL,
+    id        serial  PRIMARY KEY,
     series_id integer NOT NULL REFERENCES book_series,
     tag_id    integer NOT NULL REFERENCES tags,
     spoiler   boolean NOT NULL,
@@ -242,7 +242,7 @@ CREATE TABLE filtered_tags (
 -- Ratings
 
 CREATE TABLE book_ratings (
-    id        serial  PRIMARY KEY NOT NULL,
+    id        serial  PRIMARY KEY,
     user_id   integer NOT NULL REFERENCES users,
     series_id integer NOT NULL REFERENCES book_series,
     rating    integer NOT NULL,
@@ -250,7 +250,7 @@ CREATE TABLE book_ratings (
 );
 
 CREATE TABLE translator_ratings (
-    id            serial  PRIMARY KEY NOT NULL,
+    id            serial  PRIMARY KEY,
     user_id       integer NOT NULL REFERENCES users,
     translator_id integer NOT NULL REFERENCES translation_groups,
     rating        integer NOT NULL,
@@ -258,7 +258,7 @@ CREATE TABLE translator_ratings (
 );
 
 CREATE TABLE project_ratings (
-    id         serial  PRIMARY KEY NOT NULL,
+    id         serial  PRIMARY KEY,
     user_id    integer NOT NULL REFERENCES users,
     project_id integer NOT NULL REFERENCES translation_projects,
     rating     integer NOT NULL,
@@ -271,19 +271,19 @@ CREATE TABLE project_ratings (
 -- *_ratings.review_id will be NULL.
 
 CREATE TABLE book_reviews (
-    id          serial  PRIMARY KEY NOT NULL,
+    id          serial  PRIMARY KEY,
     rating_id   integer NOT NULL REFERENCES book_ratings,
     body        text    NOT NULL
 );
 
 CREATE TABLE translator_reviews (
-    id          serial  PRIMARY KEY NOT NULL,
+    id          serial  PRIMARY KEY,
     rating_id   integer NOT NULL REFERENCES translator_ratings,
     body        text    NOT NULL
 );
 
 CREATE TABLE project_reviews (
-    id          serial  PRIMARY KEY NOT NULL,
+    id          serial  PRIMARY KEY,
     rating_id   integer NOT NULL REFERENCES project_ratings,
     body        text    NOT NULL
 );
