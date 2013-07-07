@@ -10,13 +10,17 @@ CREATE SCHEMA books;
 
 SET search_path TO books,public;
 
+CREATE EXTENSION intarray;
+
 -- schema version (increment whenever it changes)
 CREATE TABLE schema_version ( revision integer NOT NULL );
+
+INSERT INTO schema_version VALUES (0);
 
 CREATE TABLE publishers (
     id         serial PRIMARY KEY,
     name       text   NOT NULL,
-    date_added timestamp with time zone NOT NULL,
+    date_added timestamp with time zone NOT NULL DEFAULT 'now'::timestamp with time zone,
     summary    text
 );
 
@@ -24,48 +28,59 @@ CREATE TABLE magazines (
     id         serial  PRIMARY KEY,
     title      text    NOT NULL,
     publisher  integer NOT NULL REFERENCES publishers,
-    date_added timestamp with time zone NOT NULL,
+    date_added timestamp with time zone NOT NULL DEFAULT 'now'::timestamp with time zone,
+	language   integer,
     summary    text
 );
 
+CREATE TYPE Demographic AS ENUM ( 'Shounen', 'Shoujo', 'Seinen', 'Josei' );
+CREATE TYPE SeriesKind AS ENUM ( 'Comic', 'Novel', 'Webcomic' );
+
 CREATE TABLE book_series (
     id           serial                   PRIMARY KEY,
-    kind         integer                  NOT NULL, -- enumerated
+    kind         SeriesKind               NOT NULL DEFAULT 0,
     title        text                     NOT NULL,
     other_titles text[],
     summary      text,
     vintage      integer                  NOT NULL, -- year
-    date_added   timestamp with time zone NOT NULL,
-    last_updated timestamp with time zone NOT NULL,
+    date_added   timestamp with time zone NOT NULL DEFAULT 'now'::timestamp with time zone,
+    last_updated timestamp with time zone NOT NULL DEFAULT 'epoch'::timestamp with time zone,
     finished     boolean                  NOT NULL DEFAULT false,
     nsfw         boolean                  NOT NULL DEFAULT false,
     avg_rating   real, -- NULL means not rated (as opposed to a zero rating)
     rating_count integer                  NOT NULL DEFAULT 0,
-    demographic  integer                  NOT NULL, -- enumerated, could be enum type
+    demographic  Demographic              NOT NULL,
     magazine_id  integer                  REFERENCES magazines
 );
 
+CREATE TYPE Sex AS ENUM ( 'Male', 'Female', 'Other' );
+
 CREATE TABLE authors (
     id          serial  PRIMARY KEY,
-    name        text    NOT NULL,
+	given_name  text    NOT NULL,
+    surname     text,
     native_name text,
     aliases     text[],
-    picture     boolean NOT NULL,
+    picture     boolean NOT NULL DEFAULT false,
     birthday    date,
     bio         text,
-    sex         integer NOT NULL -- we be politically correct
+    sex         Sex -- we be politically correct
 );
+
+CREATE TYPE Credit AS ENUM ( 'Scenario', 'Art', 'Illustration', 'Music' );
 
 CREATE TABLE production_credits (
     series_id integer NOT NULL REFERENCES book_series,
     author_id integer NOT NULL REFERENCES authors,
-    credit    integer NOT NULL -- enumerated
+    credit    Credit  NOT NULL
 );
 
+CREATE TYPE SeriesRelation AS ENUM ( 'Related', 'Sequel', 'Prequel', 'Adaptation' );
+
 CREATE TABLE related_series (
-    series_id         integer NOT NULL REFERENCES book_series,
-    related_series_id integer NOT NULL REFERENCES book_series,
-    relation          integer NOT NULL -- enumerated
+    series_id         integer        NOT NULL REFERENCES book_series,
+    related_series_id integer        NOT NULL REFERENCES book_series,
+    relation          SeriesRelation NOT NULL
 );
 
 CREATE TABLE translation_groups (
@@ -99,7 +114,7 @@ CREATE TABLE releases (
     translator_id   integer   NOT NULL REFERENCES translation_groups,
     project_id      integer   NOT NULL REFERENCES translation_projects,
     lang            integer   NOT NULL,
-    release_date    timestamp with time zone NOT NULL,
+    release_date    timestamp with time zone NOT NULL DEFAULT 'now'::timestamp with time zone,
     notes           text,
     is_last_release boolean   NOT NULL DEFAULT false,
     chapters_ids    integer[] NOT NULL
@@ -113,7 +128,7 @@ CREATE TABLE users (
     rights        integer NOT NULL DEFAULT 0,
     vote_weight   integer NOT NULL DEFAULT 1,
     summary       text,
-    register_date timestamp with time zone NOT NULL,
+    register_date timestamp with time zone NOT NULL DEFAULT 'now'::timestamp with time zone,
     last_active   timestamp with time zone NOT NULL,
     avatar        boolean
 );
@@ -124,11 +139,13 @@ CREATE TABLE sessions (
     expire_date timestamp with time zone NOT NULL DEFAULT 'epoch'::timestamp with time zone
 );
 
+CREATE TYPE ReadStatus AS ENUM ( 'Read', 'Owned', 'Skipped' );
+
 -- keeps track of which chapters a user has read/owns
 CREATE TABLE user_chapters (
     user_id    integer                  NOT NULL REFERENCES users,
     chapter_id integer                  NOT NULL REFERENCES chapters,
-    status     integer                  NOT NULL, -- enumeration
+    status     ReadStatus               NOT NULL,
     date_read  timestamp with time zone
 );
 
@@ -166,6 +183,18 @@ CREATE TABLE translator_links (
     url           text    NOT NULL
 );
 
+CREATE TABLE publisher_links (
+	publisher_id integer NOT NULL REFERENCES publishers,
+	link_kind    integer NOT NULL REFERENCES link_kinds,
+	url          text    NOT NULL
+);
+
+CREATE TABLE magazine_links (
+	magazine_id integer NOT NULL REFERENCES magazines,
+	link_kind    integer NOT NULL REFERENCES link_kinds,
+	url          text    NOT NULL
+);
+
 --
 -- User-submitted tags and voting
 --
@@ -189,7 +218,7 @@ CREATE TABLE tag_consensus (
     user_id     integer NOT NULL REFERENCES users,
     book_tag_id integer NOT NULL REFERENCES book_tags,
     vote        integer NOT NULL,
-    vote_date   timestamp with time zone NOT NULL
+    vote_date   timestamp with time zone NOT NULL DEFAULT 'now'::timestamp with time zone
 );
 
 --
@@ -246,7 +275,7 @@ CREATE TABLE book_ratings (
     user_id   integer NOT NULL REFERENCES users,
     series_id integer NOT NULL REFERENCES book_series,
     rating    integer NOT NULL,
-    rate_date timestamp with time zone NOT NULL
+    rate_date timestamp with time zone NOT NULL DEFAULT 'now'::timestamp with time zone
 );
 
 CREATE TABLE translator_ratings (
@@ -254,7 +283,7 @@ CREATE TABLE translator_ratings (
     user_id       integer NOT NULL REFERENCES users,
     translator_id integer NOT NULL REFERENCES translation_groups,
     rating        integer NOT NULL,
-    rate_date     timestamp with time zone NOT NULL
+    rate_date     timestamp with time zone NOT NULL DEFAULT 'now'::timestamp with time zone
 );
 
 CREATE TABLE project_ratings (
@@ -262,7 +291,7 @@ CREATE TABLE project_ratings (
     user_id    integer NOT NULL REFERENCES users,
     project_id integer NOT NULL REFERENCES translation_projects,
     rating     integer NOT NULL,
-    rate_date  timestamp with time zone NOT NULL
+    rate_date  timestamp with time zone NOT NULL DEFAULT 'now'::timestamp with time zone
 );
 
 -- Reviews
