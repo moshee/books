@@ -16,7 +16,7 @@ CREATE TABLE schema_version ( revision integer NOT NULL );
 CREATE TABLE publishers (
     id         serial PRIMARY KEY,
     name       text   NOT NULL,
-    date_added timestamp with time zone NOT NULL,
+    date_added timestamptz NOT NULL,
     summary    text
 );
 
@@ -24,7 +24,7 @@ CREATE TABLE magazines (
     id         serial  PRIMARY KEY,
     title      text    NOT NULL,
     publisher  integer NOT NULL REFERENCES publishers,
-    date_added timestamp with time zone NOT NULL,
+    date_added timestamptz NOT NULL,
     summary    text
 );
 
@@ -35,8 +35,8 @@ CREATE TABLE book_series (
     other_titles text[],
     summary      text,
     vintage      integer                  NOT NULL, -- year
-    date_added   timestamp with time zone NOT NULL,
-    last_updated timestamp with time zone NOT NULL,
+    date_added   timestamptz NOT NULL,
+    last_updated timestamptz NOT NULL,
     finished     boolean                  NOT NULL DEFAULT false,
     nsfw         boolean                  NOT NULL DEFAULT false,
     avg_rating   real, -- NULL means not rated (as opposed to a zero rating)
@@ -81,8 +81,8 @@ CREATE TABLE translation_projects (
     id            serial  PRIMARY KEY,
     series_id     integer NOT NULL REFERENCES book_series,
     translator_id integer NOT NULL REFERENCES translation_groups,
-    start_date    timestamp with time zone NOT NULL,
-    end_date      timestamp with time zone
+    start_date    timestamptz NOT NULL,
+    end_date      timestamptz
 );
 
 CREATE TABLE chapters (
@@ -99,7 +99,7 @@ CREATE TABLE releases (
     translator_id   integer   NOT NULL REFERENCES translation_groups,
     project_id      integer   NOT NULL REFERENCES translation_projects,
     lang            integer   NOT NULL,
-    release_date    timestamp with time zone NOT NULL,
+    release_date    timestamptz NOT NULL,
     notes           text,
     is_last_release boolean   NOT NULL DEFAULT false,
     chapters_ids    integer[] NOT NULL
@@ -113,15 +113,15 @@ CREATE TABLE users (
     rights        integer NOT NULL DEFAULT 0,
     vote_weight   integer NOT NULL DEFAULT 1,
     summary       text,
-    register_date timestamp with time zone NOT NULL,
-    last_active   timestamp with time zone NOT NULL,
+    register_date timestamptz NOT NULL,
+    last_active   timestamptz NOT NULL,
     avatar        boolean
 );
 
 CREATE TABLE sessions (
     id          bytea   NOT NULL,
     user_id     integer NOT NULL REFERENCES users,
-    expire_date timestamp with time zone NOT NULL DEFAULT 'epoch'::timestamp with time zone
+    expire_date timestamptz NOT NULL DEFAULT 'epoch'::timestamptz
 );
 
 -- keeps track of which chapters a user has read/owns
@@ -129,7 +129,7 @@ CREATE TABLE user_chapters (
     user_id    integer                  NOT NULL REFERENCES users,
     chapter_id integer                  NOT NULL REFERENCES chapters,
     status     integer                  NOT NULL, -- enumeration
-    date_read  timestamp with time zone
+    date_read  timestamptz
 );
 
 -- keeps track of which releases a user owns
@@ -189,7 +189,7 @@ CREATE TABLE tag_consensus (
     user_id     integer NOT NULL REFERENCES users,
     book_tag_id integer NOT NULL REFERENCES book_tags,
     vote        integer NOT NULL,
-    vote_date   timestamp with time zone NOT NULL
+    vote_date   timestamptz NOT NULL
 );
 
 --
@@ -258,7 +258,7 @@ CREATE TABLE book_ratings (
     user_id   integer NOT NULL REFERENCES users,
     series_id integer NOT NULL REFERENCES book_series,
     rating    integer NOT NULL,
-    rate_date timestamp with time zone NOT NULL
+    rate_date timestamptz NOT NULL
 );
 
 CREATE TABLE translator_ratings (
@@ -266,7 +266,7 @@ CREATE TABLE translator_ratings (
     user_id       integer NOT NULL REFERENCES users,
     translator_id integer NOT NULL REFERENCES translation_groups,
     rating        integer NOT NULL,
-    rate_date     timestamp with time zone NOT NULL
+    rate_date     timestamptz NOT NULL
 );
 
 CREATE TABLE project_ratings (
@@ -274,7 +274,7 @@ CREATE TABLE project_ratings (
     user_id    integer NOT NULL REFERENCES users,
     project_id integer NOT NULL REFERENCES translation_projects,
     rating     integer NOT NULL,
-    rate_date  timestamp with time zone NOT NULL
+    rate_date  timestamptz NOT NULL
 );
 
 -- Reviews
