@@ -20,12 +20,13 @@ type (
 )
 
 const (
-	Comic SeriesKind = iota
+	Comic SeriesKind = iota + 1
 	Novel
+	Webcomic
 )
 
 const (
-	Shounen Demographic = iota
+	Shounen Demographic = iota + 1
 	Shoujo
 	Seinen
 	Josei
@@ -240,9 +241,9 @@ type TagConsensus struct {
 type Rating struct {
 	Id int
 	User
-	*Review
 	Rating   int
 	RateDate time.Time
+	*Review
 }
 
 type Review struct {
