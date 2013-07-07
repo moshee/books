@@ -27,8 +27,57 @@
 		</ul>
 	</nav>
 	<section id=search>
+    <ul class=filter-entry>
+      <li>
+        <select class=filter-type>
+          <option value=title>Title</option>
+          <option value=tags>Tags</option>
+          <option value=demographic>Demographic</option>
+          <option value=author>Author</option>
+          <option value=magazine>Magazine</option>
+          <option value=publisher>Publisher</option>
+        </select>
+        <input type=text class=filter-content>
+        <button class=add-remove>+</button>
+        </li>
+      </ul>
 	</section>
 	<section id=latest>
+    <section id=latest-releases>
+      <h1>Latest Releases</h1>
+      <table>
+        <thead>
+          <th><td>Title</td><td>Chapter</td><td>Group</td><td>Date Added</td></th>
+        </thead>
+        <tbody>
+          {{ range .Releases }}
+          <tr><td><a href=#>{{ .BookSeries.Title }}</a></td><td>{{ .Chapters }}</td><td>({{ .Language }}) {{ .TranslationGroup.Name }}</td><td>{{ .ReleaseDate }}</td></tr>
+          {{ end }}
+        </tbody>
+      </table>
+    </section>
+    <section id=latest-books>
+      <h1>Recently Added Titles</h1>
+      <table>
+        <thead>
+          <th><td>Title</td><td>Vintage</td><td>Authors</td><td>Date Added</td></th>
+        </thead>
+        <tbody>
+          {{ range .Series }}
+          <tr>
+            <td><a href=#>{{ .Title }}</a></td>
+            <td>{{ .Vintage }}<td>
+            <td>
+              {{ range .Credits }}
+              <div><a href=/author/{{ .Author.Id }}>{{ .Author.Name }}</a> ({{ .Credit }})</div>
+              {{ end }}
+            </td>
+            <td>{{ .DateAdded }}</td>
+          </tr>
+          {{ end }}
+        </tbody>
+      </table>
+    </section>
 	</section>
 	<section id=news>
 	</section>

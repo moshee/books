@@ -86,6 +86,7 @@ type BookSeries struct {
 	AvgRating   sql.NullFloat64
 	RatingCount int
 	Demographic
+	Credits []ProductionCredit
 	*Magazine
 }
 
@@ -132,16 +133,24 @@ type Chapter struct {
 	Title       sql.NullString
 }
 
+type Chapters []*Chapter
+
+// create a representation of the list of chapters with ranges, using display
+// names as necessary
+func (self Chapters) String() string {
+	return ""
+}
+
 type Release struct {
 	Id int
 	*BookSeries
 	*TranslationGroup
 	*TranslationProject
-	Lang          Language
+	Language
 	ReleaseDate   time.Time
 	Notes         sql.NullString
 	IsLastRelease bool
-	Chapters      []*Chapter
+	Chapters
 }
 
 type TranslationProject struct {
