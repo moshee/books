@@ -236,6 +236,18 @@ CREATE TABLE filtered_tags (
 );
 
 --
+-- Site news
+--
+
+CREATE TABLE news_posts (
+	id          serial      PRIMARY KEY,
+	user_id     integer     NOT NULL REFERENCES users,
+	date_posted timestamptz NOT NULL DEFAULT 'now'::timestamptz,
+	title       text        NOT NULL,
+	body        text        NOT NULL
+);
+
+--
 -- Ratings and reviews
 --
 
