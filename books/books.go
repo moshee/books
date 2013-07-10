@@ -5,6 +5,7 @@ import (
 	// "github.com/moshee/gas"
 	pg "github.com/moshee/pgtypes"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -20,32 +21,76 @@ type (
 )
 
 const (
-	Comic SeriesKind = iota
+	Comic SeriesKind = iota + 1
 	Novel
+	Webcomic
 )
 
 const (
-	Shounen Demographic = iota
+	Shounen Demographic = iota + 1
 	Shoujo
 	Seinen
 	Josei
 )
 
+func (d Demographic) String() string {
+	switch d {
+	case Shounen:
+		return "Shōnen"
+	case Shoujo:
+		return "Shōjo"
+	case Seinen:
+		return "Seinen"
+	case Josei:
+		return "Josei"
+	}
+	return ""
+}
+
 const (
-	Male Sex = iota
+	Male Sex = iota + 1
 	Female
 	Other
 )
 
+func (s Sex) String() string {
+	switch s {
+	case Male:
+		return "Male"
+	case Female:
+		return "Female"
+	case Other:
+		return "Other"
+	}
+	return ""
+}
+
 const (
-	Scenario Credit = iota
+	Scenario Credit = 1 << iota
 	Art
 	Illustration
 	Music
 )
 
+func (c Credit) String() string {
+	cs := make([]string, 0, 4)
+	if c&Scenario != 0 {
+		cs = append(cs, "Story")
+	}
+	if c&Art != 0 {
+		cs = append(cs, "Art")
+	}
+	if c&Illustration != 0 {
+		cs = append(cs, "Illust.")
+	}
+	if c&Music != 0 {
+		cs = append(cs, "Music")
+	}
+	return strings.Join(cs, ", ")
+}
+
 const (
-	Related Relation = iota
+	Related Relation = iota + 1
 	Sequel
 	Prequel
 	Adaptation
@@ -56,6 +101,7 @@ const (
 	Administrator
 	Moderator
 	Contributor
+	Developer
 )
 
 func (self Privileges) Is(other Privileges) bool {
@@ -67,10 +113,22 @@ func (self Privileges) Isnt(other Privileges) bool {
 }
 
 const (
-	Read ReadStatus = iota
+	Read ReadStatus = iota + 1
 	Owned
 	Skipped
 )
+
+func (s ReadStatus) String() string {
+	switch s {
+	case Read:
+		return "Read it"
+	case Owned:
+		return "Have it"
+	case Skipped:
+		return "Skipped it"
+	}
+	return ""
+}
 
 type BookSeries struct {
 	Id int
@@ -86,6 +144,7 @@ type BookSeries struct {
 	AvgRating   sql.NullFloat64
 	RatingCount int
 	Demographic
+	Credits []ProductionCredit
 	*Magazine
 }
 
@@ -132,16 +191,24 @@ type Chapter struct {
 	Title       sql.NullString
 }
 
+type Chapters []*Chapter
+
+// create a representation of the list of chapters with ranges, using display
+// names as necessary
+func (self Chapters) String() string {
+	return ""
+}
+
 type Release struct {
 	Id int
 	*BookSeries
 	*TranslationGroup
 	*TranslationProject
-	Lang          Language
+	Language
 	ReleaseDate   time.Time
 	Notes         sql.NullString
 	IsLastRelease bool
-	Chapters      []*Chapter
+	Chapters
 }
 
 type TranslationProject struct {
@@ -231,9 +298,9 @@ type TagConsensus struct {
 type Rating struct {
 	Id int
 	User
-	*Review
 	Rating   int
 	RateDate time.Time
+	*Review
 }
 
 type Review struct {
