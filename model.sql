@@ -67,15 +67,11 @@ CREATE TABLE authors (
     sex         Sex -- we be politically correct
 );
 
-CREATE TYPE Credit AS ENUM ( 'Scenario', 'Art', 'Illustration', 'Music' );
-
 CREATE TABLE production_credits (
     series_id integer NOT NULL REFERENCES book_series,
     author_id integer NOT NULL REFERENCES authors,
-    credit    Credit  NOT NULL
+    credit    integer NOT NULL
 );
-
-CREATE TYPE SeriesRelation AS ENUM ( 'Related', 'Sequel', 'Prequel', 'Adaptation' );
 
 CREATE TABLE related_series (
     series_id         integer        NOT NULL REFERENCES book_series,
@@ -93,11 +89,11 @@ CREATE TABLE translation_groups (
 );
 
 CREATE TABLE translation_projects (
-    id            serial  PRIMARY KEY,
-    series_id     integer NOT NULL REFERENCES book_series,
-    translator_id integer NOT NULL REFERENCES translation_groups,
-    start_date    timestamptz NOT NULL,
-    end_date      timestamptz
+    id             serial      PRIMARY KEY,
+    series_id      integer     NOT NULL REFERENCES book_series,
+	translator_ids integer[]   NOT NULL,
+    start_date     timestamptz NOT NULL DEFAULT 'now'::timestamptz,
+    end_date       timestamptz
 );
 
 CREATE TABLE chapters (
@@ -111,14 +107,9 @@ CREATE TABLE chapters (
 CREATE TABLE releases (
     id              serial    PRIMARY KEY,
     series_id       integer   NOT NULL REFERENCES book_series,
-    translator_id   integer   NOT NULL REFERENCES translation_groups,
     project_id      integer   NOT NULL REFERENCES translation_projects,
     lang            integer   NOT NULL,
-<<<<<<< HEAD
-    release_date    timestamp with time zone NOT NULL DEFAULT 'now'::timestamp with time zone,
-=======
     release_date    timestamptz NOT NULL,
->>>>>>> 2e1ae7738667c294a19ffb241e0c02e24594a479
     notes           text,
     is_last_release boolean   NOT NULL DEFAULT false,
     chapters_ids    integer[] NOT NULL
@@ -132,13 +123,8 @@ CREATE TABLE users (
     rights        integer NOT NULL DEFAULT 0,
     vote_weight   integer NOT NULL DEFAULT 1,
     summary       text,
-<<<<<<< HEAD
-    register_date timestamp with time zone NOT NULL DEFAULT 'now'::timestamp with time zone,
-    last_active   timestamp with time zone NOT NULL,
-=======
     register_date timestamptz NOT NULL,
     last_active   timestamptz NOT NULL,
->>>>>>> 2e1ae7738667c294a19ffb241e0c02e24594a479
     avatar        boolean
 );
 
@@ -154,13 +140,8 @@ CREATE TYPE ReadStatus AS ENUM ( 'Read', 'Owned', 'Skipped' );
 CREATE TABLE user_chapters (
     user_id    integer                  NOT NULL REFERENCES users,
     chapter_id integer                  NOT NULL REFERENCES chapters,
-<<<<<<< HEAD
     status     ReadStatus               NOT NULL,
-    date_read  timestamp with time zone
-=======
-    status     integer                  NOT NULL, -- enumeration
     date_read  timestamptz
->>>>>>> 2e1ae7738667c294a19ffb241e0c02e24594a479
 );
 
 -- keeps track of which releases a user owns
@@ -232,11 +213,7 @@ CREATE TABLE tag_consensus (
     user_id     integer NOT NULL REFERENCES users,
     book_tag_id integer NOT NULL REFERENCES book_tags,
     vote        integer NOT NULL,
-<<<<<<< HEAD
-    vote_date   timestamp with time zone NOT NULL DEFAULT 'now'::timestamp with time zone
-=======
     vote_date   timestamptz NOT NULL
->>>>>>> 2e1ae7738667c294a19ffb241e0c02e24594a479
 );
 
 --
