@@ -44,7 +44,7 @@ CREATE TABLE book_series (
     title        text        NOT NULL,
     native_title text        NOT NULL,
     other_titles text[],
-    kind         SeriesKind  NOT NULL DEFAULT 0,
+    kind         SeriesKind  NOT NULL DEFAULT 'Comic',
     summary      text,
     vintage      integer     NOT NULL, -- year
     date_added   timestamptz NOT NULL,
@@ -76,6 +76,8 @@ CREATE TABLE production_credits (
     author_id integer NOT NULL REFERENCES authors,
     credit    integer NOT NULL
 );
+
+CREATE TYPE SeriesRelation AS ENUM ( 'prequel', 'sequel', 'spin-off', 'based on' );
 
 CREATE TABLE related_series (
     series_id         integer        NOT NULL REFERENCES book_series,
@@ -183,6 +185,8 @@ CREATE TABLE translator_members (
 -- Characters
 --
 
+CREATE TYPE BloodType AS ENUM ( '0', 'A', 'B', 'AB' );
+
 CREATE TABLE characters (
     id serial            PRIMARY KEY,
     name        text     NOT NULL,
@@ -191,39 +195,31 @@ CREATE TABLE characters (
     nationality text,
     birthday    date,
     age         integer,
-    sex         integer,
+    sex         Sex,
     weight      real,
     height      real,
     bust        real,
     waist       real,
     hips        real,
-    blood_type  integer,
+    blood_type  BloodType,
     description text,
     picture     boolean
 );
 
+CREATE TYPE CharacterRole AS ENUM ( 'main', 'secondary', 'appears', 'cameo' );
+
 CREATE TABLE characters_roles (
-    character_id integer NOT NULL REFERENCES characters,
-    series_id    integer NOT NULL REFERENCES book_series,
-    role         integer NOT NULL -- enumerated
+    character_id integer       NOT NULL REFERENCES characters,
+    series_id    integer       NOT NULL REFERENCES book_series,
+    role         CharacterRole NOT NULL
 );
+
+CREATE TYPE CharacterRelation AS ENUM ( 'family', 'friend', 'enemy', 'love interest', 'lover' );
 
 CREATE TABLE characters_relations (
-    character_id         integer NOT NULL REFERENCES characters,
-    related_character_id integer NOT NULL REFERENCES characters,
-    relation             integer NOT NULL -- enumerated
-);
-
-CREATE TABLE publisher_links (
-	publisher_id integer NOT NULL REFERENCES publishers,
-	link_kind    integer NOT NULL REFERENCES link_kinds,
-	url          text    NOT NULL
-);
-
-CREATE TABLE magazine_links (
-	magazine_id integer NOT NULL REFERENCES magazines,
-	link_kind    integer NOT NULL REFERENCES link_kinds,
-	url          text    NOT NULL
+    character_id         integer           NOT NULL REFERENCES characters,
+    related_character_id integer           NOT NULL REFERENCES characters,
+    relation             CharacterRelation NOT NULL
 );
 
 --
@@ -399,6 +395,17 @@ CREATE TABLE link_kinds (
     name text   NOT NULL
 );
 
+CREATE TABLE publisher_links (
+	publisher_id integer NOT NULL REFERENCES publishers,
+	link_kind    integer NOT NULL REFERENCES link_kinds,
+	url          text    NOT NULL
+);
+
+CREATE TABLE magazine_links (
+	magazine_id integer NOT NULL REFERENCES magazines,
+	link_kind   integer NOT NULL REFERENCES link_kinds,
+	url         text    NOT NULL
+);
 CREATE TABLE author_links (
     author_id integer NOT NULL REFERENCES authors,
     link_kind integer NOT NULL REFERENCES link_kinds,
