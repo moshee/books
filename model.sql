@@ -13,6 +13,10 @@ SET search_path TO books,public;
 -- schema version (increment whenever it changes)
 CREATE TABLE schema_version ( revision integer NOT NULL );
 
+--
+-- Books and Authors
+--
+
 CREATE TABLE publishers (
     id         serial PRIMARY KEY,
     name       text   NOT NULL,
@@ -32,6 +36,7 @@ CREATE TABLE book_series (
     id           serial                   PRIMARY KEY,
     kind         integer                  NOT NULL, -- enumerated
     title        text                     NOT NULL,
+    native_title text                     NOT NULL,
     other_titles text[],
     summary      text,
     vintage      integer                  NOT NULL, -- year
@@ -68,6 +73,10 @@ CREATE TABLE related_series (
     relation          integer NOT NULL -- enumerated
 );
 
+--
+-- Releases and Translators
+--
+
 CREATE TABLE translation_groups (
     id                 serial PRIMARY KEY,
     name               text   NOT NULL,
@@ -93,17 +102,26 @@ CREATE TABLE chapters (
     title        text
 );
 
+CREATE TABLE languages (
+    id   serial PRIMARY KEY,
+    name text   NOT NULL
+);
+
 CREATE TABLE releases (
     id              serial    PRIMARY KEY,
     series_id       integer   NOT NULL REFERENCES book_series,
     translator_id   integer   NOT NULL REFERENCES translation_groups,
     project_id      integer   NOT NULL REFERENCES translation_projects,
-    lang            integer   NOT NULL,
+    lang            integer   NOT NULL REFERENCES languages,
     release_date    timestamp with time zone NOT NULL,
     notes           text,
     is_last_release boolean   NOT NULL DEFAULT false,
     chapters_ids    integer[] NOT NULL
 );
+
+--
+-- Users
+--
 
 CREATE TABLE users (
     id            serial  PRIMARY KEY,
@@ -145,32 +163,49 @@ CREATE TABLE translator_members (
 );
 
 --
--- Entities that may be associated with any number of URLs
+-- Characters
 --
 
--- Website, Twitter, Blog, Facebook, etc.
-CREATE TABLE link_kinds (
-    id   serial PRIMARY KEY,
-    name text   NOT NULL
+CREATE TABLE characters (
+    id serial            PRIMARY KEY,
+    name        text     NOT NULL,
+    native_name text     NOT NULL,
+    aliases     text[],
+    nationality text,
+    birthday    date,
+    age         integer,
+    sex         integer,
+    weight      real,
+    height      real,
+    bust        real,
+    waist       real,
+    hips        real,
+    blood_type  integer,
+    description text,
+    picture     boolean
 );
 
-CREATE TABLE author_links (
-    author_id integer NOT NULL REFERENCES authors,
-    link_kind integer NOT NULL REFERENCES link_kinds,
-    url       text    NOT NULL
+CREATE TABLE characters_roles (
+    character_id integer NOT NULL REFERENCES characters,
+    series_id    integer NOT NULL REFERENCES book_series,
+    role         integer NOT NULL -- enumerated
 );
 
-CREATE TABLE translator_links (
-    translator_id integer NOT NULL REFERENCES translation_groups,
-    link_kind     integer NOT NULL REFERENCES link_kinds,
-    url           text    NOT NULL
+CREATE TABLE characters_relations (
+    character_id         integer NOT NULL REFERENCES characters,
+    related_character_id integer NOT NULL REFERENCES characters,
+    relation             integer NOT NULL -- enumerated
 );
 
 --
 -- User-submitted tags and voting
 --
 
-CREATE TABLE tags (
+-- book/character_tag_consensus
+--   Use a left join to find which tags, if any, a User has voted on
+--   for a given Series/Character.
+
+CREATE TABLE book_tags_names (
     id   serial PRIMARY KEY,
     name text   NOT NULL
 );
@@ -178,18 +213,36 @@ CREATE TABLE tags (
 CREATE TABLE book_tags (
     id        serial  PRIMARY KEY,
     series_id integer NOT NULL REFERENCES book_series,
-    tag_id    integer NOT NULL REFERENCES tags,
+    tag_id    integer NOT NULL REFERENCES book_tags_names,
     spoiler   boolean NOT NULL,
     weight    real    NOT NULL
 );
 
--- Use a left join to find which tags, if any, a User has voted on
--- for a given Series.
-CREATE TABLE tag_consensus (
+CREATE TABLE book_tag_consensus (
     user_id     integer NOT NULL REFERENCES users,
     book_tag_id integer NOT NULL REFERENCES book_tags,
     vote        integer NOT NULL,
     vote_date   timestamp with time zone NOT NULL
+);
+
+CREATE TABLE character_tags_names (
+    id   serial PRIMARY KEY,
+    name text   NOT NULL
+);
+
+CREATE TABLE character_tags (
+    id           serial  PRIMARY KEY,
+    character_id integer NOT NULL REFERENCES characters,
+    tag_id       integer NOT NULL REFERENCES character_tags_names,
+    spoiler      boolean NOT NULL,
+    weight       real    NOT NULL
+);
+
+CREATE TABLE character_tag_consensus (
+    user_id          integer NOT NULL REFERENCES users,
+    character_tag_id integer NOT NULL REFERENCES character_tags,
+    vote             integer NOT NULL,
+    vote_date        timestamp with time zone NOT NULL
 );
 
 --
@@ -216,9 +269,14 @@ CREATE TABLE favorite_magazines (
     magazine_id integer NOT NULL REFERENCES magazines
 );
 
-CREATE TABLE favorite_tags (
+CREATE TABLE favorite_book_tags (
     user_id integer NOT NULL REFERENCES users,
-    tag_id  integer NOT NULL REFERENCES tags
+    tag_id  integer NOT NULL REFERENCES book_tags_names
+);
+
+CREATE TABLE favorite_character_tags (
+    user_id integer NOT NULL REFERENCES users,
+    tag_id  integer NOT NULL REFERENCES character_tags_names
 );
 
 --
@@ -230,13 +288,23 @@ CREATE TABLE filtered_groups (
     group_id integer NOT NULL REFERENCES translation_groups
 );
 
-CREATE TABLE filtered_tags (
+CREATE TABLE filtered_languages (
     user_id integer NOT NULL REFERENCES users,
-    tag_id  integer NOT NULL REFERENCES tags
+    lang_id integer NOT NULL REFERENCES languages
+);
+
+CREATE TABLE filtered_book_tags (
+    user_id integer NOT NULL REFERENCES users,
+    tag_id  integer NOT NULL REFERENCES book_tags_names
+);
+
+CREATE TABLE filtered_character_tags (
+    user_id integer NOT NULL REFERENCES users,
+    tag_id  integer NOT NULL REFERENCES character_tags_names
 );
 
 --
--- Ratings and reviews
+-- Ratings and Reviews
 --
 
 -- Ratings
@@ -293,33 +361,64 @@ ALTER TABLE translator_ratings ADD review_id integer REFERENCES translator_revie
 ALTER TABLE project_ratings    ADD review_id integer REFERENCES project_reviews;
 
 --
+-- Entities that may be associated with any number of URLs
+--
+
+-- Website, Twitter, Blog, Facebook, etc.
+CREATE TABLE link_kinds (
+    id   serial PRIMARY KEY,
+    name text   NOT NULL
+);
+
+CREATE TABLE author_links (
+    author_id integer NOT NULL REFERENCES authors,
+    link_kind integer NOT NULL REFERENCES link_kinds,
+    url       text    NOT NULL
+);
+
+CREATE TABLE translator_links (
+    translator_id integer NOT NULL REFERENCES translation_groups,
+    link_kind     integer NOT NULL REFERENCES link_kinds,
+    url           text    NOT NULL
+);
+
+--
 -- Triggers
 --
 
 -- update the average rating whenever a rating occurs
 -- TODO: ratings may have to be cached and updates executed in batch somehow eventually
 CREATE FUNCTION do_update_book_average_rating() RETURNS trigger AS $$
-  BEGIN
-    IF (TG_OP = 'INSERT') THEN
-        UPDATE book_series SET avg_rating = (
-            SELECT AVG(rating) FROM book_ratings r
-                WHERE r.series_id = NEW.series_id ),
+    BEGIN
+        IF (TG_OP = 'INSERT') THEN
+            UPDATE book_series
+                SET avg_rating = (
+                    SELECT AVG(rating)
+                        FROM book_ratings r
+                        WHERE r.series_id = NEW.series_id
+                ),
             rating_count = rating_count + 1;
-        RETURN NEW;
-    ELSIF (TG_OP = 'UPDATE') THEN
-        UPDATE book_series SET avg_rating = (
-            SELECT AVG(rating) FROM book_ratings r
-                WHERE r.series_id = NEW.series_id );
-        RETURN NEW;
-    ELSIF (TG_OP = 'DELETE') THEN
-        UPDATE book_series SET avg_rating = (
-            SELECT AVG(rating) FROM book_ratings r
-                WHERE r.series_id = OLD.series_id ),
-            rating_count = rating_count - 1;
-        RETURN OLD;
-    END IF;
-    RETURN NULL;
-  END;
+            RETURN NEW;
+        ELSIF (TG_OP = 'UPDATE') THEN
+            UPDATE book_series
+                SET avg_rating = (
+                    SELECT AVG(rating)
+                        FROM book_ratings r
+                        WHERE r.series_id = NEW.series_id
+                );
+            RETURN NEW;
+        ELSIF (TG_OP = 'DELETE') THEN
+            UPDATE book_series
+                SET avg_rating = (
+                    SELECT AVG(rating)
+                        FROM book_ratings r
+                        WHERE r.series_id = OLD.series_id
+                ),
+                rating_count = rating_count - 1;
+            RETURN OLD;
+        END IF;
+        RETURN NULL;
+    END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_book_average_rating
@@ -327,20 +426,26 @@ CREATE TRIGGER update_book_average_rating
     EXECUTE PROCEDURE do_update_book_average_rating();
 
 CREATE FUNCTION do_update_translator_average_rating() RETURNS trigger AS $$
-  BEGIN
-    IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
-        UPDATE translation_groups SET avg_rating = (
-            SELECT AVG(rating) FROM translator_ratings r
-                WHERE r.translator_id = NEW.translator_id );
-        RETURN NEW;
-    ELSIF (TG_OP = 'DELETE') THEN
-        UPDATE translation_groups SET avg_rating = (
-            SELECT AVG(rating) FROM translator_ratings r
-                WHERE r.translator_id = OLD.translator_id );
-        RETURN OLD;
-    END IF;
-    RETURN NULL;
-  END;
+    BEGIN
+        IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
+            UPDATE translation_groups
+                SET avg_rating = (
+                    SELECT AVG(rating)
+                        FROM translator_ratings r
+                        WHERE r.translator_id = NEW.translator_id
+                );
+            RETURN NEW;
+        ELSIF (TG_OP = 'DELETE') THEN
+            UPDATE translation_groups
+                SET avg_rating = (
+                    SELECT AVG(rating)
+                        FROM translator_ratings r
+                        WHERE r.translator_id = OLD.translator_id
+                );
+            RETURN OLD;
+        END IF;
+        RETURN NULL;
+    END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_translator_average_rating
@@ -348,20 +453,24 @@ CREATE TRIGGER update_translator_average_rating
     EXECUTE PROCEDURE do_update_translator_average_rating();
 
 CREATE FUNCTION do_update_project_average_rating() RETURNS trigger AS $$
-	BEGIN
+    BEGIN
 		IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
-			UPDATE translation_groups SET avg_project_rating = (
-				SELECT AVG(r.rating)
-			FROM project_ratings r, translation_projects p
-					WHERE r.project_id = p.id
-			AND r.project_id = NEW.project_id );
-			RETURN NEW;
+			UPDATE translation_groups
+                SET avg_project_rating = (
+                    SELECT AVG(r.rating)
+                        FROM project_ratings r, translation_projects p
+                        WHERE r.project_id = p.id
+                            AND r.project_id = NEW.project_id
+                );
+            RETURN NEW;
 		ELSIF (TG_OP = 'DELETE') THEN
-			UPDATE translation_groups SET avg_project_rating = (
-				SELECT AVG(r.rating)
-					FROM project_ratings r, translation_projects p
-					WHERE r.project_id = p.id
-					AND r.project_id = OLD.project_id );
+			UPDATE translation_groups
+                SET avg_project_rating = (
+                    SELECT AVG(r.rating)
+                        FROM project_ratings r, translation_projects p
+                        WHERE r.project_id = p.id
+                            AND r.project_id = OLD.project_id
+                );
 			RETURN NEW;
 		END IF;
 		RETURN NULL;
@@ -373,7 +482,7 @@ CREATE TRIGGER update_project_average_rating
     EXECUTE PROCEDURE do_update_project_average_rating();
 
 -- update the tags whenever a vote occurs
-CREATE FUNCTION do_update_tags() RETURNS trigger AS $$
+CREATE FUNCTION do_update_book_tags() RETURNS trigger AS $$
 	DECLARE
 		r      RECORD;
 		weight real;
@@ -383,27 +492,61 @@ CREATE FUNCTION do_update_tags() RETURNS trigger AS $$
         ELSIF (TG_OP = 'DELETE') THEN
             r := OLD;
         END IF;
-
-        weight := (SELECT AVG(vote) FROM tag_consensus c
-            WHERE c.book_tag_id = r.book_tag_id);
-
+        weight := (
+            SELECT AVG(vote)
+                FROM book_tag_consensus c
+                WHERE c.book_tag_id = r.book_tag_id
+        );
         IF (weight < 1) THEN
-            DELETE FROM tag_consensus
+            DELETE FROM book_tag_consensus
                 WHERE book_tag_id = r.book_tag_id;
-            DELETE FROM book_tags
+            DELETE FROM book_tags_names
                 WHERE id = r.book_tag_id;
         ELSE
-            UPDATE book_tags AS t SET t.weight = weight
+            UPDATE book_tags_names AS t
+                SET t.weight = weight
                 WHERE t.id = r.book_tag_id;
         END IF;
-
         RETURN r;
     END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER update_tags
-    AFTER INSERT OR UPDATE OR DELETE ON tag_consensus
-    EXECUTE PROCEDURE do_update_tags();
+CREATE TRIGGER update_book_tags
+    AFTER INSERT OR UPDATE OR DELETE ON book_tag_consensus
+    EXECUTE PROCEDURE do_update_book_tags();
+
+CREATE FUNCTION do_update_character_tags() RETURNS trigger AS $$
+	DECLARE
+		r      RECORD;
+		weight real;
+    BEGIN
+        IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
+            r := NEW;
+        ELSIF (TG_OP = 'DELETE') THEN
+            r := OLD;
+        END IF;
+        weight := (
+            SELECT AVG(vote)
+                FROM character_tag_consensus c
+                WHERE c.character_tag_id = r.character_tag_id
+        );
+        IF (weight < 1) THEN
+            DELETE FROM character_tag_consensus
+                WHERE character_tag_id = r.character_tag_id;
+            DELETE FROM character_tags_names
+                WHERE id = r.character_tag_id;
+        ELSE
+            UPDATE character_tags_names AS t
+                SET t.weight = weight
+                WHERE t.id = r.character_tag_id;
+        END IF;
+        RETURN r;
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_character_tags
+    AFTER INSERT OR UPDATE OR DELETE ON character_tag_consensus
+    EXECUTE PROCEDURE do_update_character_tags();
 
 -- update the chapters a user owns when he gets a release
 CREATE FUNCTION do_update_user_chapters() RETURNS trigger AS $$
@@ -411,7 +554,11 @@ CREATE FUNCTION do_update_user_chapters() RETURNS trigger AS $$
 		ids integer[];
         id  integer;
     BEGIN
-        ids := (SELECT chapters_ids FROM releases r WHERE r.id = NEW.release_id);
+        ids := (
+            SELECT chapters_ids
+                FROM releases r
+                WHERE r.id = NEW.release_id
+        );
         FOREACH id IN ARRAY ids
         LOOP
             INSERT INTO user_chapters (user_id, chapter_id, status)
