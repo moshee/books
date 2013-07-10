@@ -89,11 +89,15 @@ CREATE TABLE translation_groups (
 );
 
 CREATE TABLE translation_projects (
-    id             serial      PRIMARY KEY,
-    series_id      integer     NOT NULL REFERENCES book_series,
-	translator_ids integer[]   NOT NULL,
-    start_date     timestamptz NOT NULL DEFAULT 'now'::timestamptz,
-    end_date       timestamptz
+    id            serial      PRIMARY KEY,
+    series_id     integer     NOT NULL REFERENCES book_series,
+    start_date    timestamptz NOT NULL DEFAULT 'now'::timestamptz,
+    end_date      timestamptz
+);
+
+CREATE TABLE translation_project_groups (
+	project_id    integer NOT NULL REFERENCES translation_projects,
+	translator_id integer NOT NULL REFERENCES translation_groups
 );
 
 CREATE TABLE chapters (
