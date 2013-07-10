@@ -18,16 +18,16 @@ CREATE TABLE schema_version ( revision integer NOT NULL );
 INSERT INTO schema_version VALUES (0);
 
 CREATE TABLE publishers (
-    id         serial PRIMARY KEY,
-    name       text   NOT NULL,
+    id         serial      PRIMARY KEY,
+    name       text        NOT NULL,
     date_added timestamptz NOT NULL,
     summary    text
 );
 
 CREATE TABLE magazines (
-    id         serial  PRIMARY KEY,
-    title      text    NOT NULL,
-    publisher  integer NOT NULL REFERENCES publishers,
+    id         serial      PRIMARY KEY,
+    title      text        NOT NULL,
+    publisher  integer     NOT NULL REFERENCES publishers,
 	language   integer,
     date_added timestamptz NOT NULL,
     summary    text
@@ -37,20 +37,20 @@ CREATE TYPE Demographic AS ENUM ( 'Shounen', 'Shoujo', 'Seinen', 'Josei' );
 CREATE TYPE SeriesKind AS ENUM ( 'Comic', 'Novel', 'Webcomic' );
 
 CREATE TABLE book_series (
-    id           serial                   PRIMARY KEY,
-    kind         SeriesKind               NOT NULL DEFAULT 0,
-    title        text                     NOT NULL,
+    id           serial      PRIMARY KEY,
+    kind         SeriesKind  NOT NULL DEFAULT 0,
+    title        text        NOT NULL,
     other_titles text[],
     summary      text,
-    vintage      integer                  NOT NULL, -- year
+    vintage      integer     NOT NULL, -- year
     date_added   timestamptz NOT NULL,
     last_updated timestamptz NOT NULL,
-    finished     boolean                  NOT NULL DEFAULT false,
-    nsfw         boolean                  NOT NULL DEFAULT false,
+    finished     boolean     NOT NULL DEFAULT false,
+    nsfw         boolean     NOT NULL DEFAULT false,
     avg_rating   real, -- NULL means not rated (as opposed to a zero rating)
-    rating_count integer                  NOT NULL DEFAULT 0,
-    demographic  Demographic              NOT NULL,
-    magazine_id  integer                  REFERENCES magazines
+    rating_count integer     NOT NULL DEFAULT 0,
+    demographic  Demographic NOT NULL,
+    magazine_id  integer     REFERENCES magazines
 );
 
 CREATE TYPE Sex AS ENUM ( 'Male', 'Female', 'Other' );
@@ -102,6 +102,7 @@ CREATE TABLE translation_project_groups (
 
 CREATE TABLE chapters (
     id           serial  PRIMARY KEY,
+	series_id    integer NOT NULL REFERENCES book_series,
     volume       integer,
     display_name text    NOT NULL,
     sort_num     integer NOT NULL,
@@ -109,23 +110,23 @@ CREATE TABLE chapters (
 );
 
 CREATE TABLE releases (
-    id              serial    PRIMARY KEY,
-    series_id       integer   NOT NULL REFERENCES book_series,
-    project_id      integer   NOT NULL REFERENCES translation_projects,
-    lang            integer   NOT NULL,
+    id              serial      PRIMARY KEY,
+    series_id       integer     NOT NULL REFERENCES book_series,
+    project_id      integer     NOT NULL REFERENCES translation_projects,
+    lang            integer     NOT NULL,
     release_date    timestamptz NOT NULL,
     notes           text,
-    is_last_release boolean   NOT NULL DEFAULT false,
-    chapters_ids    integer[] NOT NULL
+    is_last_release boolean     NOT NULL DEFAULT false,
+    chapters_ids    integer[]   NOT NULL
 );
 
 CREATE TABLE users (
-    id            serial  PRIMARY KEY,
-    name          text    NOT NULL,
-    pass          bytea   NOT NULL,
-    salt          bytea   NOT NULL,
-    rights        integer NOT NULL DEFAULT 0,
-    vote_weight   integer NOT NULL DEFAULT 1,
+    id            serial      PRIMARY KEY,
+    name          text        NOT NULL,
+    pass          bytea       NOT NULL,
+    salt          bytea       NOT NULL,
+    rights        integer     NOT NULL DEFAULT 0,
+    vote_weight   integer     NOT NULL DEFAULT 1,
     summary       text,
     register_date timestamptz NOT NULL,
     last_active   timestamptz NOT NULL,
@@ -133,8 +134,8 @@ CREATE TABLE users (
 );
 
 CREATE TABLE sessions (
-    id          bytea   NOT NULL,
-    user_id     integer NOT NULL REFERENCES users,
+    id          bytea       NOT NULL,
+    user_id     integer     NOT NULL REFERENCES users,
     expire_date timestamptz NOT NULL DEFAULT 'epoch'::timestamptz
 );
 
@@ -142,9 +143,9 @@ CREATE TYPE ReadStatus AS ENUM ( 'Read', 'Owned', 'Skipped' );
 
 -- keeps track of which chapters a user has read/owns
 CREATE TABLE user_chapters (
-    user_id    integer                  NOT NULL REFERENCES users,
-    chapter_id integer                  NOT NULL REFERENCES chapters,
-    status     ReadStatus               NOT NULL,
+    user_id    integer    NOT NULL REFERENCES users,
+    chapter_id integer    NOT NULL REFERENCES chapters,
+    status     ReadStatus NOT NULL,
     date_read  timestamptz
 );
 
@@ -214,9 +215,9 @@ CREATE TABLE book_tags (
 -- Use a left join to find which tags, if any, a User has voted on
 -- for a given Series.
 CREATE TABLE tag_consensus (
-    user_id     integer NOT NULL REFERENCES users,
-    book_tag_id integer NOT NULL REFERENCES book_tags,
-    vote        integer NOT NULL,
+    user_id     integer     NOT NULL REFERENCES users,
+    book_tag_id integer     NOT NULL REFERENCES book_tags,
+    vote        integer     NOT NULL,
     vote_date   timestamptz NOT NULL
 );
 
@@ -282,26 +283,26 @@ CREATE TABLE news_posts (
 -- Ratings
 
 CREATE TABLE book_ratings (
-    id        serial  PRIMARY KEY,
-    user_id   integer NOT NULL REFERENCES users,
-    series_id integer NOT NULL REFERENCES book_series,
-    rating    integer NOT NULL,
+    id        serial      PRIMARY KEY,
+    user_id   integer     NOT NULL REFERENCES users,
+    series_id integer     NOT NULL REFERENCES book_series,
+    rating    integer     NOT NULL,
     rate_date timestamptz NOT NULL
 );
 
 CREATE TABLE translator_ratings (
-    id            serial  PRIMARY KEY,
-    user_id       integer NOT NULL REFERENCES users,
-    translator_id integer NOT NULL REFERENCES translation_groups,
-    rating        integer NOT NULL,
+    id            serial      PRIMARY KEY,
+    user_id       integer     NOT NULL REFERENCES users,
+    translator_id integer     NOT NULL REFERENCES translation_groups,
+    rating        integer     NOT NULL,
     rate_date     timestamptz NOT NULL
 );
 
 CREATE TABLE project_ratings (
-    id         serial  PRIMARY KEY,
-    user_id    integer NOT NULL REFERENCES users,
-    project_id integer NOT NULL REFERENCES translation_projects,
-    rating     integer NOT NULL,
+    id         serial      PRIMARY KEY,
+    user_id    integer     NOT NULL REFERENCES users,
+    project_id integer     NOT NULL REFERENCES translation_projects,
+    rating     integer     NOT NULL,
     rate_date  timestamptz NOT NULL
 );
 
