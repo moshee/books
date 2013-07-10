@@ -10,14 +10,17 @@ import (
 )
 
 type (
-	SeriesKind  int
-	Demographic int
-	Sex         int
-	Credit      int
-	Relation    int
-	Language    int
-	Privileges  int
-	ReadStatus  int
+	SeriesKind        int
+	Demographic       int
+	Sex               int
+	Credit            int
+	SeriesRelation    int
+	Language          int
+	Privileges        int
+	ReadStatus        int
+    BloodType         int
+    CharacterRole     int
+    CharacterRelation int
 )
 
 const (
@@ -90,9 +93,10 @@ func (c Credit) String() string {
 }
 
 const (
-	Related Relation = iota + 1
+	Related SeriesRelation = iota + 1
 	Sequel
 	Prequel
+    SpinOff
 	Adaptation
 )
 
@@ -130,10 +134,47 @@ func (s ReadStatus) String() string {
 	return ""
 }
 
+const (
+    Main CharacterRole = iota + 1
+    Secondary
+    Appears
+    Cameo
+)
+
+const (
+	Family CharacterRelation = iota + 1
+	Friend
+	Enemy
+    LoveInterest
+    Lover
+)
+
+const (
+    O BloodType = iota + 1
+    A
+    B
+    AB
+)
+
+func (b BloodType) String() string {
+	switch b {
+	case O:
+		return "0"
+	case A:
+		return "A"
+	case B:
+		return "B"
+	case AB:
+		return "AB"
+	}
+	return ""
+}
+
 type BookSeries struct {
 	Id int
 	SeriesKind
 	Title       string
+    NativeTitle string
 	OtherTitles pg.StringArray
 	Summary     sql.NullString
 	Vintage     int
@@ -171,7 +212,7 @@ type ProductionCredit struct {
 
 type RelatedSeries struct {
 	*BookSeries
-	Relation Relation
+	Relation SeriesRelation
 }
 
 type TranslationGroup struct {
@@ -265,6 +306,35 @@ type Publisher struct {
 	Summary   sql.NullString
 }
 
+type Character struct {
+	Id          int
+	Name        string
+    NativeName  string
+	Aliases     pg.StringArray
+    Nationality string
+    Birthday    string
+    Age         int
+    Sex
+    Weight      int
+    Height      int
+    Bust        int
+    Waist       int
+    Hips        int
+    BloodType
+	Description string
+	Picture     bool
+}
+
+type CharacterRole struct {
+    *Character
+    Role CharacterRole
+}
+
+type RelatedCharacter struct {
+	*Character
+	Relation CharacterRelation
+}
+
 type LinkKind struct {
 	Id   int
 	Name string
@@ -275,7 +345,7 @@ type Link struct {
 	URL string
 }
 
-type Tag struct {
+type BookTagName struct {
 	Id   int
 	Name string
 }
@@ -283,14 +353,34 @@ type Tag struct {
 type BookTag struct {
 	Id int
 	BookSeries
-	Tag
+	BookTagName
 	Spoiler bool
 	Weight  float32
 }
 
-type TagConsensus struct {
+type BookTagConsensus struct {
 	User
 	BookTag
+	Vote     int
+	VoteDate time.Time
+}
+
+type CharacterTagName struct {
+	Id   int
+	Name string
+}
+
+type CharacterTag struct {
+	Id int
+	Character
+	CharacterTagName
+	Spoiler bool
+	Weight  float32
+}
+
+type CharacterTagConsensus struct {
+	User
+	CharacterTag
 	Vote     int
 	VoteDate time.Time
 }

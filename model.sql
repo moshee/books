@@ -77,7 +77,7 @@ CREATE TABLE production_credits (
     credit    integer NOT NULL
 );
 
-CREATE TYPE SeriesRelation AS ENUM ( 'prequel', 'sequel', 'spin-off', 'based on' );
+CREATE TYPE SeriesRelation AS ENUM ( 'prequel', 'sequel', 'spin-off', 'adaptation' );
 
 CREATE TABLE related_series (
     series_id         integer        NOT NULL REFERENCES book_series,
@@ -193,7 +193,7 @@ CREATE TABLE characters (
     native_name text     NOT NULL,
     aliases     text[],
     nationality text,
-    birthday    date,
+    birthday    text,
     age         integer,
     sex         Sex,
     weight      real,
