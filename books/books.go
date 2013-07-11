@@ -18,9 +18,9 @@ type (
 	Language          int
 	Privileges        int
 	ReadStatus        int
-    BloodType         int
-    CharacterRole     int
-    CharacterRelation int
+	BloodType         int
+	CharacterRole     int
+	CharacterRelation int
 )
 
 const (
@@ -96,7 +96,7 @@ const (
 	Related SeriesRelation = iota + 1
 	Sequel
 	Prequel
-    SpinOff
+	SpinOff
 	Adaptation
 )
 
@@ -135,25 +135,25 @@ func (s ReadStatus) String() string {
 }
 
 const (
-    Main CharacterRole = iota + 1
-    Secondary
-    Appears
-    Cameo
+	Main CharacterRole = iota + 1
+	Secondary
+	Appears
+	Cameo
 )
 
 const (
 	Family CharacterRelation = iota + 1
 	Friend
 	Enemy
-    LoveInterest
-    Lover
+	LoveInterest
+	Lover
 )
 
 const (
-    O BloodType = iota + 1
-    A
-    B
-    AB
+	O BloodType = iota + 1
+	A
+	B
+	AB
 )
 
 func (b BloodType) String() string {
@@ -174,7 +174,7 @@ type BookSeries struct {
 	Id int
 	SeriesKind
 	Title       string
-    NativeTitle string
+	NativeTitle string
 	OtherTitles pg.StringArray
 	Summary     sql.NullString
 	Vintage     int
@@ -309,25 +309,25 @@ type Publisher struct {
 type Character struct {
 	Id          int
 	Name        string
-    NativeName  string
+	NativeName  string
 	Aliases     pg.StringArray
-    Nationality string
-    Birthday    string
-    Age         int
-    Sex
-    Weight      int
-    Height      int
-    Bust        int
-    Waist       int
-    Hips        int
-    BloodType
+	Nationality string
+	Birthday    string
+	Age         int
+	Sex
+	Weight int
+	Height int
+	Bust   int
+	Waist  int
+	Hips   int
+	BloodType
 	Description string
 	Picture     bool
 }
 
 type CharacterRole struct {
-    *Character
-    Role CharacterRole
+	*Character
+	Role CharacterRole
 }
 
 type RelatedCharacter struct {
