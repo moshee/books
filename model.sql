@@ -31,7 +31,7 @@ CREATE TABLE magazines (
     id         serial      PRIMARY KEY,
     title      text        NOT NULL,
     publisher  integer     NOT NULL REFERENCES publishers,
-	language   integer,
+    language   integer,
     date_added timestamptz NOT NULL,
     summary    text
 );
@@ -61,7 +61,7 @@ CREATE TYPE Sex AS ENUM ( 'Male', 'Female', 'Other' );
 
 CREATE TABLE authors (
     id          serial  PRIMARY KEY,
-	given_name  text    NOT NULL,
+    given_name  text    NOT NULL,
     surname     text,
     native_name text,
     aliases     text[],
@@ -106,13 +106,13 @@ CREATE TABLE translation_projects (
 );
 
 CREATE TABLE translation_project_groups (
-	project_id    integer NOT NULL REFERENCES translation_projects,
-	translator_id integer NOT NULL REFERENCES translation_groups
+    project_id    integer NOT NULL REFERENCES translation_projects,
+    translator_id integer NOT NULL REFERENCES translation_groups
 );
 
 CREATE TABLE chapters (
     id           serial  PRIMARY KEY,
-	series_id    integer NOT NULL REFERENCES book_series,
+    series_id    integer NOT NULL REFERENCES book_series,
     volume       integer,
     display_name text    NOT NULL,
     sort_num     integer NOT NULL,
@@ -396,15 +396,15 @@ CREATE TABLE link_kinds (
 );
 
 CREATE TABLE publisher_links (
-	publisher_id integer NOT NULL REFERENCES publishers,
-	link_kind    integer NOT NULL REFERENCES link_kinds,
-	url          text    NOT NULL
+    publisher_id integer NOT NULL REFERENCES publishers,
+    link_kind    integer NOT NULL REFERENCES link_kinds,
+    url          text    NOT NULL
 );
 
 CREATE TABLE magazine_links (
-	magazine_id integer NOT NULL REFERENCES magazines,
-	link_kind   integer NOT NULL REFERENCES link_kinds,
-	url         text    NOT NULL
+    magazine_id integer NOT NULL REFERENCES magazines,
+    link_kind   integer NOT NULL REFERENCES link_kinds,
+    url         text    NOT NULL
 );
 CREATE TABLE author_links (
     author_id integer NOT NULL REFERENCES authors,
@@ -423,11 +423,11 @@ CREATE TABLE translator_links (
 --
 
 CREATE TABLE news_posts (
-	id          serial      PRIMARY KEY,
-	user_id     integer     NOT NULL REFERENCES users,
-	date_posted timestamptz NOT NULL DEFAULT 'now'::timestamptz,
-	title       text        NOT NULL,
-	body        text        NOT NULL
+    id          serial      PRIMARY KEY,
+    user_id     integer     NOT NULL REFERENCES users,
+    date_posted timestamptz NOT NULL DEFAULT 'now'::timestamptz,
+    title       text        NOT NULL,
+    body        text        NOT NULL
 );
 
 --
@@ -502,8 +502,8 @@ CREATE TRIGGER update_translator_average_rating
 
 CREATE FUNCTION do_update_project_average_rating() RETURNS trigger AS $$
     BEGIN
-		IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
-			UPDATE translation_groups
+        IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
+            UPDATE translation_groups
                 SET avg_project_rating = (
                     SELECT AVG(r.rating)
                         FROM project_ratings r, translation_projects p
@@ -511,18 +511,18 @@ CREATE FUNCTION do_update_project_average_rating() RETURNS trigger AS $$
                             AND r.project_id = NEW.project_id
                 );
             RETURN NEW;
-		ELSIF (TG_OP = 'DELETE') THEN
-			UPDATE translation_groups
+        ELSIF (TG_OP = 'DELETE') THEN
+            UPDATE translation_groups
                 SET avg_project_rating = (
                     SELECT AVG(r.rating)
                         FROM project_ratings r, translation_projects p
                         WHERE r.project_id = p.id
                             AND r.project_id = OLD.project_id
                 );
-			RETURN NEW;
-		END IF;
-		RETURN NULL;
-	END;
+            RETURN NEW;
+        END IF;
+        RETURN NULL;
+    END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_project_average_rating
@@ -531,9 +531,9 @@ CREATE TRIGGER update_project_average_rating
 
 -- update the tags whenever a vote occurs
 CREATE FUNCTION do_update_book_tags() RETURNS trigger AS $$
-	DECLARE
-		r      RECORD;
-		weight real;
+    DECLARE
+        r      RECORD;
+        weight real;
     BEGIN
         IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
             r := NEW;
@@ -564,9 +564,9 @@ CREATE TRIGGER update_book_tags
     EXECUTE PROCEDURE do_update_book_tags();
 
 CREATE FUNCTION do_update_character_tags() RETURNS trigger AS $$
-	DECLARE
-		r      RECORD;
-		weight real;
+    DECLARE
+        r      RECORD;
+        weight real;
     BEGIN
         IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
             r := NEW;
@@ -599,7 +599,7 @@ CREATE TRIGGER update_character_tags
 -- update the chapters a user owns when he gets a release
 CREATE FUNCTION do_update_user_chapters() RETURNS trigger AS $$
     DECLARE
-		ids integer[];
+        ids integer[];
         id  integer;
     BEGIN
         ids := (

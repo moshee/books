@@ -327,6 +327,7 @@ type Character struct {
 
 type CharacterRole struct {
 	*Character
+	*BookSeries
 	Role CharacterRole
 }
 
