@@ -77,7 +77,7 @@ CREATE TABLE production_credits (
     credit    integer NOT NULL
 );
 
-CREATE TYPE SeriesRelation AS ENUM ( 'prequel', 'sequel', 'spin-off', 'adaptation' );
+CREATE TYPE SeriesRelation AS ENUM ( 'Original Work', 'Alternative Version', 'Adaptation', 'Prequel', 'Sequel', 'Spin-Off', 'Shares Character' );
 
 CREATE TABLE related_series (
     series_id         integer        NOT NULL REFERENCES book_series,
@@ -188,9 +188,9 @@ CREATE TABLE translator_members (
 CREATE TYPE BloodType AS ENUM ( '0', 'A', 'B', 'AB' );
 
 CREATE TABLE characters (
-    id serial            PRIMARY KEY,
-    name        text     NOT NULL,
-    native_name text     NOT NULL,
+    id          serial     PRIMARY KEY,
+    name        text       NOT NULL,
+    native_name text       NOT NULL,
     aliases     text[],
     nationality text,
     birthday    text,
@@ -206,20 +206,26 @@ CREATE TABLE characters (
     picture     boolean
 );
 
-CREATE TYPE CharacterRole AS ENUM ( 'main', 'secondary', 'appears', 'cameo' );
+CREATE TYPE CharacterRole AS ENUM ( 'Main', 'Secondary', 'Appears', 'Cameo' );
 
 CREATE TABLE characters_roles (
     character_id integer       NOT NULL REFERENCES characters,
     series_id    integer       NOT NULL REFERENCES book_series,
-    role         CharacterRole NOT NULL
+    role         CharacterRole NOT NULL,
+    appearances  integer[] --           REFERENCES chapters
 );
 
-CREATE TYPE CharacterRelation AS ENUM ( 'family', 'friend', 'enemy', 'love interest', 'lover' );
+CREATE TABLE characters_relation_kinds (
+    id      serial  PRIMARY KEY,
+    name    text    NOT NULL,
+    opposes integer NOT NULL REFERENCES characters_relation_kinds
+);
 
-CREATE TABLE characters_relations (
-    character_id         integer           NOT NULL REFERENCES characters,
-    related_character_id integer           NOT NULL REFERENCES characters,
-    relation             CharacterRelation NOT NULL
+CREATE TABLE related_characters (
+    character_id         integer NOT NULL REFERENCES characters,
+    related_character_id integer NOT NULL REFERENCES characters,
+    relation             integer NOT NULL REFERENCES characters_relation_kinds,
+    ends                 boolean NOT NULL
 );
 
 --
@@ -617,13 +623,120 @@ $$ LANGUAGE plpgsql;
 
 CREATE RULE user_chapters_ignore_duplicates_on_insert AS
     ON INSERT TO user_chapters
-    WHERE (EXISTS (SELECT 1
+    WHERE (EXISTS (
+        SELECT 1
         FROM user_chapters
-        WHERE user_chapters.chapter_id = NEW.chapter_id))
-        DO INSTEAD NOTHING;
+        WHERE user_chapters.chapter_id = NEW.chapter_id
+    ))
+    DO INSTEAD NOTHING;
 
 CREATE TRIGGER update_user_chapters
     AFTER INSERT ON user_releases
     EXECUTE PROCEDURE do_update_user_chapters();
+
+-- update the object of a series relation
+CREATE FUNCTION do_update_series_relations() RETURNS trigger AS $$
+    DECLARE
+        related_relation SeriesRelation;
+    BEGIN
+        IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
+            CASE NEW.relation
+                WHEN 'Alternative Version' THEN
+                    related_relation := 'Alternative Version';
+                WHEN 'Adaptation' THEN
+                    related_relation := 'Original Work';
+                WHEN 'Prequel' THEN
+                    related_relation := 'Sequel';
+                WHEN 'Sequel' THEN
+                    related_relation := 'Prequel';
+                WHEN 'Spin-Off' THEN
+                    related_relation := 'Original Work';
+                WHEN 'Shares Character' THEN
+                    related_relation := 'Shares Character';
+            END CASE;
+        END IF;
+        CASE TG_OP
+            WHEN 'INSERT' THEN
+                INSERT INTO related_series (series_id, related_series_id, relation)
+                    VALUES (NEW.related_series_id, NEW.series_id, related_relation);
+            WHEN 'UPDATE' THEN
+                UPDATE related_series
+                    SET relation = related_relation
+                    WHERE series_id = NEW.related_series_id
+                        AND related_series_id = NEW.series_id;
+            WHEN 'DELETE' THEN
+                DELETE FROM related_series
+                    WHERE series_id = OLD.related_series_id
+                        AND related_series_id = OLD.series_id;
+        END CASE;
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE RULE series_relations_ignore_duplicates_on_insert AS
+    ON INSERT TO related_series
+    WHERE (EXISTS (
+        SELECT 1
+        FROM related_series
+            WHERE series_id = NEW.series_id
+                AND related_series_id = NEW.related_series_id
+    ))
+    DO INSTEAD NOTHING;
+
+CREATE TRIGGER update_series_relations
+    AFTER INSERT OR UPDATE OR DELETE ON related_series
+    EXECUTE PROCEDURE do_update_series_relations();
+
+-- update the object of a character relation
+CREATE FUNCTION do_update_character_relations() RETURNS trigger AS $$
+    BEGIN
+        CASE TG_OP
+            WHEN 'INSERT' THEN
+                INSERT INTO related_characters (character_id, related_character_id, relation, ends)
+                    VALUES (NEW.related_character_id, NEW.character_id, (
+                        SELECT opposes
+                            FROM characters_relation_kinds
+                            WHERE id = NEW.relation
+                        ),
+                        NEW.ends);
+            WHEN 'UPDATE' THEN
+                UPDATE related_characters
+                    SET relation = (
+                        SELECT opposes
+                            FROM characters_relation_kinds
+                            WHERE id = NEW.relation
+                        ),
+                        ends = NEW.ends
+                    WHERE relation = OLD.relation
+                        AND character_id = NEW.related_character_id
+                        AND related_character_id = NEW.character_id;
+            WHEN 'DELETE' THEN
+                DELETE FROM related_characters
+                    WHERE relation = OLD.relation
+                        AND character_id = OLD.related_character_id
+                        AND related_character_id = OLD.character_id;
+        END CASE;
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE RULE characters_relations_ignore_duplicates_on_insert AS
+    ON INSERT TO related_characters
+    WHERE (EXISTS (
+        SELECT 1
+        FROM related_characters
+            WHERE (
+                relation = NEW.relation
+                    OR relation = (SELECT opposes
+                        FROM characters_relation_kinds
+                        WHERE id = NEW.relation
+                    )
+            )
+                AND character_id = NEW.character_id
+                AND related_character_id = NEW.related_character_id
+    ))
+    DO INSTEAD NOTHING;
+
+CREATE TRIGGER update_character_relations
+    AFTER INSERT OR UPDATE OR DELETE ON related_characters
+    EXECUTE PROCEDURE do_update_character_relations();
 
 END;
