@@ -115,6 +115,14 @@ CREATE TABLE languages (
     name text   NOT NULL
 );
 
+CREATE TABLE chapters (
+	id serial PRIMARY KEY,
+	release_date timestamptz NOT NULL,
+	series_id integer NOT NULL REFERENCES book_series,
+	num integer NOT NULL,
+	notes text
+);
+
 CREATE TABLE releases (
     id              serial      PRIMARY KEY,
     series_id       integer     NOT NULL REFERENCES book_series,
@@ -126,9 +134,14 @@ CREATE TABLE releases (
     is_last_release boolean     NOT NULL DEFAULT false,
 	unit            text        NOT NULL,
 	num             integer,              -- volume number, if volume
-	range_lower     integer     NOT NULL, -- first chapter in range
-	range_upper     integer,              -- last chapter in range, NULL if single
 	extra           text
+);
+
+-- Keeps track of which releases a chapter is included in (may be multiple releases for a given chapter)
+CREATE TABLE chapters_releases (
+	id serial PRIMARY KEY,
+	chapter_id integer NOT NULL REFERENCES chapters,
+	release_id integer NOT NULL REFERENCES releases
 );
 
 --
@@ -541,6 +554,7 @@ CREATE FUNCTION do_update_book_tags() RETURNS trigger AS $$
         ELSIF (TG_OP = 'DELETE') THEN
             r := OLD;
         END IF;
+
         weight := (
             SELECT AVG(vote)
                 FROM book_tag_consensus c
@@ -556,6 +570,7 @@ CREATE FUNCTION do_update_book_tags() RETURNS trigger AS $$
                 SET t.weight = weight
                 WHERE t.id = r.book_tag_id;
         END IF;
+
         RETURN r;
     END;
 $$ LANGUAGE plpgsql;
@@ -574,11 +589,13 @@ CREATE FUNCTION do_update_character_tags() RETURNS trigger AS $$
         ELSIF (TG_OP = 'DELETE') THEN
             r := OLD;
         END IF;
+
         weight := (
             SELECT AVG(vote)
                 FROM character_tag_consensus c
                 WHERE c.character_tag_id = r.character_tag_id
         );
+
         IF (weight < 1) THEN
             DELETE FROM character_tag_consensus
                 WHERE character_tag_id = r.character_tag_id;
@@ -589,6 +606,7 @@ CREATE FUNCTION do_update_character_tags() RETURNS trigger AS $$
                 SET t.weight = weight
                 WHERE t.id = r.character_tag_id;
         END IF;
+
         RETURN r;
     END;
 $$ LANGUAGE plpgsql;
@@ -599,20 +617,17 @@ CREATE TRIGGER update_character_tags
 
 -- update the chapters a user owns when he gets a release
 CREATE FUNCTION do_update_user_chapters() RETURNS trigger AS $$
-    DECLARE
-        ids integer[];
-        id  integer;
     BEGIN
-        ids := (
-            SELECT chapters_ids
-                FROM releases r
-                WHERE r.id = NEW.release_id
-        );
-        FOREACH id IN ARRAY ids
-        LOOP
-            INSERT INTO user_chapters (user_id, chapter_id, status)
-                VALUES (NEW.user_id, id, 0); -- assuming status=0 is what we want
-        END LOOP;
+		INSERT INTO user_chapters (user_id, chapter_id, status)
+			VALUES (
+				NEW.user_id,
+				( SELECT id
+						FROM chapters
+						WHERE chapters_releases.chapter_id = chapters.id
+						AND chapters_releases.release_id = NEW.release_id
+				),
+				'Owned'
+			);
     END;
 $$ LANGUAGE plpgsql;
 
@@ -657,12 +672,12 @@ CREATE FUNCTION do_update_series_relations() RETURNS trigger AS $$
             WHEN 'UPDATE' THEN
                 UPDATE related_series
                     SET relation = related_relation
-                    WHERE series_id = NEW.related_series_id
+						WHERE series_id = NEW.related_series_id
                         AND related_series_id = NEW.series_id;
             WHEN 'DELETE' THEN
                 DELETE FROM related_series
                     WHERE series_id = OLD.related_series_id
-                        AND related_series_id = OLD.series_id;
+					AND related_series_id = OLD.series_id;
         END CASE;
     END;
 $$ LANGUAGE plpgsql;
@@ -671,9 +686,9 @@ CREATE RULE series_relations_ignore_duplicates_on_insert AS
     ON INSERT TO related_series
     WHERE (EXISTS (
         SELECT 1
-        FROM related_series
-            WHERE series_id = NEW.series_id
-                AND related_series_id = NEW.related_series_id
+        FROM related_series WHERE
+			series_id = NEW.series_id
+            AND related_series_id = NEW.related_series_id
     ))
     DO INSTEAD NOTHING;
 
