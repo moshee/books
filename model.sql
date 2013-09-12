@@ -100,15 +100,6 @@ CREATE TABLE translation_project_groups (
 	translator_id integer NOT NULL REFERENCES translation_groups
 );
 
-CREATE TABLE chapters (
-    id           serial  PRIMARY KEY,
-	series_id    integer NOT NULL REFERENCES book_series,
-    volume       integer,
-    display_name text    NOT NULL,
-    sort_num     integer NOT NULL,
-    title        text
-);
-
 CREATE TABLE releases (
     id              serial      PRIMARY KEY,
     series_id       integer     NOT NULL REFERENCES book_series,
@@ -117,7 +108,11 @@ CREATE TABLE releases (
     release_date    timestamptz NOT NULL,
     notes           text,
     is_last_release boolean     NOT NULL DEFAULT false,
-    chapters_ids    integer[]   NOT NULL
+	unit            text        NOT NULL,
+	num             integer,              -- volume number, if volume
+	range_lower     integer     NOT NULL, -- first chapter in range
+	range_upper     integer,              -- last chapter in range, NULL if single
+	extra           text
 );
 
 CREATE TABLE users (
