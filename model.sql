@@ -180,9 +180,9 @@ CREATE TYPE ReadStatus AS ENUM ( 'Read', 'Owned', 'Skipped' );
 
 -- keeps track of which chapters a user has read/owns
 CREATE TABLE user_chapters (
-    user_id    integer    NOT NULL REFERENCES users,
-    chapter_id integer    NOT NULL REFERENCES chapters,
-    status     ReadStatus NOT NULL,
+    user_id    integer NOT NULL REFERENCES users,
+    chapter_id integer NOT NULL REFERENCES chapters,
+    status     ReadStatus,
     date_read  timestamptz
 );
 
