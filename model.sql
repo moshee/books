@@ -31,12 +31,12 @@ CREATE TABLE magazines (
     id         serial      PRIMARY KEY,
     title      text        NOT NULL,
     publisher  integer     NOT NULL REFERENCES publishers,
-    language   integer,
+    language   text        NOT NULL,
     date_added timestamptz NOT NULL,
     summary    text
 );
 
-CREATE TYPE Demographic AS ENUM ( 'Shounen', 'Shoujo', 'Seinen', 'Josei' );
+CREATE TYPE Demographic AS ENUM ( 'Shounen', 'Shoujo', 'Seinen', 'Josei', 'Kodomomuke', 'Seijin' );
 CREATE TYPE SeriesKind AS ENUM ( 'Comic', 'Novel', 'Webcomic' );
 
 CREATE TABLE book_series (
@@ -54,7 +54,17 @@ CREATE TABLE book_series (
     avg_rating   real, -- NULL means not rated (as opposed to a zero rating)
     rating_count integer     NOT NULL DEFAULT 0,
     demographic  Demographic NOT NULL,
-    magazine_id  integer     REFERENCES magazines
+    magazine_id  integer     REFERENCES magazines,
+);
+
+-- This table glues book_series and publishers to indicate if a series is
+-- officially licensed in countries outside of the original
+CREATE TABLE series_licenses (
+	id           serial  PRIMARY KEY,
+	series_id    integer NOT NULL REFERENCES book_series,
+	publisher_id integer NOT NULL REFERENCES publishers,
+	country      text    NOT NULL,
+	when         date
 );
 
 CREATE TYPE Sex AS ENUM ( 'Male', 'Female', 'Other' );
@@ -74,6 +84,9 @@ CREATE TABLE authors (
 CREATE TABLE production_credits (
     series_id integer NOT NULL REFERENCES book_series,
     author_id integer NOT NULL REFERENCES authors,
+
+	-- 0001 : art
+	-- 0010 : scenario
     credit    integer NOT NULL
 );
 
@@ -110,11 +123,6 @@ CREATE TABLE translation_project_groups (
     translator_id integer NOT NULL REFERENCES translation_groups
 );
 
-CREATE TABLE languages (
-    id   serial PRIMARY KEY,
-    name text   NOT NULL
-);
-
 CREATE TABLE chapters (
 	id serial PRIMARY KEY,
 	release_date timestamptz NOT NULL,
@@ -128,16 +136,17 @@ CREATE TABLE releases (
     series_id       integer     NOT NULL REFERENCES book_series,
     translator_id   integer     NOT NULL REFERENCES translation_groups,
     project_id      integer     NOT NULL REFERENCES translation_projects,
-    lang            integer     NOT NULL REFERENCES languages,
+	language        text        NOT NULL,
     release_date    timestamptz NOT NULL,
     notes           text,
     is_last_release boolean     NOT NULL DEFAULT false,
 	unit            text        NOT NULL,
-	num             integer,              -- volume number, if volume
+	num             integer, -- volume number, if volume
 	extra           text
 );
 
--- Keeps track of which releases a chapter is included in (may be multiple releases for a given chapter)
+-- Keeps track of which releases a chapter is included in
+-- (may be multiple releases for a given chapter)
 CREATE TABLE chapters_releases (
 	id serial PRIMARY KEY,
 	chapter_id integer NOT NULL REFERENCES chapters,
@@ -156,9 +165,9 @@ CREATE TABLE users (
     rights        integer     NOT NULL DEFAULT 0,
     vote_weight   integer     NOT NULL DEFAULT 1,
     summary       text,
-    register_date timestamptz NOT NULL,
-    last_active   timestamptz NOT NULL,
-    avatar        boolean
+    register_date timestamptz NOT NULL DEFAULT 'now'::timestamptz,
+    last_active   timestamptz NOT NULL DEFAULT 'epoch'::timestamptz,
+    avatar        boolean     NOT NULL DEFAULT false
 );
 
 CREATE TABLE sessions (
@@ -328,8 +337,8 @@ CREATE TABLE filtered_groups (
 );
 
 CREATE TABLE filtered_languages (
-    user_id integer NOT NULL REFERENCES users,
-    lang_id integer NOT NULL REFERENCES languages
+    user_id  integer NOT NULL REFERENCES users,
+    language text    NOT NULL
 );
 
 CREATE TABLE filtered_book_tags (
