@@ -137,7 +137,7 @@ CREATE TABLE releases (
     translator_id   integer     NOT NULL REFERENCES translation_groups,
     project_id      integer     NOT NULL REFERENCES translation_projects,
 	language        text        NOT NULL DEFAULT 'en',
-    release_date    timestamptz NOT NULL DEFAULT 'now'::epoch,
+    release_date    timestamptz NOT NULL DEFAULT 'now'::timestamptz,
     notes           text,
     is_last_release boolean     NOT NULL DEFAULT false,
 	volume          integer,
