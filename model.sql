@@ -103,19 +103,18 @@ CREATE TABLE related_series (
 --
 
 CREATE TABLE translation_groups (
-    id                 serial PRIMARY KEY,
-    name               text   NOT NULL,
-    summary            text,
-    avg_rating         real,
-    avg_project_rating real,
-    avg_release_rate   bigint -- seconds
+    id               serial PRIMARY KEY,
+    name             text   NOT NULL,
+    summary          text,
+    avg_rating       real,
+    avg_release_rate bigint -- seconds
 );
 
 CREATE TABLE translation_projects (
-    id            serial      PRIMARY KEY,
-    series_id     integer     NOT NULL REFERENCES book_series,
-    start_date    timestamptz NOT NULL DEFAULT 'now'::timestamptz,
-    end_date      timestamptz
+    id         serial      PRIMARY KEY,
+    series_id  integer     NOT NULL REFERENCES book_series,
+    start_date timestamptz NOT NULL DEFAULT 'now'::timestamptz,
+    end_date   timestamptz
 );
 
 CREATE TABLE translation_project_groups (
@@ -124,11 +123,12 @@ CREATE TABLE translation_project_groups (
 );
 
 CREATE TABLE chapters (
-	id serial PRIMARY KEY,
-	release_date timestamptz NOT NULL,
-	series_id integer NOT NULL REFERENCES book_series,
-	num integer NOT NULL,
-	notes text
+	id           serial      PRIMARY KEY,
+	release_date timestamptz NOT NULL DEFAULT 'epoch'::timestamptz,
+	series_id    integer     NOT NULL REFERENCES book_series,
+	num          integer     NOT NULL,
+	volume       integer,
+	notes        text
 );
 
 CREATE TABLE releases (
@@ -136,19 +136,18 @@ CREATE TABLE releases (
     series_id       integer     NOT NULL REFERENCES book_series,
     translator_id   integer     NOT NULL REFERENCES translation_groups,
     project_id      integer     NOT NULL REFERENCES translation_projects,
-	language        text        NOT NULL,
-    release_date    timestamptz NOT NULL,
+	language        text        NOT NULL DEFAULT 'en',
+    release_date    timestamptz NOT NULL DEFAULT 'now'::epoch,
     notes           text,
     is_last_release boolean     NOT NULL DEFAULT false,
-	unit            text        NOT NULL,
-	num             integer, -- volume number, if volume
+	volume          integer,
 	extra           text
 );
 
 -- Keeps track of which releases a chapter is included in
 -- (may be multiple releases for a given chapter)
 CREATE TABLE chapters_releases (
-	id serial PRIMARY KEY,
+	id         serial  PRIMARY KEY,
 	chapter_id integer NOT NULL REFERENCES chapters,
 	release_id integer NOT NULL REFERENCES releases
 );
@@ -373,14 +372,6 @@ CREATE TABLE translator_ratings (
     rate_date     timestamptz NOT NULL
 );
 
-CREATE TABLE project_ratings (
-    id         serial      PRIMARY KEY,
-    user_id    integer     NOT NULL REFERENCES users,
-    project_id integer     NOT NULL REFERENCES translation_projects,
-    rating     integer     NOT NULL,
-    rate_date  timestamptz NOT NULL
-);
-
 -- Reviews
 -- Reviews always have a parent rating that they are associated with,
 -- but ratings do not have to include reviews. In that case,
@@ -398,15 +389,8 @@ CREATE TABLE translator_reviews (
     body        text    NOT NULL
 );
 
-CREATE TABLE project_reviews (
-    id          serial  PRIMARY KEY,
-    rating_id   integer NOT NULL REFERENCES project_ratings,
-    body        text    NOT NULL
-);
-
 ALTER TABLE book_ratings       ADD review_id integer REFERENCES book_reviews;
 ALTER TABLE translator_ratings ADD review_id integer REFERENCES translator_reviews;
-ALTER TABLE project_ratings    ADD review_id integer REFERENCES project_reviews;
 
 --
 -- Entities that may be associated with any number of URLs
@@ -522,35 +506,6 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER update_translator_average_rating
     AFTER INSERT OR UPDATE OR DELETE ON translator_ratings
     EXECUTE PROCEDURE do_update_translator_average_rating();
-
-CREATE FUNCTION do_update_project_average_rating() RETURNS trigger AS $$
-    BEGIN
-        IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
-            UPDATE translation_groups
-                SET avg_project_rating = (
-                    SELECT AVG(r.rating)
-                        FROM project_ratings r, translation_projects p
-                        WHERE r.project_id = p.id
-                            AND r.project_id = NEW.project_id
-                );
-            RETURN NEW;
-        ELSIF (TG_OP = 'DELETE') THEN
-            UPDATE translation_groups
-                SET avg_project_rating = (
-                    SELECT AVG(r.rating)
-                        FROM project_ratings r, translation_projects p
-                        WHERE r.project_id = p.id
-                            AND r.project_id = OLD.project_id
-                );
-            RETURN NEW;
-        END IF;
-        RETURN NULL;
-    END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER update_project_average_rating
-    AFTER INSERT OR UPDATE OR DELETE ON project_ratings
-    EXECUTE PROCEDURE do_update_project_average_rating();
 
 -- update the tags whenever a vote occurs
 CREATE FUNCTION do_update_book_tags() RETURNS trigger AS $$
