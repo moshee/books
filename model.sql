@@ -202,7 +202,7 @@ CREATE TABLE translator_members (
 -- Characters
 --
 
-CREATE TYPE BloodType AS ENUM ( '0', 'A', 'B', 'AB' );
+CREATE TYPE BloodType AS ENUM ( 'O', 'A', 'B', 'AB' );
 
 CREATE TABLE characters (
     id          serial     PRIMARY KEY,
@@ -210,7 +210,7 @@ CREATE TABLE characters (
     native_name text       NOT NULL,
     aliases     text[],
     nationality text,
-    birthday    text,
+    birthday    date,
     age         integer,
     sex         Sex,
     weight      real,
@@ -220,7 +220,7 @@ CREATE TABLE characters (
     hips        real,
     blood_type  BloodType,
     description text,
-    picture     boolean
+    picture     boolean NOT NULL DEFAULT false
 );
 
 CREATE TYPE CharacterRole AS ENUM ( 'Main', 'Secondary', 'Appears', 'Cameo' );
@@ -355,13 +355,12 @@ CREATE TABLE filtered_character_tags (
 -- Ratings and Reviews
 --
 
--- Ratings
-
 CREATE TABLE book_ratings (
     id        serial      PRIMARY KEY,
     user_id   integer     NOT NULL REFERENCES users,
     series_id integer     NOT NULL REFERENCES book_series,
     rating    integer     NOT NULL,
+	review    text,
     rate_date timestamptz NOT NULL
 );
 
@@ -370,28 +369,9 @@ CREATE TABLE translator_ratings (
     user_id       integer     NOT NULL REFERENCES users,
     translator_id integer     NOT NULL REFERENCES translation_groups,
     rating        integer     NOT NULL,
+	review        text,
     rate_date     timestamptz NOT NULL
 );
-
--- Reviews
--- Reviews always have a parent rating that they are associated with,
--- but ratings do not have to include reviews. In that case,
--- *_ratings.review_id will be NULL.
-
-CREATE TABLE book_reviews (
-    id          serial  PRIMARY KEY,
-    rating_id   integer NOT NULL REFERENCES book_ratings,
-    body        text    NOT NULL
-);
-
-CREATE TABLE translator_reviews (
-    id          serial  PRIMARY KEY,
-    rating_id   integer NOT NULL REFERENCES translator_ratings,
-    body        text    NOT NULL
-);
-
-ALTER TABLE book_ratings       ADD review_id integer REFERENCES book_reviews;
-ALTER TABLE translator_ratings ADD review_id integer REFERENCES translator_reviews;
 
 --
 -- Entities that may be associated with any number of URLs
@@ -430,9 +410,15 @@ CREATE TABLE translator_links (
 -- Site news
 --
 
+CREATE TABLE news_categories (
+	id    serial PRIMARY KEY,
+	name text    NOT NULL
+)
+
 CREATE TABLE news_posts (
     id          serial      PRIMARY KEY,
     user_id     integer     NOT NULL REFERENCES users,
+	category_id integer     NOT NULL REFERENCES categories,
     date_posted timestamptz NOT NULL DEFAULT 'now'::timestamptz,
     title       text        NOT NULL,
     body        text        NOT NULL
