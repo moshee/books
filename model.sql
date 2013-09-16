@@ -413,12 +413,12 @@ CREATE TABLE translator_links (
 CREATE TABLE news_categories (
 	id    serial PRIMARY KEY,
 	name text    NOT NULL
-)
+);
 
 CREATE TABLE news_posts (
     id          serial      PRIMARY KEY,
     user_id     integer     NOT NULL REFERENCES users,
-	category_id integer     NOT NULL REFERENCES categories,
+	category_id integer     NOT NULL REFERENCES news_categories,
     date_posted timestamptz NOT NULL DEFAULT 'now'::timestamptz,
     title       text        NOT NULL,
     body        text        NOT NULL
