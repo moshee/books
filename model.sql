@@ -54,17 +54,17 @@ CREATE TABLE book_series (
     avg_rating   real, -- NULL means not rated (as opposed to a zero rating)
     rating_count integer     NOT NULL DEFAULT 0,
     demographic  Demographic NOT NULL,
-    magazine_id  integer     REFERENCES magazines,
+    magazine_id  integer     REFERENCES magazines
 );
 
 -- This table glues book_series and publishers to indicate if a series is
 -- officially licensed in countries outside of the original
 CREATE TABLE series_licenses (
-	id           serial  PRIMARY KEY,
-	series_id    integer NOT NULL REFERENCES book_series,
-	publisher_id integer NOT NULL REFERENCES publishers,
-	country      text    NOT NULL,
-	when         date
+	id            serial  PRIMARY KEY,
+	series_id     integer NOT NULL REFERENCES book_series,
+	publisher_id  integer NOT NULL REFERENCES publishers,
+	country       text    NOT NULL,
+	date_licensed date
 );
 
 CREATE TYPE Sex AS ENUM ( 'Male', 'Female', 'Other' );
@@ -158,6 +158,7 @@ CREATE TABLE chapters_releases (
 
 CREATE TABLE users (
     id            serial      PRIMARY KEY,
+	email         text        NOT NULL,
     name          text        NOT NULL,
     pass          bytea       NOT NULL,
     salt          bytea       NOT NULL,
