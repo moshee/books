@@ -188,8 +188,9 @@ CREATE TABLE user_chapters (
 
 -- keeps track of which releases a user owns
 CREATE TABLE user_releases (
-    user_id    integer NOT NULL REFERENCES users,
-    release_id integer NOT NULL REFERENCES releases
+    user_id    integer    NOT NULL REFERENCES users,
+    release_id integer    NOT NULL REFERENCES releases,
+	status     ReadStatus NOT NULL
 );
 
 -- keeps track of users belonging to translator groups
@@ -205,19 +206,16 @@ CREATE TABLE translator_members (
 CREATE TYPE BloodType AS ENUM ( 'O', 'A', 'B', 'AB' );
 
 CREATE TABLE characters (
-    id          serial     PRIMARY KEY,
-    name        text       NOT NULL,
-    native_name text       NOT NULL,
+    id          serial  PRIMARY KEY,
+    name        text    NOT NULL,
+    native_name text    NOT NULL,
     aliases     text[],
     nationality text,
     birthday    date,
-    age         integer,
     sex         Sex,
     weight      real,
     height      real,
-    bust        real,
-    waist       real,
-    hips        real,
+	sizes       text,
     blood_type  BloodType,
     description text,
     picture     boolean NOT NULL DEFAULT false
@@ -235,7 +233,7 @@ CREATE TABLE characters_roles (
 CREATE TABLE characters_relation_kinds (
     id      serial  PRIMARY KEY,
     name    text    NOT NULL,
-    opposes integer NOT NULL REFERENCES characters_relation_kinds
+    opposes integer REFERENCES characters_relation_kinds
 );
 
 CREATE TABLE related_characters (
@@ -570,15 +568,10 @@ CREATE TRIGGER update_character_tags
 CREATE FUNCTION do_update_user_chapters() RETURNS trigger AS $$
     BEGIN
 		INSERT INTO user_chapters (user_id, chapter_id, status)
-			VALUES (
-				NEW.user_id,
-				( SELECT id
-						FROM chapters
-						WHERE chapters_releases.chapter_id = chapters.id
-						AND chapters_releases.release_id = NEW.release_id
-				),
-				'Owned'
-			);
+			SELECT NEW.user_id, id, NEW.status
+				FROM chapters
+				WHERE chapters_releases.chapter_id = chapters.id
+				AND chapters_releases.release_id = NEW.release_id;
     END;
 $$ LANGUAGE plpgsql;
 
