@@ -23,7 +23,7 @@ INSERT INTO schema_version VALUES (0);
 CREATE TABLE publishers (
     id         serial      PRIMARY KEY,
     name       text        NOT NULL,
-    date_added timestamptz NOT NULL,
+    date_added timestamptz NOT NULL DEFAULT 'now'::timestamptz,
     summary    text
 );
 
@@ -32,7 +32,7 @@ CREATE TABLE magazines (
     title      text        NOT NULL,
     publisher  integer     NOT NULL REFERENCES publishers,
     language   text        NOT NULL,
-    date_added timestamptz NOT NULL,
+    date_added timestamptz NOT NULL DEFAULT 'now'::timestamptz,
     summary    text
 );
 

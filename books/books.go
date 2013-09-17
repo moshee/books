@@ -3,6 +3,7 @@ package books
 import (
 	//"database/sql"
 	"github.com/moshee/gas"
+	//"github.com/argusdusty/Ferret"
 )
 
 type Model interface {
