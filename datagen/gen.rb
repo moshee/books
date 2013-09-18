@@ -6,11 +6,12 @@ require 'erb'
 
 $files = {}
 Dir['*.txt'].each do |file|
-  $files[File.basename(file, '.txt').intern] = File.open(file).lines.map(&:chomp)
+  $files[File.basename(file, '.txt').intern] = File.open(file).each_line.map(&:chomp)
 end
 
 def sample(sym)
-  $files[sym.intern].sample end
+  p = $files[sym.intern].sample.sub('[', '').sub(']', '').tr('[]', '()').gsub('( )', ' ').gsub('|)', ')').gsub('(|', '(').gsub('||', '|')
+  Regexp.new(p).gen end
 
 =begin
 
