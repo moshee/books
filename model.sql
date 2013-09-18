@@ -180,17 +180,20 @@ CREATE TYPE ReadStatus AS ENUM ( 'Read', 'Owned', 'Skipped' );
 
 -- keeps track of which chapters a user has read/owns
 CREATE TABLE user_chapters (
-    user_id    integer NOT NULL REFERENCES users,
-    chapter_id integer NOT NULL REFERENCES chapters,
-    status     ReadStatus,
-    date_read  timestamptz
+	id         serial      PRIMARY KEY,
+    user_id    integer     NOT NULL REFERENCES users,
+    chapter_id integer     NOT NULL REFERENCES chapters,
+    status     ReadStatus  NOT NULL,
+    date_read  timestamptz NOT NULL DEFAULT 'now'::timestamptz
 );
 
 -- keeps track of which releases a user owns
 CREATE TABLE user_releases (
-    user_id    integer    NOT NULL REFERENCES users,
-    release_id integer    NOT NULL REFERENCES releases,
-	status     ReadStatus NOT NULL
+	id         serial      PRIMARY KEY,
+    user_id    integer     NOT NULL REFERENCES users,
+    release_id integer     NOT NULL REFERENCES releases,
+	status     ReadStatus  NOT NULL,
+	date_owned timestamptz NOT NULL DEFAULT 'now'::timestamptz
 );
 
 -- keeps track of users belonging to translator groups

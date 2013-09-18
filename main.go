@@ -1,18 +1,15 @@
 package main
 
 import (
-	"./books"
+	"github.com/moshee/books/books"
 	"github.com/moshee/gas"
+	"net/http"
+	"path/filepath"
 )
 
 func StaticHandler(g *gas.Gas) {
-	path := g.Args["path"]
-	f, err := os.Open(filepath.Join("./static", path))
-	if err != nil {
-		return
-	}
-	defer f.Close()
-	io.Copy(g.ResponseWriter, f)
+	name := filepath.Join("./static", g.Args["path"])
+	http.ServeFile(g.ResponseWriter, g.Request, name)
 }
 
 func main() {

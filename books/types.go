@@ -18,7 +18,7 @@ type (
 	Privileges        int
 	ReadStatus        int
 	BloodType         int
-	CharacterRole     int
+	Role              int
 	CharacterRelation int
 )
 
@@ -140,7 +140,7 @@ func (s ReadStatus) String() string {
 }
 
 const (
-	Main CharacterRole = iota + 1
+	Main Role = iota + 1
 	Secondary
 	Appears
 	Cameo
@@ -250,7 +250,7 @@ type Release struct {
 	*BookSeries
 	*TranslationGroup
 	*TranslationProject
-	Language
+	Language      string
 	ReleaseDate   time.Time
 	Notes         sql.NullString
 	IsLastRelease bool
@@ -335,7 +335,7 @@ type Character struct {
 type CharacterRole struct {
 	*Character
 	*BookSeries
-	Role CharacterRole
+	Role
 }
 
 type RelatedCharacter struct {

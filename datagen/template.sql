@@ -109,3 +109,8 @@ INSERT INTO releases VALUES
 INSERT INTO chapters_releases VALUES
 <%= rec(50) { ['DEFAULT', rand(1..295), rand(1..50)] } %>
 
+INSERT INTO user_chapters VALUES
+<%= rec(100) { ['DEFAULT', rand(1..103), rand(1..295), text %w(Read Owned Skipped).sample, tstz] } %>
+
+INSERT INTO user_releases VALUES
+<%= rec(30) { ['DEFAULT', rand(1..103), rand(1..295), text %w(Read Owned Skipped).sample, tstz] } %>

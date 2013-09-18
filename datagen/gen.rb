@@ -1,6 +1,11 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
 
+# TODO: - sql parsing and generator choosing
+#       - enum parsing in particular
+#       - automatic logical sorting
+#       - better generators
+#       - performance
 require 'randexp'
 require 'erb'
 
