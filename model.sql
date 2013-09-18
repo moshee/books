@@ -60,11 +60,11 @@ CREATE TABLE book_series (
 -- This table glues book_series and publishers to indicate if a series is
 -- officially licensed in countries outside of the original
 CREATE TABLE series_licenses (
-	id            serial  PRIMARY KEY,
-	series_id     integer NOT NULL REFERENCES book_series,
-	publisher_id  integer NOT NULL REFERENCES publishers,
-	country       text    NOT NULL,
-	date_licensed date
+    id            serial  PRIMARY KEY,
+    series_id     integer NOT NULL REFERENCES book_series,
+    publisher_id  integer NOT NULL REFERENCES publishers,
+    country       text    NOT NULL,
+    date_licensed date
 );
 
 CREATE TYPE Sex AS ENUM ( 'Male', 'Female', 'Other' );
@@ -85,8 +85,8 @@ CREATE TABLE production_credits (
     series_id integer NOT NULL REFERENCES book_series,
     author_id integer NOT NULL REFERENCES authors,
 
-	-- 0001 : art
-	-- 0010 : scenario
+    -- 0001 : art
+    -- 0010 : scenario
     credit    integer NOT NULL
 );
 
@@ -123,12 +123,12 @@ CREATE TABLE translation_project_groups (
 );
 
 CREATE TABLE chapters (
-	id           serial      PRIMARY KEY,
-	release_date timestamptz NOT NULL DEFAULT 'epoch'::timestamptz,
-	series_id    integer     NOT NULL REFERENCES book_series,
-	num          integer     NOT NULL,
-	volume       integer,
-	notes        text
+    id           serial      PRIMARY KEY,
+    release_date timestamptz NOT NULL DEFAULT 'epoch'::timestamptz,
+    series_id    integer     NOT NULL REFERENCES book_series,
+    num          integer     NOT NULL,
+    volume       integer,
+    notes        text
 );
 
 CREATE TABLE releases (
@@ -136,20 +136,20 @@ CREATE TABLE releases (
     series_id       integer     NOT NULL REFERENCES book_series,
     translator_id   integer     NOT NULL REFERENCES translation_groups,
     project_id      integer     NOT NULL REFERENCES translation_projects,
-	language        text        NOT NULL DEFAULT 'en',
+    language        text        NOT NULL DEFAULT 'en',
     release_date    timestamptz NOT NULL DEFAULT 'now'::timestamptz,
     notes           text,
     is_last_release boolean     NOT NULL DEFAULT false,
-	volume          integer,
-	extra           text
+    volume          integer,
+    extra           text
 );
 
 -- Keeps track of which releases a chapter is included in
 -- (may be multiple releases for a given chapter)
 CREATE TABLE chapters_releases (
-	id         serial  PRIMARY KEY,
-	chapter_id integer NOT NULL REFERENCES chapters,
-	release_id integer NOT NULL REFERENCES releases
+    id         serial  PRIMARY KEY,
+    chapter_id integer NOT NULL REFERENCES chapters,
+    release_id integer NOT NULL REFERENCES releases
 );
 
 --
@@ -158,7 +158,7 @@ CREATE TABLE chapters_releases (
 
 CREATE TABLE users (
     id            serial      PRIMARY KEY,
-	email         text        NOT NULL,
+    email         text        NOT NULL,
     name          text        NOT NULL,
     pass          bytea       NOT NULL,
     salt          bytea       NOT NULL,
@@ -180,7 +180,7 @@ CREATE TYPE ReadStatus AS ENUM ( 'Read', 'Owned', 'Skipped' );
 
 -- keeps track of which chapters a user has read/owns
 CREATE TABLE user_chapters (
-	id         serial      PRIMARY KEY,
+    id         serial      PRIMARY KEY,
     user_id    integer     NOT NULL REFERENCES users,
     chapter_id integer     NOT NULL REFERENCES chapters,
     status     ReadStatus  NOT NULL,
@@ -189,11 +189,11 @@ CREATE TABLE user_chapters (
 
 -- keeps track of which releases a user owns
 CREATE TABLE user_releases (
-	id         serial      PRIMARY KEY,
+    id         serial      PRIMARY KEY,
     user_id    integer     NOT NULL REFERENCES users,
     release_id integer     NOT NULL REFERENCES releases,
-	status     ReadStatus  NOT NULL,
-	date_owned timestamptz NOT NULL DEFAULT 'now'::timestamptz
+    status     ReadStatus  NOT NULL,
+    date_owned timestamptz NOT NULL DEFAULT 'now'::timestamptz
 );
 
 -- keeps track of users belonging to translator groups
@@ -218,7 +218,7 @@ CREATE TABLE characters (
     sex         Sex,
     weight      real,
     height      real,
-	sizes       text,
+    sizes       text,
     blood_type  BloodType,
     description text,
     picture     boolean NOT NULL DEFAULT false
@@ -361,7 +361,7 @@ CREATE TABLE book_ratings (
     user_id   integer     NOT NULL REFERENCES users,
     series_id integer     NOT NULL REFERENCES book_series,
     rating    integer     NOT NULL,
-	review    text,
+    review    text,
     rate_date timestamptz NOT NULL
 );
 
@@ -370,7 +370,7 @@ CREATE TABLE translator_ratings (
     user_id       integer     NOT NULL REFERENCES users,
     translator_id integer     NOT NULL REFERENCES translation_groups,
     rating        integer     NOT NULL,
-	review        text,
+    review        text,
     rate_date     timestamptz NOT NULL
 );
 
@@ -412,14 +412,14 @@ CREATE TABLE translator_links (
 --
 
 CREATE TABLE news_categories (
-	id    serial PRIMARY KEY,
-	name text    NOT NULL
+    id    serial PRIMARY KEY,
+    name text    NOT NULL
 );
 
 CREATE TABLE news_posts (
     id          serial      PRIMARY KEY,
     user_id     integer     NOT NULL REFERENCES users,
-	category_id integer     NOT NULL REFERENCES news_categories,
+    category_id integer     NOT NULL REFERENCES news_categories,
     date_posted timestamptz NOT NULL DEFAULT 'now'::timestamptz,
     title       text        NOT NULL,
     body        text        NOT NULL
@@ -570,11 +570,11 @@ CREATE TRIGGER update_character_tags
 -- update the chapters a user owns when he gets a release
 CREATE FUNCTION do_update_user_chapters() RETURNS trigger AS $$
     BEGIN
-		INSERT INTO user_chapters (user_id, chapter_id, status)
-			SELECT NEW.user_id, id, NEW.status
-				FROM chapters
-				WHERE chapters_releases.chapter_id = chapters.id
-				AND chapters_releases.release_id = NEW.release_id;
+    	INSERT INTO user_chapters (user_id, chapter_id, status)
+    		SELECT NEW.user_id, id, NEW.status
+    			FROM chapters
+    			WHERE chapters_releases.chapter_id = chapters.id
+    			AND chapters_releases.release_id = NEW.release_id;
     END;
 $$ LANGUAGE plpgsql;
 
@@ -619,12 +619,12 @@ CREATE FUNCTION do_update_series_relations() RETURNS trigger AS $$
             WHEN 'UPDATE' THEN
                 UPDATE related_series
                     SET relation = related_relation
-						WHERE series_id = NEW.related_series_id
+    					WHERE series_id = NEW.related_series_id
                         AND related_series_id = NEW.series_id;
             WHEN 'DELETE' THEN
                 DELETE FROM related_series
                     WHERE series_id = OLD.related_series_id
-					AND related_series_id = OLD.series_id;
+    				AND related_series_id = OLD.series_id;
         END CASE;
     END;
 $$ LANGUAGE plpgsql;
@@ -634,7 +634,7 @@ CREATE RULE series_relations_ignore_duplicates_on_insert AS
     WHERE (EXISTS (
         SELECT 1
         FROM related_series WHERE
-			series_id = NEW.series_id
+    		series_id = NEW.series_id
             AND related_series_id = NEW.related_series_id
     ))
     DO INSTEAD NOTHING;
