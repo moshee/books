@@ -76,8 +76,6 @@ func (s Sex) String() string {
 const (
 	Scenario Credit = 1 << iota
 	Art
-	Illustration
-	Music
 )
 
 func (c Credit) String() string {
@@ -87,12 +85,6 @@ func (c Credit) String() string {
 	}
 	if c&Art != 0 {
 		cs = append(cs, "Art")
-	}
-	if c&Illustration != 0 {
-		cs = append(cs, "Illust.")
-	}
-	if c&Music != 0 {
-		cs = append(cs, "Music")
 	}
 	return strings.Join(cs, ", ")
 }
@@ -175,12 +167,27 @@ func (b BloodType) String() string {
 	return ""
 }
 
+type Publisher struct {
+	Id        int
+	Name      string
+	DateAdded time.Time
+	Summary   sql.NullString
+}
+
+type Magazine struct {
+	Id    int
+	Title string
+	*Publisher
+	DateAdded time.Time
+	Summary   sql.NullString
+}
+
 type BookSeries struct {
-	Id int
-	SeriesKind
+	Id          int
 	Title       string
 	NativeTitle string
 	OtherTitles pg.StringArray
+	SeriesKind
 	Summary     sql.NullString
 	Vintage     int
 	DateAdded   time.Time
@@ -190,12 +197,23 @@ type BookSeries struct {
 	AvgRating   sql.NullFloat64
 	RatingCount int
 	Demographic
-	Credits []ProductionCredit
 	*Magazine
 }
 
 func (self *BookSeries) Related() []RelatedSeries {
 	return nil
+}
+
+func (self *BookSeries) Credits() []ProductionCredit {
+	panic("unimplemented")
+}
+
+type SeriesLicense struct {
+	Id int
+	*BookSeries
+	*Publisher
+	Country      string
+	DateLicensed time.Time
 }
 
 type Author struct {
@@ -217,6 +235,7 @@ type ProductionCredit struct {
 
 type RelatedSeries struct {
 	*BookSeries
+	Related  *BookSeries
 	Relation SeriesRelation
 }
 
@@ -231,10 +250,11 @@ type TranslationGroup struct {
 
 type Chapter struct {
 	Id          int
-	Volume      sql.NullInt64
-	DisplayName string
-	SortNum     int
-	Title       sql.NullString
+	ReleaseDate time.Time
+	*BookSeries
+	Num    int
+	Volume sql.NullInt64
+	Notes  sql.NullString
 }
 
 type Chapters []*Chapter
@@ -242,7 +262,7 @@ type Chapters []*Chapter
 // create a representation of the list of chapters with ranges, using display
 // names as necessary
 func (self Chapters) String() string {
-	return ""
+	panic("unimplemented")
 }
 
 type Release struct {
@@ -254,13 +274,13 @@ type Release struct {
 	ReleaseDate   time.Time
 	Notes         sql.NullString
 	IsLastRelease bool
-	Chapters
+	Volume        sql.NullInt64
+	Extra         sql.NullString
 }
 
 type TranslationProject struct {
 	Id int
 	*BookSeries
-	*TranslationGroup
 	StartDate time.Time
 	EndDate   time.Time
 }
@@ -270,16 +290,22 @@ func (self *TranslationProject) Members() []*User {
 }
 
 type User struct {
-	Id   int
-	Name string
-	Pass []byte
-	Salt []byte
+	Id    int
+	Email string
+	Name  string
+	Pass  []byte
+	Salt  []byte
 	Privileges
 	VoteWeight   int
 	Summary      sql.NullString
 	RegisterDate time.Time
 	LastActive   time.Time
 	Avatar       bool
+
+	// Not to be confused with Online(), Active indicates whether or not the
+	// user is an activated user on the site (has their activation email been
+	// sent yet, etc.). May be used for other purposes later such as banning.
+	Active bool
 }
 
 func (self *User) AvatarFile() string {
@@ -294,25 +320,24 @@ func (self *User) OwnedChapters() []OwnedChapter {
 	panic("unimplemented")
 }
 
+func (self *User) Online() bool {
+	panic("unimplemented")
+}
+
 type OwnedChapter struct {
+	Id int
+	*User
 	*Chapter
-	Status   ReadStatus
-	DateRead time.Time
+	ReadStatus
+	Date time.Time
 }
 
-type Magazine struct {
-	Id    int
-	Title string
-	*Publisher
-	DateAdded time.Time
-	Summary   sql.NullString
-}
-
-type Publisher struct {
-	Id        int
-	Name      string
-	DateAdded time.Time
-	Summary   sql.NullString
+type OwnedRelease struct {
+	Id int
+	*User
+	*Release
+	ReadStatus
+	Date time.Time
 }
 
 type Character struct {
@@ -332,6 +357,10 @@ type Character struct {
 	BloodType
 	Description string
 	Picture     bool
+}
+
+func (self *Character) CastIn() []CharacterRole {
+	panic("unimplemented")
 }
 
 type CharacterRole struct {
@@ -355,58 +384,54 @@ type Link struct {
 	URL string
 }
 
-type BookTagName struct {
-	Id   int
-	Name string
-}
-
 type BookTag struct {
 	Id int
-	BookSeries
-	BookTagName
+	*BookSeries
+	Name    string
 	Spoiler bool
-	Weight  float32
+	Weight  int
 }
 
 type BookTagConsensus struct {
+	Id int
 	User
-	BookTag
+	*BookTag
 	Vote     int
 	VoteDate time.Time
-}
-
-type CharacterTagName struct {
-	Id   int
-	Name string
 }
 
 type CharacterTag struct {
 	Id int
-	Character
-	CharacterTagName
+	*Character
+	Name    string
 	Spoiler bool
-	Weight  float32
+	Weight  int
 }
 
 type CharacterTagConsensus struct {
-	User
-	CharacterTag
+	Id int
+	*User
+	*CharacterTag
 	Vote     int
 	VoteDate time.Time
 }
 
-type Rating struct {
+type BookRating struct {
 	Id int
-	User
+	*User
+	*BookSeries
 	Rating   int
+	Review   sql.NullString
 	RateDate time.Time
-	*Review
 }
 
-type Review struct {
+type TranslatorRating struct {
 	Id int
-	*Rating
-	Body string
+	*User
+	*TranslationGroup
+	Rating   int
+	Review   sql.NullString
+	RateDate time.Time
 }
 
 var Langs = map[string]string{
