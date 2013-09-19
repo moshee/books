@@ -1,8 +1,12 @@
+BEGIN;
+
+SET search_path TO books,public;
+
 INSERT INTO users VALUES
-	( DEFAULT, 'moshee@displaynone.us', 'moshee', <%= bytea %>, <%= bytea %>, 30, 10, 'ザー・会長', <%= tstz %>, 'now'::timestamptz, true),
-	( DEFAULT, 'deu@pomf.eu', 'moshee', <%= bytea %>, <%= bytea %>, 30, 10, 'hi my name is deu and I have bad taste', <%= tstz %>, 'now'::timestamptz, true),
-	( DEFAULT, 'franz@gj-bu.com', 'moshee', <%= bytea %>, <%= bytea %>, 30, 10, 'constantly eating foods', <%= tstz %>, 'now'::timestamptz, true),
-	<%= rec(100) { ['DEFAULT', email, text(/[:first_name:]\d{0,4}/.gen), bytea, bytea, (if rand < 0.05 then 1 else 0 end), rand(0..10), (null or longstring), tstz, tstz, bool] } %>
+	( DEFAULT, 'moshee@displaynone.us', 'moshee', <%= bytea %>, <%= bytea %>, 30, 10, 'ザー・会長', <%= tstz %>, 'now'::timestamptz, true, true),
+	( DEFAULT, 'deu@pomf.eu', 'deu', <%= bytea %>, <%= bytea %>, 30, 10, 'hi my name is deu and I have bad taste', <%= tstz %>, 'now'::timestamptz, true, true),
+	( DEFAULT, 'franz@gj-bu.com', 'franz', <%= bytea %>, <%= bytea %>, 30, 10, 'constantly eating foods', <%= tstz %>, 'now'::timestamptz, true, true),
+	<%= rec(100) { ['DEFAULT', email, text(/[:first_name:]\d{0,4}/.gen), bytea, bytea, (if rand > 0.05 then 1 else 0 end), rand(0..10), (null or longstring), tstz, tstz, bool, bool(0.9)] } %>
 
 INSERT INTO publishers VALUES
 	( DEFAULT, 'Kodansha', <%= tstz %>, NULL ),
@@ -13,26 +17,24 @@ INSERT INTO publishers VALUES
 	<%= rec(50) { ['DEFAULT', sample(:companies), tstz, string] } %>
 
 INSERT INTO magazines VALUES
-	( DEFAULT, 'Bessatsu Shounen Magazine', 1, 'ja', <%= tstz %>, 'eotens' ),
-	( DEFAULT, 'Weekly Young Jump', 2, 'ja', <%= tstz %>, 'johj' ),
-	( DEFAULT, 'Young Animal', 3, 'ja', <%= tstz %>, 'KAAAAAAIIIIIIIII' ),
-	( DEFAULT, 'Manga Time Kirara Carat', 4, 'ja', <%= tstz %>, 'hidamari yes' ),
-	( DEFAULT, 'Comic Flapper', 5, 'ja', <%= tstz %>, 'chocolate panic' ),
-	<%= rec(50) { ['DEFAULT', sample(:products), rand(1..55), lang('ja', 0.99), tstz, string] } %>
+	( DEFAULT, 'Bessatsu Shounen Magazine', 1, 'ja', <%= tstz %>, 'Shounen', 'eotens' ),
+	( DEFAULT, 'Weekly Young Jump', 2, 'ja', <%= tstz %>, 'Seinen', 'johj' ),
+	( DEFAULT, 'Young Animal', 3, 'ja', <%= tstz %>, 'Seinen', 'KAAAAAAIIIIIIIII' ),
+	( DEFAULT, 'Manga Time Kirara Carat', 4, 'ja', <%= tstz %>, 'Seinen', 'hidamari yes' ),
+	( DEFAULT, 'Comic Flapper', 5, 'ja', <%= tstz %>, 'Seinen', 'chocolate panic' ),
+	<%= rec(50) { ['DEFAULT', sample(:products), rand(1..55), lang('ja', 0.99), tstz, text(%w(Shounen Shoujo Seinen Josei Kodomomuke Seijin).sample), (null or string)] } %>
 
-INSERT INTO book_series
-	( kind, title, summary, vintage, nsfw, demographic, magazine_id )
-	VALUES
-	( 'Comic', 'From the New World', 'so many scifi tropes', 2012, true, 'Shounen', 1 ),
-	( 'Comic', 'The Eotena Onslaught', 'eotens', 2009, false, 'Shounen', 1 ),
-	( 'Comic', 'Flying Witch', 'it''s like yotsuba with magic', 2012, false, 'Shounen', 1 ),
-	( 'Comic', 'Terra ForMars', 'johj', 2011, true, 'Seinen', 2 ),
-	( 'Comic', 'Suicide Island', 'goats', 2008, true, 'Seinen', 3 ),
-	( 'Comic', 'Electric Town Bookstore', 'sensei-san best', 2011, false, 'Seinen', 5 ),
-	( 'Comic', 'Girl Meets Bear', 'I''m not really sure myself', 2013, false, 'Seinen', 5 ),
-	( 'Comic', 'Sunshine Sketch', '( X''___________''X)', 2004, false, 'Seinen', 4 ),
-	( 'Comic', 'Let''s have a meal together!', 'food', 2012, false, 'Seinen', 5 ),
-	<%= rec(150) { [text(%w(Comic Novel Webcomic).sample), sample(:products), longstring(4), rand(1950..2013), bool(0.1), text(%w(Shounen Shoujo Seinen Josei Kodomomuke Seijin).sample), rand(1..55)] } %>
+INSERT INTO book_series VALUES
+    ( DEFAULT, 'From the New World', '新世界より', NULL, 'Comic', 'so many scifi tropes', 2012, <%= tstz %>, <%= tstz %>, false, true, NULL, 0, 'Shounen', 1 ),
+	( DEFAULT, 'The Eotena Onslaught', '進撃の巨人', NULL, 'Comic', 'eotens', 2009, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 'Shounen', 1 ),
+	( DEFAULT, 'Flying Witch', 'ふらいんぐうぃっち', NULL, 'Comic', 'it''s like yotsuba with magic', 2012, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 'Shounen', 1 ),
+	( DEFAULT, 'Terra ForMars', 'テラフォーマーズ', NULL, 'Comic', 'johj', 2011, <%= tstz %>, <%= tstz %>, false, true, NULL, 0, 'Seinen', 2 ),
+	( DEFAULT, 'Suicide Island', '自殺島', NULL, 'Comic', 'goats', 2008, <%= tstz %>, <%= tstz %>, false, true, NULL, 0, 'Seinen', 3 ),
+	( DEFAULT, 'Electric Town Bookstore', 'デンキ街の本屋さん', NULL, 'Comic', 'sensei-san best', 2011, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 'Seinen', 5 ),
+	( DEFAULT, 'Girl Meets Bear', 'くまみこ', NULL, 'Comic', 'I''m not really sure myself', 2013, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 'Seinen', 5 ),
+	( DEFAULT, 'Sunshine Sketch', 'ひだまりスケッチ', NULL, 'Comic', 'X''___________''X)', 2004, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 'Seinen', 4 ),
+	( DEFAULT, 'Let''s have a meal together!', 'ごはん しよ！', NULL, 'Comic', 'food', 2012, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 'Seinen', 5 ),
+	<%= rec(150) { ['DEFAULT', sample(:products), ja_title, nil, text(%w(Comic Novel Webcomic).sample), longstring(4), rand(1950..2013), tstz, tstz, bool(0.3), bool(0.1), nil, 0, text(%w(Shounen Shoujo Seinen Josei Kodomomuke Seijin).sample), rand(1..55)] } %>
 
 INSERT INTO authors
 	( given_name, surname, native_name, sex )
@@ -47,7 +49,7 @@ INSERT INTO authors
 	( 'Asato', 'Mizu', '水 あさと', 'Male' ),
 	( 'Masume', 'Yoshimoto', '吉元 ますめ', NULL ),
 	( 'Ume', 'Aoki', '蒼樹 うめ', 'Female' ),
-    ( 'Sei', 'Takano', '高野 聖', 'Male' ),
+    ( 'Sei', 'Takano', '高野 聖', 'Male' );
 
 INSERT INTO authors VALUES
 <%= rec(50) { ['DEFAULT', firstname, (null(0.1) or lastname), (null(0.05) or cjk_name), nil, bool, (null or date), (null or string), (null(0.2) or gender)] } %>
@@ -65,14 +67,12 @@ INSERT INTO production_credits VALUES
 	( 8, 10, 3 ),
 	( 9, 11, 3 );
 
-INSERT INTO translation_groups
-	( name )
-	VALUES
-	( 'display: none;' ),
-	( 'Mixini Studios' ),
-	( 'NEO ZEED Marine Stronghold' ),
-	( 'Duwang' ),
-    <%= rec(50) { [sample(:companies)] } %>
+INSERT INTO translation_groups VALUES
+	( DEFAULT, 'display: none;', 'that''s me', NULL, 0, 0 ),
+	( DEFAULT, 'Mixini Studios', 'slow', NULL, 0, 0 ),
+	( DEFAULT, 'NEO ZEED Marine Stronghold', ':E', NULL, 0, 0 ),
+	( DEFAULT, 'Duwang', 'A feeling so complicated.', NULL, 0, 0 ),
+    <%= rec(50) { ['DEFAULT', sample(:companies), longstring, nil, 0, 0] } %>
 
 INSERT INTO translation_projects
 	( series_id )
@@ -90,7 +90,7 @@ INSERT INTO translation_project_groups
 	( 4, 1 ),
 	( 5, 4 ),
 	( 6, 1 ),
-	( 9, 1 );
+	( 7, 1 );
 
 INSERT INTO chapters
 	( series_id, num )
@@ -117,7 +117,7 @@ INSERT INTO user_chapters VALUES
 <%= rec(100) { ['DEFAULT', rand(1..103), rand(1..295), text(%w(Read Owned Skipped).sample), tstz] } %>
 
 INSERT INTO user_releases VALUES
-<%= rec(30) { ['DEFAULT', rand(1..103), rand(1..295), text(%w(Read Owned Skipped).sample), tstz] } %>
+<%= rec(30) { ['DEFAULT', rand(1..103), rand(1..50), text(%w(Read Owned Skipped).sample), tstz] } %>
 
 INSERT INTO translator_members
 	( user_id, translator_id )
@@ -149,19 +149,19 @@ INSERT INTO related_characters VALUES
 <%= rec(100) { ['DEFAULT', rand(1..100), rand(101..200), rand(1..8)] } %>
 
 INSERT INTO book_tag_names VALUES
-<%= rec($files[:colors].size) { |n| ['DEFAULT', $files[:colors][n]] } %>
+<%= rec($files[:colors].size) { |n| ['DEFAULT', text($files[:colors][n-1])] } %>
 
 INSERT INTO book_tags VALUES
-<%= rec(500) { ['DEFAULT', rand(1..159), rand(1..($files[:colors].size+1)), bool(0.05), rand] } %>
+<%= rec(500) { ['DEFAULT', rand(1..159), rand(1..($files[:colors].size)), bool(0.05), rand] } %>
 
 INSERT INTO book_tag_consensus VALUES
 <%= rec(500) { ['DEFAULT', rand(1..103), rand(1..500), rand(-5..10), tstz] } %>
 
 INSERT INTO character_tag_names VALUES
-<%= rec($files[:colors].size) { |n| ['DEFAULT', $files[:colors][n]] } %>
+<%= rec($files[:colors].size) { |n| ['DEFAULT', text($files[:colors][n-1])] } %>
 
 INSERT INTO character_tags VALUES
-<%= rec(500) { ['DEFAULT', rand(1..200), rand(1..($files[:colors].size+1)), bool(0.05), rand] } %>
+<%= rec(500) { ['DEFAULT', rand(1..200), rand(1..($files[:colors].size)), bool(0.05), rand] } %>
 
 INSERT INTO character_tag_consensus VALUES
 <%= rec(500) { ['DEFAULT', rand(1..103), rand(1..500), rand(-5..10), tstz] } %>
@@ -170,7 +170,7 @@ INSERT INTO character_tag_consensus VALUES
 
 <% sizes.each do |k, v| %>
 INSERT INTO favorite_<%= k %> VALUES
-<%= rec(300) { ['DEFAULT', rand(1..v)] } %>
+<%= rec(300) { ['DEFAULT', rand(1..103), rand(1..v)] } %>
 <% end %>
 
 <% sizes[:publishers] = 55 %>
@@ -178,14 +178,14 @@ INSERT INTO favorite_<%= k %> VALUES
 INSERT INTO filtered_groups (user_id, group_id) VALUES
 <%= rec(50) { [rand(1..103), rand(1..54)] } %>
 
-INSERT INTO filtered_languages (user_id, group_id) VALUES
+INSERT INTO filtered_languages (user_id, language) VALUES
 <%= rec(50) { [rand(1..103), lang] } %>
 
-INSERT INTO filtered_book_tags (user_id, group_id) VALUES
-<%= rec(50) { [rand(1..103), rand(1..500)] } %>
+INSERT INTO filtered_book_tags (user_id, tag_id) VALUES
+<%= rec(50) { [rand(1..103), rand(1..sizes[:book_tags])] } %>
 
-INSERT INTO filtered_character_tags (user_id, group_id) VALUES
-<%= rec(50) { [rand(1..103), rand(1..500)] } %>
+INSERT INTO filtered_character_tags (user_id, tag_id) VALUES
+<%= rec(50) { [rand(1..103), rand(1..sizes[:character_tags])] } %>
 
 INSERT INTO book_ratings VALUES
 <%= rec(500) { ['DEFAULT', rand(1..103), rand(1..159), rand(1..5), (null(0.99) or longstring), tstz] } %>
@@ -214,7 +214,7 @@ INSERT INTO author_links VALUES
 <%= rec(80) { ['DEFAULT', rand(1..sizes[:authors]), rand(1..9), url] } %>
 
 INSERT INTO translator_links VALUES
-<%= rec(80) { ['DEFAULT', rand(1..sizes[:authors]), rand(1..9), url] } %>
+<%= rec(80) { ['DEFAULT', rand(1..sizes[:translators]), rand(1..9), url] } %>
 
 INSERT INTO news_categories (name) VALUES
     ( 'Site update' ),
@@ -224,3 +224,5 @@ INSERT INTO news_categories (name) VALUES
 
 INSERT INTO news_posts VALUES
 <%= rec(20) { ['DEFAULT', rand(1..3), rand(1..4), tstz, string, longstring] } %>
+
+END;

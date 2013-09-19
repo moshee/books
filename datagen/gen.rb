@@ -6,9 +6,31 @@
 #       - cross-field combination uniqueness enforcement
 #       - automatic logical sorting
 #       - better generators
-#       - performance
 require 'randexp'
 require 'erb'
+
+CJK = [
+  0x4e00..0x9faf, # CJK Unified 1
+  0x3041..0x3094, # Hiragana
+  0x30a1..0x30fc  # Katakana
+]
+
+class Randgen
+  def self.ja_name(opts={})
+    n = opts[:length]
+    n.times.map { rand(CJK.first).chr(Encoding::UTF_8) }.join('')
+  end
+  def self.ja(opts={})
+    n = opts[:length]
+    n.times.map { rand(CJK.sample).chr(Encoding::UTF_8) }.join('')
+  end
+end
+
+def cjk_name
+  text /[:ja_name:]{1,2} [:ja_name:]{1,2}/.gen end
+
+def ja_title
+  text /[:ja:]{2,15}/.gen end
 
 $files = {}
 Dir['*.txt'].each do |file|
@@ -52,7 +74,7 @@ class Numeric
 end
 
 def text(*args)
-  "'#{args.join(' ')}'" end
+  "'#{args.map { |s| s.gsub("'", "''") }.join(' ')}'" end
 
 def randdate
   Time.at(rand Time.now.to_i) end
@@ -91,18 +113,6 @@ def firstname
 def lastname
   text $files[:lastnames].sample end
 
-CJK = 0x4e00..0x9faf
-
-U = 5.times.map { |n| 'U' * n }
-
-def cjk_name_component
-  n = rand 1..2
-  n.times.map { rand CJK }.pack(U[n])
-end
-
-def cjk_name
-  text "#{cjk_name_component} #{cjk_name_component}" end
-
 def gender
   text (if rand < 0.005 then 'Other' else ['Male', 'Female'].sample end) end
 
@@ -110,10 +120,10 @@ def bytea(length=32)
   text('\x' + length.times.map { rand(255).to_s(16).rjust(2, '0') }.join('')) end
 
 def email
-  /\w{1,20}@\w{3,20}\.(com|net|org|us|eu|co\.jp|mx)/.gen end
+  text /\w{1,20}@\w{3,20}\.(com|net|org|us|eu|co\.jp|mx)/.gen end
 
 def url
-  /https?:\/\/(www\.)?\w{3,15}\.(com|org|co\.jp|net|jp)/.gen end
+  text /https?:\/\/(www\.)?\w{3,15}\.(com|org|co\.jp|net|jp)/.gen end
 
 def bool(yes=0.5)
   if rand < yes
