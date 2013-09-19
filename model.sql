@@ -167,7 +167,8 @@ CREATE TABLE users (
     summary       text,
     register_date timestamptz NOT NULL DEFAULT 'now'::timestamptz,
     last_active   timestamptz NOT NULL DEFAULT 'epoch'::timestamptz,
-    avatar        boolean     NOT NULL DEFAULT false
+    avatar        boolean     NOT NULL DEFAULT false,
+	active        boolean     NOT NULL DEFAULT false
 );
 
 CREATE TABLE sessions (
@@ -198,6 +199,7 @@ CREATE TABLE user_releases (
 
 -- keeps track of users belonging to translator groups
 CREATE TABLE translator_members (
+	id            serial  PRIMARY KEY,
     user_id       integer NOT NULL REFERENCES users,
     translator_id integer NOT NULL REFERENCES translation_groups
 );
@@ -214,7 +216,7 @@ CREATE TABLE characters (
     native_name text    NOT NULL,
     aliases     text[],
     nationality text,
-    birthday    date,
+    birthday    date, -- the year is ignored
     sex         Sex,
     weight      real,
     height      real,
@@ -227,6 +229,7 @@ CREATE TABLE characters (
 CREATE TYPE CharacterRole AS ENUM ( 'Main', 'Secondary', 'Appears', 'Cameo' );
 
 CREATE TABLE characters_roles (
+    id           serial        PRIMARY KEY,
     character_id integer       NOT NULL REFERENCES characters,
     series_id    integer       NOT NULL REFERENCES book_series,
     role         CharacterRole NOT NULL,
@@ -234,16 +237,15 @@ CREATE TABLE characters_roles (
 );
 
 CREATE TABLE characters_relation_kinds (
-    id      serial  PRIMARY KEY,
-    name    text    NOT NULL,
-    opposes integer REFERENCES characters_relation_kinds
+    id   serial PRIMARY KEY,
+    name text   NOT NULL
 );
 
 CREATE TABLE related_characters (
+    id                   serial  PRIMARY KEY,
     character_id         integer NOT NULL REFERENCES characters,
     related_character_id integer NOT NULL REFERENCES characters,
-    relation             integer NOT NULL REFERENCES characters_relation_kinds,
-    ends                 boolean NOT NULL
+    relation             integer NOT NULL REFERENCES characters_relation_kinds
 );
 
 --
@@ -254,7 +256,7 @@ CREATE TABLE related_characters (
 --   Use a left join to find which tags, if any, a User has voted on
 --   for a given Series/Character.
 
-CREATE TABLE book_tags_names (
+CREATE TABLE book_tag_names (
     id   serial PRIMARY KEY,
     name text   NOT NULL
 );
@@ -262,19 +264,20 @@ CREATE TABLE book_tags_names (
 CREATE TABLE book_tags (
     id        serial  PRIMARY KEY,
     series_id integer NOT NULL REFERENCES book_series,
-    tag_id    integer NOT NULL REFERENCES book_tags_names,
+    tag_id    integer NOT NULL REFERENCES book_tag_names,
     spoiler   boolean NOT NULL,
     weight    real    NOT NULL
 );
 
 CREATE TABLE book_tag_consensus (
-    user_id     integer NOT NULL REFERENCES users,
-    book_tag_id integer NOT NULL REFERENCES book_tags,
-    vote        integer NOT NULL,
+    id          serial      PRIMARY KEY
+    user_id     integer     NOT NULL REFERENCES users,
+    book_tag_id integer     NOT NULL REFERENCES book_tags,
+    vote        integer     NOT NULL,
     vote_date   timestamptz NOT NULL
 );
 
-CREATE TABLE character_tags_names (
+CREATE TABLE character_tag_names (
     id   serial PRIMARY KEY,
     name text   NOT NULL
 );
@@ -282,12 +285,13 @@ CREATE TABLE character_tags_names (
 CREATE TABLE character_tags (
     id           serial  PRIMARY KEY,
     character_id integer NOT NULL REFERENCES characters,
-    tag_id       integer NOT NULL REFERENCES character_tags_names,
+    tag_id       integer NOT NULL REFERENCES character_tag_names,
     spoiler      boolean NOT NULL,
     weight       real    NOT NULL
 );
 
 CREATE TABLE character_tag_consensus (
+    id               serial  PRIMARY KEY,
     user_id          integer NOT NULL REFERENCES users,
     character_tag_id integer NOT NULL REFERENCES character_tags,
     vote             integer NOT NULL,
@@ -320,12 +324,12 @@ CREATE TABLE favorite_magazines (
 
 CREATE TABLE favorite_book_tags (
     user_id integer NOT NULL REFERENCES users,
-    tag_id  integer NOT NULL REFERENCES book_tags_names
+    tag_id  integer NOT NULL REFERENCES book_tag_names
 );
 
 CREATE TABLE favorite_character_tags (
     user_id integer NOT NULL REFERENCES users,
-    tag_id  integer NOT NULL REFERENCES character_tags_names
+    tag_id  integer NOT NULL REFERENCES character_tag_names
 );
 
 --
@@ -333,23 +337,27 @@ CREATE TABLE favorite_character_tags (
 --
 
 CREATE TABLE filtered_groups (
+    id       serial  PRIMARY KEY,
     user_id  integer NOT NULL REFERENCES users,
     group_id integer NOT NULL REFERENCES translation_groups
 );
 
 CREATE TABLE filtered_languages (
+    id       serial  PRIMARY KEY,
     user_id  integer NOT NULL REFERENCES users,
     language text    NOT NULL
 );
 
 CREATE TABLE filtered_book_tags (
+    id      serial  PRIMARY KEY,
     user_id integer NOT NULL REFERENCES users,
-    tag_id  integer NOT NULL REFERENCES book_tags_names
+    tag_id  integer NOT NULL REFERENCES book_tag_names
 );
 
 CREATE TABLE filtered_character_tags (
+    id      serial  PRIMARY KEY,
     user_id integer NOT NULL REFERENCES users,
-    tag_id  integer NOT NULL REFERENCES character_tags_names
+    tag_id  integer NOT NULL REFERENCES character_tag_names
 );
 
 --
@@ -385,17 +393,20 @@ CREATE TABLE link_kinds (
 );
 
 CREATE TABLE publisher_links (
+    id           serial  PRIMARY KEY,
     publisher_id integer NOT NULL REFERENCES publishers,
     link_kind    integer NOT NULL REFERENCES link_kinds,
     url          text    NOT NULL
 );
 
 CREATE TABLE magazine_links (
+    id          serial  PRIMARY KEY,
     magazine_id integer NOT NULL REFERENCES magazines,
     link_kind   integer NOT NULL REFERENCES link_kinds,
     url         text    NOT NULL
 );
 CREATE TABLE author_links (
+    id        serial  PRIMARY KEY,
     author_id integer NOT NULL REFERENCES authors,
     link_kind integer NOT NULL REFERENCES link_kinds,
     url       text    NOT NULL
@@ -515,10 +526,10 @@ CREATE FUNCTION do_update_book_tags() RETURNS trigger AS $$
         IF (weight < 1) THEN
             DELETE FROM book_tag_consensus
                 WHERE book_tag_id = r.book_tag_id;
-            DELETE FROM book_tags_names
+            DELETE FROM book_tag_names
                 WHERE id = r.book_tag_id;
         ELSE
-            UPDATE book_tags_names AS t
+            UPDATE book_tag_names AS t
                 SET t.weight = weight
                 WHERE t.id = r.book_tag_id;
         END IF;
@@ -551,10 +562,10 @@ CREATE FUNCTION do_update_character_tags() RETURNS trigger AS $$
         IF (weight < 1) THEN
             DELETE FROM character_tag_consensus
                 WHERE character_tag_id = r.character_tag_id;
-            DELETE FROM character_tags_names
+            DELETE FROM character_tag_names
                 WHERE id = r.character_tag_id;
         ELSE
-            UPDATE character_tags_names AS t
+            UPDATE character_tag_names AS t
                 SET t.weight = weight
                 WHERE t.id = r.character_tag_id;
         END IF;

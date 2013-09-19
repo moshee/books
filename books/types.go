@@ -266,7 +266,7 @@ type TranslationProject struct {
 }
 
 func (self *TranslationProject) Members() []*User {
-	return nil
+	panic("unimplemented")
 }
 
 type User struct {
@@ -280,8 +280,6 @@ type User struct {
 	RegisterDate time.Time
 	LastActive   time.Time
 	Avatar       bool
-
-	OwnedChapters []OwnedChapter
 }
 
 func (self *User) AvatarFile() string {
@@ -290,6 +288,10 @@ func (self *User) AvatarFile() string {
 	} else {
 		return ""
 	}
+}
+
+func (self *User) OwnedChapters() []OwnedChapter {
+	panic("unimplemented")
 }
 
 type OwnedChapter struct {

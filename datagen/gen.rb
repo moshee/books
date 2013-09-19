@@ -3,6 +3,7 @@
 
 # TODO: - sql parsing and generator choosing
 #       - enum parsing in particular
+#       - cross-field combination uniqueness enforcement
 #       - automatic logical sorting
 #       - better generators
 #       - performance
@@ -14,9 +15,11 @@ Dir['*.txt'].each do |file|
   $files[File.basename(file, '.txt').intern] = File.open(file).each_line.map(&:chomp)
 end
 
+$files[:countries].map! { |s| s.split(',').first }
+
 def sample(sym)
   p = $files[sym.intern].sample.sub('[', '').sub(']', '').tr('[]', '()').gsub('( )', ' ').gsub('|)', ')').gsub('(|', '(').gsub('||', '|')
-  Regexp.new(p).gen end
+  text Regexp.new(p).gen end
 
 =begin
 
@@ -36,11 +39,11 @@ $lastnames.sort_by &:last
 =end
 
 def tuple(*args)
-  "( #{args.join(', ')} )"
+  "( #{args.map { |b| if b.nil? then 'NULL' else b end }.join(', ')} )"
 end
 
 def rec(n)
-  n.times.map { tuple *yield }.join(",\n") + ';' end
+  n.times.map { |n| tuple *(yield n+1) }.join(",\n") + ';' end
 
 class Numeric
   def pad2
@@ -88,21 +91,29 @@ def firstname
 def lastname
   text $files[:lastnames].sample end
 
-CJK = 0x4e00..0x9fff
+CJK = 0x4e00..0x9faf
 
-def cjk_name
-  n = rand 3..4
-  n.times.map { rand CJK }.pack('U' * n)
+U = 5.times.map { |n| 'U' * n }
+
+def cjk_name_component
+  n = rand 1..2
+  n.times.map { rand CJK }.pack(U[n])
 end
 
+def cjk_name
+  text "#{cjk_name_component} #{cjk_name_component}" end
 
-def bytea(length=64)
-  text ("\\x" + /[a-f0-9]{#{length}}/.gen) end
+def gender
+  text (if rand < 0.005 then 'Other' else ['Male', 'Female'].sample end) end
 
-email_re = /\w{1,20}@\w{3,20}\.(com|net|org|us|eu|co\.jp|mx)/
+def bytea(length=32)
+  text('\x' + length.times.map { rand(255).to_s(16).rjust(2, '0') }.join('')) end
 
 def email
-  email_re.gen end
+  /\w{1,20}@\w{3,20}\.(com|net|org|us|eu|co\.jp|mx)/.gen end
+
+def url
+  /https?:\/\/(www\.)?\w{3,15}\.(com|org|co\.jp|net|jp)/.gen end
 
 def bool(yes=0.5)
   if rand < yes
@@ -120,4 +131,4 @@ def null(chance=0.5)
   end
 end
 
-puts ERB.new(File.open('testdata.sql').read).result
+puts ERB.new(File.open('template.sql').read).result
