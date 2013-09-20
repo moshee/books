@@ -1,10 +1,10 @@
 {{ define "release-list" }}<table>
   <thead>
-    <th><td>Title</td><td>Chapter</td><td>Group</td><td>Date Added</td></th>
+    <tr><th>Title</th><th>Chapter</th><th>Group</th><th>Date Added</th></tr>
   </thead>
   <tbody>
-    {{ range .Releases }}
-    <tr><td><a href=#>{{ .BookSeries.Title }}</a></td><td>{{ .Chapters }}</td><td>({{ .Language }}) {{ .TranslationGroup.Name }}</td><td>{{ .ReleaseDate }}</td></tr>
+    {{ range .}}
+    <tr><td><a href=#>{{ .BookSeries.Title }}</a></td><td>{{ .ChapterRange }}</td><td>({{ .Language }}) {{ .TranslationGroup.Name }}</td><td>{{ .ReleaseDate }}</td></tr>
     {{ end }}
   </tbody>
 </table>
@@ -15,7 +15,7 @@
     <th><td>Title</td><td>Vintage</td><td>Authors</td><td>Date Added</td></th>
   </thead>
   <tbody>
-    {{ range .Series }}
+    {{ range .}}
     <tr>
       <td><a href=#>{{ .Title }}</a></td>
       <td>{{ .Vintage }}<td>

@@ -8,7 +8,7 @@ import (
 
 func Index(g *gas.Gas) {
 	releases := make([]*Release, 20)
-	rows, err := gas.DB.Query("SELECT * FROM recent_releases LIMIT 20")
+	rows, err := gas.DB.Query("SELECT * FROM books.recent_releases LIMIT 20")
 	if err != nil {
 		g.Render("books", "index-error", err)
 		return
@@ -17,17 +17,26 @@ func Index(g *gas.Gas) {
 	for i := 0; rows.Next(); i++ {
 		r := new(Release)
 		s := new(BookSeries)
-		g := new(TranslationGroup)
+		t := new(TranslationGroup)
 
-		err = rows.Scan(&r.Id, &s.Id, &s.Title, &g.Id, &g.Name, &r.Language, &r.ReleaseDate, &r.Notes, &r.IsLastRelease, &r.Volume, &r.Extra)
+		err = rows.Scan(&r.Id, &r.Language, &r.ReleaseDate, &r.IsLastRelease, &r.Volume, &r.Extra, &r.Chapters, &s.Id, &s.Title, &t.Id, &t.Name)
 		if err != nil {
 			g.Render("books", "index-error", err)
 			return
 		}
 
 		r.BookSeries = s
-		r.TranslationGroup = g
+		r.TranslationGroup = t
 		releases[i] = r
 	}
-	g.Render("books", "index", nil)
+
+	g.Render("books", "index", &struct {
+		Releases []*Release
+		Series   []*BookSeries
+		News     []*NewsPost
+	}{
+		releases,
+		nil,
+		nil,
+	})
 }

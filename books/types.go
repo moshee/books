@@ -278,7 +278,7 @@ type Release struct {
 	Volume        sql.NullInt64
 	Extra         sql.NullString
 
-	Chapters []int
+	Chapters pg.IntArray
 }
 
 func (self *Release) ChapterRange() string {
@@ -479,6 +479,15 @@ type TranslatorRating struct {
 	Rating   int
 	Review   sql.NullString
 	RateDate time.Time
+}
+
+type NewsPost struct {
+	Id int
+	*User
+	Category   string
+	DatePosted time.Time
+	Title      string
+	Body       string
 }
 
 var Langs = map[string]string{
