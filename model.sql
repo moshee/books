@@ -157,6 +157,37 @@ CREATE TABLE chapters_releases (
     release_id integer NOT NULL REFERENCES releases
 );
 
+CREATE VIEW recent_releases AS
+    SELECT
+        r.id AS release_id,
+        r.language,
+        r.release_date,
+        r.is_last_release,
+        r.volume,
+        r.extra,
+        array_agg(ch.num),
+        s.id AS series_id, s.title,
+        t.id AS translator_id, t.name
+    FROM
+        releases r,
+        book_series s,
+        translation_groups t,
+        chapters_releases cr,
+        chapters ch
+   WHERE r.series_id     = s.id
+     AND r.translator_id = t.id
+     AND cr.release_id   = r.id
+     AND cr.chapter_id   = ch.id
+    GROUP BY
+        r.id,
+        r.language,
+        r.release_date,
+        r.is_last_release,
+        r.volume,
+        r.extra,
+        s.id, s.title,
+        t.id, t.name
+ORDER BY r.release_date DESC;
 --
 -- Users
 --
@@ -231,13 +262,15 @@ CREATE TABLE characters (
     picture     boolean NOT NULL DEFAULT false
 );
 
-CREATE TYPE CharacterRole AS ENUM ( 'Main', 'Secondary', 'Appears', 'Cameo' );
+CREATE TYPE CharacterType AS ENUM ( 'Main character', 'Secondary character', 'Appears', 'Cameo' );
+CREATE TYPE CharacterRole AS ENUM ( 'Antagonist', 'Antihero', 'Archenemy', 'Characterization', 'False protagonist', 'Foil', 'Protagonist', 'Stock', 'Supporting', 'Narrator' );
 
 CREATE TABLE characters_roles (
     id           serial        PRIMARY KEY,
     character_id integer       NOT NULL REFERENCES characters,
     series_id    integer       NOT NULL REFERENCES book_series,
-    role         CharacterRole NOT NULL,
+    type         CharacterType NOT NULL,
+    role         CharacterRole,
     appearances  integer[] --           REFERENCES chapters
 );
 

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	// "github.com/moshee/gas"
 	pg "github.com/moshee/pgtypes"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -276,6 +277,52 @@ type Release struct {
 	IsLastRelease bool
 	Volume        sql.NullInt64
 	Extra         sql.NullString
+
+	Chapters []int
+}
+
+func (self *Release) ChapterRange() string {
+	switch len(self.Chapters) {
+	case 0:
+		return ""
+	case 1:
+		return strconv.Itoa(self.Chapters[0])
+	}
+	sort.Ints(self.Chapters)
+
+	var (
+		this  = self.Chapters[1]
+		last  = self.Chapters[0]
+		lower = last
+		upper = last
+		out   = make([]string, 0)
+	)
+	for _, this = range self.Chapters[1:] {
+		switch this - last {
+		case 0:
+			continue
+		case 1:
+			upper = this
+			last = this
+			continue
+		}
+		// not consecutive
+		s := strconv.Itoa(lower)
+		if lower != upper {
+			s += "-" + strconv.Itoa(upper)
+		}
+		out = append(out, s)
+		upper = this
+		lower = this
+		last = this
+	}
+	s := strconv.Itoa(lower)
+	if lower != upper {
+		s += "-" + strconv.Itoa(upper)
+	}
+	out = append(out, s)
+
+	return strings.Join(out, ", ")
 }
 
 type TranslationProject struct {

@@ -64,8 +64,33 @@ def tuple(*args)
   "( #{args.map { |b| if b.nil? then 'NULL' else b end }.join(', ')} )"
 end
 
-def rec(n)
-  n.times.map { |n| tuple *(yield n+1) }.join(",\n") + ';' end
+def rec(n, repeat_chance=0.0, repeat_range=1..2)
+  if repeat_chance == 0.0
+    n.times.map { |n| tuple *(yield n+1) }.join(",\n") + ';'
+  else
+    i = 1
+    display = 1
+    arr = Array.new(n)
+    loop do
+      break if i > n
+      t = rand repeat_range
+      if rand > repeat_chance and t == 1
+        arr[i-1] = yield display, false
+        i += 1
+        display += 1
+        next
+      end
+      
+      t.times do
+        arr[i-1] = yield display, true
+        i += 1
+        break if i > n
+      end
+      display += 1
+    end
+    arr.map(&method(:tuple)).join(",\n") + ';'
+  end
+end
 
 class Numeric
   def pad2
@@ -141,4 +166,6 @@ def null(chance=0.5)
   end
 end
 
-puts ERB.new(File.open('template.sql').read).result
+filename = if ARGV.size.zero? then 'template.sql' else ARGV.pop end
+
+puts ERB.new(File.open(filename).read).result

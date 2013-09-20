@@ -65,7 +65,8 @@ INSERT INTO production_credits VALUES
 	( 6, 8, 3 ),
 	( 7, 9, 3 ),
 	( 8, 10, 3 ),
-	( 9, 11, 3 );
+	( 9, 11, 3 ),
+    <%= rec(150, repeat_chance=0.4) { |n, repeating| [n+9, rand(1..61), (if repeating then [1, 2].sample else 3 end)] } %>
 
 INSERT INTO translation_groups VALUES
 	( DEFAULT, 'display: none;', 'that''s me', NULL, 0, 0 ),
@@ -77,7 +78,8 @@ INSERT INTO translation_groups VALUES
 INSERT INTO translation_projects
 	( series_id )
 	VALUES
-	(1), (2), (3), (4), (5), (6), (9);
+	(1), (2), (3), (4), (5), (6), (9),
+    <%= rec(90) { |n| [n+9] } %> -- we're not doing all of them here because I wanna see series that haven't been picked up
 
 INSERT INTO translation_project_groups
 	( project_id, translator_id )
@@ -90,7 +92,12 @@ INSERT INTO translation_project_groups
 	( 4, 1 ),
 	( 5, 4 ),
 	( 6, 1 ),
-	( 7, 1 );
+	( 7, 1 ),
+    <%= rec(90) { |n| [n+7, rand(5..54)] } %>
+
+--==--==--==--==--==--==--==--==--==--
+
+-- real world chapters
 
 INSERT INTO chapters
 	( series_id, num )
@@ -104,14 +111,31 @@ INSERT INTO chapters
 	( 7, 1 ), ( 7, 2 ), ( 7, 3 ), ( 7, 4 ), ( 7, 5 ), ( 7, 6 ),
     ( 9, 1 ), ( 9, 2 ), ( 9, 3 ), ( 9, 4 ), ( 9, 5 ), ( 9, 6 ), ( 9, 7 ), ( 9, 8 ), ( 9, 9 ), ( 9, 10 );
 
+
+-- random chapters
+
 INSERT INTO chapters VALUES
 <%= rec(500) { ['DEFAULT', tstz, rand(10..159), rand(1..200), (null or rand(30)), (null(0.99) or string)] } %>
+
+--==--==--==--==--==--==--==--==--==--
+
+-- real-world data releases+chapters
 
 INSERT INTO releases VALUES
 <%= rec(50) { ['DEFAULT', rand(1..9), rand(1..4), rand(1..7), lang('en', 0.9), tstz, (null(0.99) or string), bool(0.01), (null or rand(1..50)), (null(0.8) or text(['Extra', 'Omake'].sample))] } %>
 
 INSERT INTO chapters_releases VALUES
-<%= rec(50) { ['DEFAULT', rand(1..295), rand(1..50)] } %>
+<%= rec(200) { ['DEFAULT', rand(1..295), rand(1..50)] } %>
+
+-- random data releases+chapters
+
+INSERT INTO releases VALUES
+<%= rec(300) { ['DEFAULT', rand(10..159), rand(5..54), rand(8..97), lang('en', 0.9), tstz, (null(0.99) or string), bool(0.01), (null or rand(1..50)), (null(0.8) or text(['Extra', 'Omake'].sample))] } %>
+
+INSERT INTO chapters_releases VALUES
+<%= rec(200) { ['DEFAULT', rand(296..795), rand(51..350)] } %>
+
+--==--==--==--==--==--==--==--==--==--
 
 INSERT INTO user_chapters VALUES
 <%= rec(100) { ['DEFAULT', rand(1..103), rand(1..295), text(%w(Read Owned Skipped).sample), tstz] } %>
@@ -131,7 +155,7 @@ INSERT INTO characters VALUES
 <%= rec(200) { ['DEFAULT', name, cjk_name, nil, (null or country), (null or date), (null or text(%w(Male Female).sample)), (null or rand(1..100)), (null or rand(1..500)), (null(0.9) or /\d{2}-\d{2}-\d{2}/.gen), (null or text(%w(A O B AB).sample)), (null or string), bool] } %>
 
 INSERT INTO characters_roles VALUES
-<%= rec(200) { |n| ['DEFAULT', n, rand(1..159), text(%w(Main Secondary Appears Cameo).sample), nil] } %>
+<%= rec(200) { |n| ['DEFAULT', n, rand(1..159), text(['Main character', 'Secondary character', 'Appears', 'Cameo'].sample), (nil or text(['Antagonist', 'Antihero', 'Archenemy', 'Characterization', 'False protagonist', 'Foil', 'Protagonist', 'Stock', 'Supporting', 'Narrator'].sample)), nil] } %>
 
 INSERT INTO characters_relation_kinds
     ( name )
