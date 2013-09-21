@@ -19,59 +19,36 @@ type (
 	Privileges        int
 	ReadStatus        int
 	BloodType         int
-	Role              int
+	CharacterType     int
+	CharacterRole     int
 	CharacterRelation int
 )
 
-const (
-	Comic SeriesKind = iota + 1
-	Novel
-	Webcomic
-)
-
-const (
-	Shounen Demographic = iota + 1
-	Shoujo
-	Seinen
-	Josei
-	Kodomomuke
-	Seijin
-)
-
-func (d Demographic) String() string {
-	switch d {
-	case Shounen:
-		return "Shōnen"
-	case Shoujo:
-		return "Shōjo"
-	case Seinen:
-		return "Seinen"
-	case Josei:
-		return "Josei"
-	case Kodomomuke:
-		return "Kodomomuke"
-	case Seijin:
-		return "Seijin"
-	}
-	return ""
+func (self SeriesKind) String() string {
+	return []string{
+		"Comic",
+		"Novel",
+		"Webcomic",
+	}[self]
 }
 
-const (
-	Male Sex = iota + 1
-	Female
-	Other
-)
+func (d Demographic) String() string {
+	return []string{
+		"Shounen",
+		"Shoujo",
+		"Seinen",
+		"Josei",
+		"Kodomomuke",
+		"Seijin",
+	}[d]
+}
 
 func (s Sex) String() string {
-	switch s {
-	case Male:
-		return "Male"
-	case Female:
-		return "Female"
-	case Other:
-		return "Other"
-	}
-	return ""
+	return []string{
+		"Male",
+		"Female",
+		"Other",
+	}[self]
 }
 
 const (
@@ -90,13 +67,15 @@ func (c Credit) String() string {
 	return strings.Join(cs, ", ")
 }
 
-const (
-	Related SeriesRelation = iota + 1
-	Sequel
-	Prequel
-	SpinOff
-	Adaptation
-)
+func (self SeriesRelation) String() string {
+	return []string{
+		"Related",
+		"Sequel",
+		"Prequel",
+		"SpinOff",
+		"Adaptation",
+	}[self]
+}
 
 const (
 	Banned Privileges = 1 << iota
@@ -106,6 +85,25 @@ const (
 	Developer
 )
 
+func (self Privileges) String() string {
+	if self.Is(Developer) {
+		return "Developer"
+	}
+	if self.Is(Contributor) {
+		return "Contributor"
+	}
+	if self.Is(Moderator) {
+		return "Moderator"
+	}
+	if self.Is(Administrator) {
+		return "Administrator"
+	}
+	if self.Is(Banned) {
+		return "Banned"
+	}
+	return ""
+}
+
 func (self Privileges) Is(other Privileges) bool {
 	return self&other != 0
 }
@@ -114,58 +112,55 @@ func (self Privileges) Isnt(other Privileges) bool {
 	return self&other == 0
 }
 
-const (
-	Read ReadStatus = iota + 1
-	Owned
-	Skipped
-)
-
 func (s ReadStatus) String() string {
-	switch s {
-	case Read:
-		return "Read it"
-	case Owned:
-		return "Have it"
-	case Skipped:
-		return "Skipped it"
-	}
-	return ""
+	return []string{
+		"Read it",
+		"Have it",
+		"Skipped it",
+	}[s]
 }
 
-const (
-	Main Role = iota + 1
-	Secondary
-	Appears
-	Cameo
-)
+func (t CharacterType) String() string {
+	return []string{
+		"Main character",
+		"Secondary character",
+		"Appears",
+		"Cameo",
+	}[t]
+}
 
-const (
-	Family CharacterRelation = iota + 1
-	Friend
-	Enemy
-	LoveInterest
-	Lover
-)
+func (r CharacterRole) String() string {
+	return []string{
+		"Antagonist",
+		"Antihero",
+		"Archenemy",
+		"Characterization",
+		"False protagonist",
+		"Foil",
+		"Protagonist",
+		"Stock",
+		"Supporting",
+		"Narrator",
+	}[r]
+}
 
-const (
-	O BloodType = iota + 1
-	A
-	B
-	AB
-)
+func (r CharacterRelation) String() string {
+	return []string{
+		"Family",
+		"Friend",
+		"Enemy",
+		"Love interest",
+		"Lover",
+	}[r]
+}
 
-func (b BloodType) String() string {
-	switch b {
-	case O:
-		return "O"
-	case A:
-		return "A"
-	case B:
-		return "B"
-	case AB:
-		return "AB"
-	}
-	return ""
+func (t BloodType) String() string {
+	return []string{
+		"O",
+		"A",
+		"B",
+		"AB",
+	}[t]
 }
 
 type Publisher struct {
@@ -413,6 +408,7 @@ func (self *Character) CastIn() []CharacterRole {
 type CharacterRole struct {
 	*Character
 	*BookSeries
+	CharacterType
 	Role
 }
 

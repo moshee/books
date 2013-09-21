@@ -30,13 +30,25 @@ func Index(g *gas.Gas) {
 		releases[i] = r
 	}
 
+	n := new(NewsPost)
+	u := new(User)
+
+	row := gas.DB.QueryRow("SELECT * FROM books.latest_news LIMIT 1")
+
+	if err := row.Scan(&n.Id, &u.Id, &u.Name, &n.Category, &n.DatePosted, &n.Title, &n.Body); err != nil {
+		g.Render("books", "index-error", err)
+		return
+	}
+
+	news.User = user
+
 	g.Render("books", "index", &struct {
 		Releases []*Release
 		Series   []*BookSeries
-		News     []*NewsPost
+		News     *NewsPost
 	}{
 		releases,
 		nil,
-		nil,
+		n,
 	})
 }

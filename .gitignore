@@ -1,3 +1,7 @@
 .*.swp
 .*.swo
 ./main
+datagen/*.txt
+datagen/namedb
+datagen/scratch*
+datagen/test*

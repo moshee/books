@@ -481,6 +481,23 @@ CREATE TABLE news_posts (
     body        text        NOT NULL
 );
 
+CREATE VIEW latest_news AS
+    SELECT
+        p.id,
+        u.id,
+        u.name,
+        c.name,
+        p.date_posted,
+        p.title,
+        p.body
+    FROM
+        news_posts p,
+        users u,
+        news_categories c
+    WHERE c.id = p.category_id
+      AND u.id = p.user_id
+    ORDER BY p.date_posted DESC;
+
 --
 -- Triggers and rules
 --
