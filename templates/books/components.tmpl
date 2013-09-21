@@ -12,11 +12,11 @@
 
 {{ define "series-list" }}<table>
   <thead>
-    <th><td>Title</td><td>Vintage</td><td>Authors</td><td>Date Added</td></th>
+    <tr><th>Title</th><th>Vintage</th><th>Authors</th><th>Date Added</th></tr>
   </thead>
   <tbody>
     {{ range .}}
-	<tr{{ if .NSFW }} class=nsfw{{ end }}>
+	<tr{{ if .NSFW }} class=nsfw {{ end }}>
       <td><a href=#>{{ .Title }}</a></td>
 	  <td>
 		  <ul class=rating-stars>
