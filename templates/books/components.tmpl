@@ -4,7 +4,7 @@
   </thead>
   <tbody>
     {{ range .}}
-    <tr><td><a href=#>{{ .BookSeries.Title }}</a></td><td>{{ .ChapterRange }}</td><td>({{ .Language }}) {{ .TranslationGroup.Name }}</td><td>{{ .ReleaseDate }}</td></tr>
+    <tr><td><a href=/series/{{ .BookSeries.Id }}/{{ slugify .BookSeries.Title }}>{{ .BookSeries.Title }}</a></td><td>{{ .ChapterRange }}</td><td>({{ .Language }}) {{ .TranslationGroup.Name }}</td><td>{{ .ReleaseDate }}</td></tr>
     {{ end }}
   </tbody>
 </table>
@@ -16,14 +16,17 @@
   </thead>
   <tbody>
     {{ range .}}
-    <tr>
+	<tr{{ if .NSFW }} class=nsfw{{ end }}>
       <td><a href=#>{{ .Title }}</a></td>
+	  <td>
+		  <ul class=rating-stars>
+			  {{ range .RatingStars }}
+			  <li class={{ . }}></li>
+			  {{ end }}
+		  </ul>
+	  </td>
+	  <td>{{ range .Tags }}<a class=tag href="/tag/{{ urlquery . }}">{{ . }}</a>{{ end }}</td>
       <td>{{ .Vintage }}<td>
-      <td>
-        {{ range .Credits }}
-        <div><a href=/author/{{ .Author.Id }}>{{ .Author.Name }}</a> ({{ .Credit }})</div>
-        {{ end }}
-      </td>
       <td>{{ .DateAdded }}</td>
     </tr>
     {{ end }}

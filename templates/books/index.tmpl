@@ -55,11 +55,13 @@
 	</section>
 	<section id=news>
     {{ if .News }}
+    {{ with .News }}
     <article id=news-{{ .Id }}>
       <h2>{{ .Title }}</h2>
-      <div class=news-meta>Posted on <time datetime={{ .Time.Format "2006-01-02T15:04:05-0700" }}>{{ .Time.Format "2 Jan., 2006" }}</time> under {{ .Category }}</div>
-      {{ markdown .Body }}
+      <div class=news-meta>Posted by <a href="/user/{{ .User.Id }}/{{ slugify .User.Name }}">{{ .User.Name }}</a> on <time datetime="{{ .DatePosted.Format "2006-01-02T15:04:05-0700" }}">{{ .DatePosted.Format "2 Jan., 2006" }}</time> under {{ .Category }}</div>
+      {{ smarkdown .Body }}
     </article>
+    {{ end }}
 	  {{ else }}
     <h2 class=no-news>No news at this time.</h2>
     {{ end }}

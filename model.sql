@@ -30,7 +30,6 @@ CREATE TABLE publishers (
     summary    text
 );
 
-CREATE TYPE Demographic AS ENUM ( 'Shounen', 'Shoujo', 'Seinen', 'Josei', 'Kodomomuke', 'Seijin' );
 CREATE TABLE magazines (
     id          serial      PRIMARY KEY,
     title       text        NOT NULL,
@@ -40,8 +39,6 @@ CREATE TABLE magazines (
     demographic Demographic,
     summary     text
 );
-
-CREATE TYPE SeriesKind AS ENUM ( 'Comic', 'Novel', 'Webcomic' );
 
 CREATE TABLE book_series (
     id           serial      PRIMARY KEY,
@@ -71,8 +68,6 @@ CREATE TABLE series_licenses (
     date_licensed date
 );
 
-CREATE TYPE Sex AS ENUM ( 'Male', 'Female', 'Other' );
-
 CREATE TABLE authors (
     id          serial  PRIMARY KEY,
     given_name  text    NOT NULL,
@@ -94,9 +89,8 @@ CREATE TABLE production_credits (
     credit    integer NOT NULL
 );
 
-CREATE TYPE SeriesRelation AS ENUM ( 'Original Work', 'Alternative Version', 'Adaptation', 'Prequel', 'Sequel', 'Spin-Off', 'Shares Character' );
-
 CREATE TABLE related_series (
+    id                serial         PRIMARY KEY,
     series_id         integer        NOT NULL REFERENCES book_series,
     related_series_id integer        NOT NULL REFERENCES book_series,
     relation          SeriesRelation NOT NULL
@@ -213,8 +207,6 @@ CREATE TABLE sessions (
     expire_date timestamptz NOT NULL DEFAULT 'epoch'::timestamptz
 );
 
-CREATE TYPE ReadStatus AS ENUM ( 'Read', 'Owned', 'Skipped' );
-
 -- keeps track of which chapters a user has read/owns
 CREATE TABLE user_chapters (
     id         serial      PRIMARY KEY,
@@ -244,8 +236,6 @@ CREATE TABLE translator_members (
 -- Characters
 --
 
-CREATE TYPE BloodType AS ENUM ( 'O', 'A', 'B', 'AB' );
-
 CREATE TABLE characters (
     id          serial  PRIMARY KEY,
     name        text    NOT NULL,
@@ -261,9 +251,6 @@ CREATE TABLE characters (
     description text,
     picture     boolean NOT NULL DEFAULT false
 );
-
-CREATE TYPE CharacterType AS ENUM ( 'Main character', 'Secondary character', 'Appears', 'Cameo' );
-CREATE TYPE CharacterRole AS ENUM ( 'Antagonist', 'Antihero', 'Archenemy', 'Characterization', 'False protagonist', 'Foil', 'Protagonist', 'Stock', 'Supporting', 'Narrator' );
 
 CREATE TABLE characters_roles (
     id           serial        PRIMARY KEY,
@@ -314,6 +301,33 @@ CREATE TABLE book_tag_consensus (
     vote        integer     NOT NULL,
     vote_date   timestamptz NOT NULL
 );
+
+CREATE VIEW latest_series AS
+    SELECT
+        s.id,
+        s.title,
+        s.kind,
+        s.vintage,
+        s.date_added,
+        s.nsfw,
+        s.avg_rating,
+        array_agg(n.name)
+    FROM 
+        book_series s,
+        book_tags t,
+        book_tag_names n
+    WHERE t.series_id = s.id
+      AND t.tag_id    = n.id
+      AND t.spoiler   = false
+    GROUP BY
+        s.id,
+        s.title,
+        s.kind,
+        s.vintage,
+        s.date_added,
+        s.nsfw,
+        s.avg_rating
+    ORDER BY s.date_added DESC;
 
 CREATE TABLE character_tag_names (
     id   serial PRIMARY KEY,
@@ -483,10 +497,10 @@ CREATE TABLE news_posts (
 
 CREATE VIEW latest_news AS
     SELECT
-        p.id,
-        u.id,
-        u.name,
-        c.name,
+        p.id AS post_id,
+        u.id AS user_id,
+        u.name AS user_name,
+        c.name AS category,
         p.date_posted,
         p.title,
         p.body

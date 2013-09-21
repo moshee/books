@@ -17,39 +17,39 @@ INSERT INTO publishers VALUES
 	<%= rec(50) { ['DEFAULT', sample(:companies), tstz, string] } %>
 
 INSERT INTO magazines VALUES
-	( DEFAULT, 'Bessatsu Shounen Magazine', 1, 'ja', <%= tstz %>, 'Shounen', 'eotens' ),
-	( DEFAULT, 'Weekly Young Jump', 2, 'ja', <%= tstz %>, 'Seinen', 'johj' ),
-	( DEFAULT, 'Young Animal', 3, 'ja', <%= tstz %>, 'Seinen', 'KAAAAAAIIIIIIIII' ),
-	( DEFAULT, 'Manga Time Kirara Carat', 4, 'ja', <%= tstz %>, 'Seinen', 'hidamari yes' ),
-	( DEFAULT, 'Comic Flapper', 5, 'ja', <%= tstz %>, 'Seinen', 'chocolate panic' ),
-	<%= rec(50) { ['DEFAULT', sample(:products), rand(1..55), lang('ja', 0.99), tstz, text(%w(Shounen Shoujo Seinen Josei Kodomomuke Seijin).sample), (null or string)] } %>
+	( DEFAULT, 'Bessatsu Shounen Magazine', 1, 'ja', <%= tstz %>, 0, 'eotens' ),
+	( DEFAULT, 'Weekly Young Jump', 2, 'ja', <%= tstz %>, 2, 'johj' ),
+	( DEFAULT, 'Young Animal', 3, 'ja', <%= tstz %>, 2, 'KAAAAAAIIIIIIIII' ),
+	( DEFAULT, 'Manga Time Kirara Carat', 4, 'ja', <%= tstz %>, 2, 'hidamari yes' ),
+	( DEFAULT, 'Comic Flapper', 5, 'ja', <%= tstz %>, 2, 'chocolate panic' ),
+	<%= rec(50) { ['DEFAULT', sample(:products), rand(1..55), lang('ja', 0.99), tstz, rand(5), (null or string)] } %>
 
 INSERT INTO book_series VALUES
-    ( DEFAULT, 'From the New World', '新世界より', NULL, 'Comic', 'so many scifi tropes', 2012, <%= tstz %>, <%= tstz %>, false, true, NULL, 0, 'Shounen', 1 ),
-	( DEFAULT, 'The Eotena Onslaught', '進撃の巨人', NULL, 'Comic', 'eotens', 2009, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 'Shounen', 1 ),
-	( DEFAULT, 'Flying Witch', 'ふらいんぐうぃっち', NULL, 'Comic', 'it''s like yotsuba with magic', 2012, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 'Shounen', 1 ),
-	( DEFAULT, 'Terra ForMars', 'テラフォーマーズ', NULL, 'Comic', 'johj', 2011, <%= tstz %>, <%= tstz %>, false, true, NULL, 0, 'Seinen', 2 ),
-	( DEFAULT, 'Suicide Island', '自殺島', NULL, 'Comic', 'goats', 2008, <%= tstz %>, <%= tstz %>, false, true, NULL, 0, 'Seinen', 3 ),
-	( DEFAULT, 'Electric Town Bookstore', 'デンキ街の本屋さん', NULL, 'Comic', 'sensei-san best', 2011, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 'Seinen', 5 ),
-	( DEFAULT, 'Girl Meets Bear', 'くまみこ', NULL, 'Comic', 'I''m not really sure myself', 2013, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 'Seinen', 5 ),
-	( DEFAULT, 'Sunshine Sketch', 'ひだまりスケッチ', NULL, 'Comic', 'X''___________''X)', 2004, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 'Seinen', 4 ),
-	( DEFAULT, 'Let''s have a meal together!', 'ごはん しよ！', NULL, 'Comic', 'food', 2012, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 'Seinen', 5 ),
-	<%= rec(150) { ['DEFAULT', sample(:products), ja_title, nil, text(%w(Comic Novel Webcomic).sample), longstring(4), rand(1950..2013), tstz, tstz, bool(0.3), bool(0.1), nil, 0, text(%w(Shounen Shoujo Seinen Josei Kodomomuke Seijin).sample), rand(1..55)] } %>
+    ( DEFAULT, 'From the New World', '新世界より', NULL, 'Comic', 'so many scifi tropes', 2012, <%= tstz %>, <%= tstz %>, false, true, NULL, 0, 0, 1 ),
+	( DEFAULT, 'The Eotena Onslaught', '進撃の巨人', NULL, 'Comic', 'eotens', 2009, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 0, 1 ),
+	( DEFAULT, 'Flying Witch', 'ふらいんぐうぃっち', NULL, 'Comic', 'it''s like yotsuba with magic', 2012, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 0, 1 ),
+	( DEFAULT, 'Terra ForMars', 'テラフォーマーズ', NULL, 'Comic', 'johj', 2011, <%= tstz %>, <%= tstz %>, false, true, NULL, 0, 2, 2 ),
+	( DEFAULT, 'Suicide Island', '自殺島', NULL, 'Comic', 'goats', 2008, <%= tstz %>, <%= tstz %>, false, true, NULL, 0, 2, 3 ),
+	( DEFAULT, 'Electric Town Bookstore', 'デンキ街の本屋さん', NULL, 'Comic', 'sensei-san best', 2011, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 2, 5 ),
+	( DEFAULT, 'Girl Meets Bear', 'くまみこ', NULL, 'Comic', 'I''m not really sure myself', 2013, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 2, 5 ),
+	( DEFAULT, 'Sunshine Sketch', 'ひだまりスケッチ', NULL, 'Comic', 'X''___________''X)', 2004, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 2, 4 ),
+	( DEFAULT, 'Let''s have a meal together!', 'ごはん しよ！', NULL, 'Comic', 'food', 2012, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 2, 5 ),
+	<%= rec(150) { ['DEFAULT', rand(2), longstring(4), rand(1950..2013), tstz, tstz, bool(0.3), bool(0.1), nil, 0, rand(5), rand(1..55)] } %>
 
 INSERT INTO authors
 	( given_name, surname, native_name, sex )
 	VALUES
-	( 'Toru', 'Oikawa', '及川 徹', 'Female' ),
-	( 'Yusuke', 'Kishi', '貴志 祐介', 'Male' ),
-	( 'Hajime', 'Isayama', '諫山 創', 'Male' ),
+	( 'Toru', 'Oikawa', '及川 徹', 1 ),
+	( 'Yusuke', 'Kishi', '貴志 祐介', 0 ),
+	( 'Hajime', 'Isayama', '諫山 創', 0 ),
 	( 'Chihiro', 'Ishizuka', '石塚 千尋', NULL ),
-	( 'Yu', 'Sasuga', '貴家 悠', 'Male' ),
-	( 'Kenichi', 'Tachibana', '橘 賢一', 'Male' ),
-	( 'Koji', 'Mori', '森 恒二', 'Male' ),
-	( 'Asato', 'Mizu', '水 あさと', 'Male' ),
+	( 'Yu', 'Sasuga', '貴家 悠', 0 ),
+	( 'Kenichi', 'Tachibana', '橘 賢一', 0 ),
+	( 'Koji', 'Mori', '森 恒二', 0 ),
+	( 'Asato', 'Mizu', '水 あさと', 0 ),
 	( 'Masume', 'Yoshimoto', '吉元 ますめ', NULL ),
-	( 'Ume', 'Aoki', '蒼樹 うめ', 'Female' ),
-    ( 'Sei', 'Takano', '高野 聖', 'Male' );
+	( 'Ume', 'Aoki', '蒼樹 うめ', 1 ),
+    ( 'Sei', 'Takano', '高野 聖', 0 );
 
 INSERT INTO authors VALUES
 <%= rec(50) { ['DEFAULT', firstname, (null(0.1) or lastname), (null(0.05) or cjk_name), nil, bool, (null or date), (null or string), (null(0.2) or gender)] } %>
@@ -67,6 +67,9 @@ INSERT INTO production_credits VALUES
 	( 8, 10, 3 ),
 	( 9, 11, 3 ),
     <%= rec(150, repeat_chance=0.4) { |n, repeating| [n+9, rand(1..61), (if repeating then [1, 2].sample else 3 end)] } %>
+
+INSERT INTO related_series VALUES
+    <%= rec(60) { ['DEFAULT', rand(10..76), rand(77..159), rand(6)] } %>
 
 INSERT INTO translation_groups VALUES
 	( DEFAULT, 'display: none;', 'that''s me', NULL, 0, 0 ),
@@ -122,7 +125,7 @@ INSERT INTO chapters VALUES
 -- real-world data releases+chapters
 
 INSERT INTO releases VALUES
-<%= rec(50) { ['DEFAULT', rand(1..9), rand(1..4), rand(1..7), lang('en', 0.9), tstz, (null(0.99) or string), bool(0.01), (null or rand(1..50)), (null(0.8) or text(['Extra', 'Omake'].sample))] } %>
+<%= rec(50) { ['DEFAULT', rand(1..9), rand(1..4), rand(1..7), lang('en', 0.9), tstz, (null(0.99) or string), bool(0.01), (null or rand(1..50)), (null(0.8) or rand(1))] } %>
 
 INSERT INTO chapters_releases VALUES
 <%= rec(200) { ['DEFAULT', rand(1..295), rand(1..50)] } %>
@@ -130,7 +133,7 @@ INSERT INTO chapters_releases VALUES
 -- random data releases+chapters
 
 INSERT INTO releases VALUES
-<%= rec(300) { ['DEFAULT', rand(10..159), rand(5..54), rand(8..97), lang('en', 0.9), tstz, (null(0.99) or string), bool(0.01), (null or rand(1..50)), (null(0.8) or text(['Extra', 'Omake'].sample))] } %>
+<%= rec(300) { ['DEFAULT', rand(10..159), rand(5..54), rand(8..97), lang('en', 0.9), tstz, (null(0.99) or string), bool(0.01), (null or rand(1..50)), (null(0.8) or rand(1))] } %>
 
 INSERT INTO chapters_releases VALUES
 <%= rec(200) { ['DEFAULT', rand(296..795), rand(51..350)] } %>
@@ -138,10 +141,10 @@ INSERT INTO chapters_releases VALUES
 --==--==--==--==--==--==--==--==--==--
 
 INSERT INTO user_chapters VALUES
-<%= rec(100) { ['DEFAULT', rand(1..103), rand(1..295), text(%w(Read Owned Skipped).sample), tstz] } %>
+<%= rec(100) { ['DEFAULT', rand(1..103), rand(1..295), rand(2), tstz] } %>
 
 INSERT INTO user_releases VALUES
-<%= rec(30) { ['DEFAULT', rand(1..103), rand(1..50), text(%w(Read Owned Skipped).sample), tstz] } %>
+<%= rec(30) { ['DEFAULT', rand(1..103), rand(1..50), rand(2), tstz] } %>
 
 INSERT INTO translator_members
 	( user_id, translator_id )
@@ -152,10 +155,10 @@ INSERT INTO translator_members
     <%= rec(20) { [rand(1..103), rand(1..54)] } %>
 
 INSERT INTO characters VALUES
-<%= rec(200) { ['DEFAULT', name, cjk_name, nil, (null or country), (null or date), (null or text(%w(Male Female).sample)), (null or rand(1..100)), (null or rand(1..500)), (null(0.9) or /\d{2}-\d{2}-\d{2}/.gen), (null or text(%w(A O B AB).sample)), (null or string), bool] } %>
+<%= rec(200) { ['DEFAULT', name, cjk_name, nil, (null or country), (null or date), (null or gender), (null or rand(1..100)), (null or rand(1..500)), (null(0.9) or /\d{2}-\d{2}-\d{2}/.gen), (null or rand(3)), (null or string), bool] } %>
 
 INSERT INTO characters_roles VALUES
-<%= rec(200) { |n| ['DEFAULT', n, rand(1..159), text(['Main character', 'Secondary character', 'Appears', 'Cameo'].sample), (nil or text(['Antagonist', 'Antihero', 'Archenemy', 'Characterization', 'False protagonist', 'Foil', 'Protagonist', 'Stock', 'Supporting', 'Narrator'].sample)), nil] } %>
+<%= rec(200) { |n| ['DEFAULT', n, rand(1..159), rand(3), (nil or rand(9)), nil] } %>
 
 INSERT INTO characters_relation_kinds
     ( name )
@@ -212,7 +215,7 @@ INSERT INTO filtered_character_tags (user_id, tag_id) VALUES
 <%= rec(50) { [rand(1..103), rand(1..sizes[:character_tags])] } %>
 
 INSERT INTO book_ratings VALUES
-<%= rec(500) { ['DEFAULT', rand(1..103), rand(1..159), rand(1..5), (null(0.99) or longstring), tstz] } %>
+<%= rec(1000) { ['DEFAULT', rand(1..103), rand(1..159), rand(1..5), (null(0.99) or longstring), tstz] } %>
 
 INSERT INTO translator_ratings VALUES
 <%= rec(200) { ['DEFAULT', rand(1..103), rand(1..54), rand(1..5), (null(0.99) or longstring), tstz] } %>

@@ -194,6 +194,8 @@ type BookSeries struct {
 	RatingCount int
 	Demographic
 	*Magazine
+
+	Tags pg.StringArray
 }
 
 func (self *BookSeries) Related() []RelatedSeries {
@@ -202,6 +204,26 @@ func (self *BookSeries) Related() []RelatedSeries {
 
 func (self *BookSeries) Credits() []ProductionCredit {
 	panic("unimplemented")
+}
+
+func (self *BookSeries) RatingStars() []string {
+	if !self.AvgRating.Valid {
+		return nil
+	}
+
+	s := make([]string, 5)
+	round_max := self.AvgRating.Float64 + 0.5
+
+	n := 0.0
+	for i := range s {
+		if n < round_max {
+			s[i] = "on"
+		} else {
+			s[i] = "off"
+		}
+		n += 1.0
+	}
+	return s
 }
 
 type SeriesLicense struct {

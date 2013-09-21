@@ -139,7 +139,7 @@ def lastname
   text $files[:lastnames].sample end
 
 def gender
-  text (if rand < 0.005 then 'Other' else ['Male', 'Female'].sample end) end
+  text (if rand < 0.005 then 2 else rand 0..1 end) end
 
 def bytea(length=32)
   text('\x' + length.times.map { rand(255).to_s(16).rjust(2, '0') }.join('')) end

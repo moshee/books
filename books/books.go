@@ -4,17 +4,18 @@ import (
 	//"database/sql"
 	"github.com/moshee/gas"
 	//"github.com/argusdusty/Ferret"
+	"time"
 )
 
 func Index(g *gas.Gas) {
-	releases := make([]*Release, 20)
+	releases := make([]*Release, 0, 20)
 	rows, err := gas.DB.Query("SELECT * FROM books.recent_releases LIMIT 20")
 	if err != nil {
 		g.Render("books", "index-error", err)
 		return
 	}
 
-	for i := 0; rows.Next(); i++ {
+	for rows.Next() {
 		r := new(Release)
 		s := new(BookSeries)
 		t := new(TranslationGroup)
@@ -27,7 +28,25 @@ func Index(g *gas.Gas) {
 
 		r.BookSeries = s
 		r.TranslationGroup = t
-		releases[i] = r
+		releases = append(releases, r)
+	}
+
+	series := make([]*BookSeries, 0, 10)
+	rows, err = gas.DB.Query("SELECT * FROM books.latest_series LIMIT 10")
+	if err != nil {
+		g.Render("books", "index-error", err)
+		return
+	}
+
+	for rows.Next() {
+		s := new(BookSeries)
+		err := rows.Scan(&s.Id, &s.Title, &s.SeriesKind, &s.Vintage, &s.DateAdded, &s.NSFW, &s.AvgRating, &s.Tags)
+		if err != nil {
+			g.Render("books", "index-error", err)
+			return
+		}
+
+		series = append(series, s)
 	}
 
 	n := new(NewsPost)
@@ -46,9 +65,11 @@ func Index(g *gas.Gas) {
 		Releases []*Release
 		Series   []*BookSeries
 		News     *NewsPost
+		Now      time.Time
 	}{
 		releases,
-		nil,
+		series,
 		n,
+		time.Now(),
 	})
 }
