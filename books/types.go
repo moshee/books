@@ -69,11 +69,13 @@ func (c Credit) String() string {
 
 func (self SeriesRelation) String() string {
 	return []string{
-		"Related",
+		"Original work",
+		"Alternate version",
 		"Sequel",
 		"Prequel",
-		"SpinOff",
+		"Spin-off",
 		"Adaptation",
+		"Shares character",
 	}[self]
 }
 

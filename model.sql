@@ -36,7 +36,7 @@ CREATE TABLE magazines (
     publisher   integer     NOT NULL REFERENCES publishers,
     language    text        NOT NULL,
     date_added  timestamptz NOT NULL DEFAULT 'now'::timestamptz,
-    demographic Demographic,
+    demographic integer,
     summary     text
 );
 
@@ -45,7 +45,7 @@ CREATE TABLE book_series (
     title        text        NOT NULL,
     native_title text        NOT NULL,
     other_titles text[],
-    kind         SeriesKind  NOT NULL DEFAULT 'Comic',
+    kind         integer     NOT NULL DEFAULT 0,
     summary      text,
     vintage      integer     NOT NULL, -- year
     date_added   timestamptz NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE book_series (
     nsfw         boolean     NOT NULL DEFAULT false,
     avg_rating   real, -- NULL means not rated (as opposed to a zero rating)
     rating_count integer     NOT NULL DEFAULT 0,
-    demographic  Demographic NOT NULL,
+    demographic  integer     NOT NULL,
     magazine_id  integer     REFERENCES magazines
 );
 
@@ -77,7 +77,7 @@ CREATE TABLE authors (
     picture     boolean NOT NULL DEFAULT false,
     birthday    date,
     bio         text,
-    sex         Sex -- we be politically correct
+    sex         integer
 );
 
 CREATE TABLE production_credits (
@@ -90,10 +90,10 @@ CREATE TABLE production_credits (
 );
 
 CREATE TABLE related_series (
-    id                serial         PRIMARY KEY,
-    series_id         integer        NOT NULL REFERENCES book_series,
-    related_series_id integer        NOT NULL REFERENCES book_series,
-    relation          SeriesRelation NOT NULL
+    id                serial  PRIMARY KEY,
+    series_id         integer NOT NULL REFERENCES book_series,
+    related_series_id integer NOT NULL REFERENCES book_series,
+    relation          integer NOT NULL
 );
 
 --
@@ -212,7 +212,7 @@ CREATE TABLE user_chapters (
     id         serial      PRIMARY KEY,
     user_id    integer     NOT NULL REFERENCES users,
     chapter_id integer     NOT NULL REFERENCES chapters,
-    status     ReadStatus  NOT NULL,
+    status     integer     NOT NULL,
     date_read  timestamptz NOT NULL DEFAULT 'now'::timestamptz
 );
 
@@ -221,7 +221,7 @@ CREATE TABLE user_releases (
     id         serial      PRIMARY KEY,
     user_id    integer     NOT NULL REFERENCES users,
     release_id integer     NOT NULL REFERENCES releases,
-    status     ReadStatus  NOT NULL,
+    status     integer     NOT NULL,
     date_owned timestamptz NOT NULL DEFAULT 'now'::timestamptz
 );
 
@@ -243,21 +243,21 @@ CREATE TABLE characters (
     aliases     text[],
     nationality text,
     birthday    date, -- the year is ignored
-    sex         Sex,
+    sex         integer,
     weight      real,
     height      real,
     sizes       text,
-    blood_type  BloodType,
+    blood_type  integer,
     description text,
     picture     boolean NOT NULL DEFAULT false
 );
 
 CREATE TABLE characters_roles (
-    id           serial        PRIMARY KEY,
-    character_id integer       NOT NULL REFERENCES characters,
-    series_id    integer       NOT NULL REFERENCES book_series,
-    type         CharacterType NOT NULL,
-    role         CharacterRole,
+    id           serial  PRIMARY KEY,
+    character_id integer NOT NULL REFERENCES characters,
+    series_id    integer NOT NULL REFERENCES book_series,
+    type         integer NOT NULL,
+    role         integer,
     appearances  integer[] --           REFERENCES chapters
 );
 
@@ -708,24 +708,24 @@ CREATE TRIGGER update_user_chapters
 -- update the object of a series relation
 CREATE FUNCTION do_update_series_relations() RETURNS trigger AS $$
     DECLARE
-        related_relation SeriesRelation;
+        related_relation integer;
     BEGIN
         IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
             CASE NEW.relation
-            WHEN 'Original Work' THEN
-                related_relation := 'Adaptation';
-            WHEN 'Alternative Version' THEN
-                related_relation := 'Alternative Version';
-            WHEN 'Adaptation' THEN
-                related_relation := 'Original Work';
-            WHEN 'Prequel' THEN
-                related_relation := 'Sequel';
-            WHEN 'Sequel' THEN
-                related_relation := 'Prequel';
-            WHEN 'Spin-Off' THEN
-                related_relation := 'Original Work';
-            WHEN 'Shares Character' THEN
-                related_relation := 'Shares Character';
+            WHEN 0 THEN
+                related_relation := 5;
+            WHEN 1 THEN
+                related_relation := 1;
+            WHEN 5 THEN
+                related_relation := 0;
+            WHEN 3 THEN
+                related_relation := 2;
+            WHEN 2 THEN
+                related_relation := 3;
+            WHEN 4 THEN
+                related_relation := 0;
+            WHEN 6 THEN
+                related_relation := 6;
             ELSE
                 RAISE EXCEPTION 'Unknown series relation enum value: %', NEW.relation
                     USING HINT = 'Function do_update_series_relations() may need to be updated';
@@ -738,14 +738,14 @@ CREATE FUNCTION do_update_series_relations() RETURNS trigger AS $$
         END IF;
 
         CASE TG_OP
-            WHEN 'INSERT' THEN
-                INSERT INTO related_series (series_id, related_series_id, relation)
-                    VALUES (NEW.related_series_id, NEW.series_id, related_relation);
-            WHEN 'UPDATE' THEN
-                UPDATE related_series
-                    SET relation = related_relation
-                    WHERE series_id = NEW.related_series_id
-                    AND related_series_id = NEW.series_id;
+        WHEN 'INSERT' THEN
+            INSERT INTO related_series (series_id, related_series_id, relation)
+                VALUES (NEW.related_series_id, NEW.series_id, related_relation);
+        WHEN 'UPDATE' THEN
+            UPDATE related_series
+                SET relation = related_relation
+                WHERE series_id = NEW.related_series_id
+                AND related_series_id = NEW.series_id;
         END CASE;
 
         RETURN NEW;

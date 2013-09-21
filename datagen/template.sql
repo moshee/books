@@ -25,16 +25,16 @@ INSERT INTO magazines VALUES
 	<%= rec(50) { ['DEFAULT', sample(:products), rand(1..55), lang('ja', 0.99), tstz, rand(5), (null or string)] } %>
 
 INSERT INTO book_series VALUES
-    ( DEFAULT, 'From the New World', '新世界より', NULL, 'Comic', 'so many scifi tropes', 2012, <%= tstz %>, <%= tstz %>, false, true, NULL, 0, 0, 1 ),
-	( DEFAULT, 'The Eotena Onslaught', '進撃の巨人', NULL, 'Comic', 'eotens', 2009, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 0, 1 ),
-	( DEFAULT, 'Flying Witch', 'ふらいんぐうぃっち', NULL, 'Comic', 'it''s like yotsuba with magic', 2012, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 0, 1 ),
-	( DEFAULT, 'Terra ForMars', 'テラフォーマーズ', NULL, 'Comic', 'johj', 2011, <%= tstz %>, <%= tstz %>, false, true, NULL, 0, 2, 2 ),
-	( DEFAULT, 'Suicide Island', '自殺島', NULL, 'Comic', 'goats', 2008, <%= tstz %>, <%= tstz %>, false, true, NULL, 0, 2, 3 ),
-	( DEFAULT, 'Electric Town Bookstore', 'デンキ街の本屋さん', NULL, 'Comic', 'sensei-san best', 2011, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 2, 5 ),
-	( DEFAULT, 'Girl Meets Bear', 'くまみこ', NULL, 'Comic', 'I''m not really sure myself', 2013, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 2, 5 ),
-	( DEFAULT, 'Sunshine Sketch', 'ひだまりスケッチ', NULL, 'Comic', 'X''___________''X)', 2004, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 2, 4 ),
-	( DEFAULT, 'Let''s have a meal together!', 'ごはん しよ！', NULL, 'Comic', 'food', 2012, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 2, 5 ),
-	<%= rec(150) { ['DEFAULT', rand(2), longstring(4), rand(1950..2013), tstz, tstz, bool(0.3), bool(0.1), nil, 0, rand(5), rand(1..55)] } %>
+    ( DEFAULT, 'From the New World', '新世界より', NULL, 0, 'so many scifi tropes', 2012, <%= tstz %>, <%= tstz %>, false, true, NULL, 0, 0, 1 ),
+	( DEFAULT, 'The Eotena Onslaught', '進撃の巨人', NULL, 0, 'eotens', 2009, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 0, 1 ),
+	( DEFAULT, 'Flying Witch', 'ふらいんぐうぃっち', NULL, 0, 'it''s like yotsuba with magic', 2012, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 0, 1 ),
+	( DEFAULT, 'Terra ForMars', 'テラフォーマーズ', NULL, 0, 'johj', 2011, <%= tstz %>, <%= tstz %>, false, true, NULL, 0, 2, 2 ),
+	( DEFAULT, 'Suicide Island', '自殺島', NULL, 0, 'goats', 2008, <%= tstz %>, <%= tstz %>, false, true, NULL, 0, 2, 3 ),
+	( DEFAULT, 'Electric Town Bookstore', 'デンキ街の本屋さん', NULL, 0, 'sensei-san best', 2011, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 2, 5 ),
+	( DEFAULT, 'Girl Meets Bear', 'くまみこ', NULL, 0, 'I''m not really sure myself', 2013, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 2, 5 ),
+	( DEFAULT, 'Sunshine Sketch', 'ひだまりスケッチ', NULL, 0, 'X''___________''X)', 2004, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 2, 4 ),
+	( DEFAULT, 'Let''s have a meal together!', 'ごはん しよ！', NULL, 0, 'food', 2012, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 2, 5 ),
+	<%= rec(150) { ['DEFAULT', sample(:products), text(/[:ja:]{3,12}/.gen), nil, rand(2), longstring(4), rand(1950..2013), tstz, tstz, bool(0.3), bool(0.1), nil, 0, rand(5), rand(1..55)] } %>
 
 INSERT INTO authors
 	( given_name, surname, native_name, sex )
