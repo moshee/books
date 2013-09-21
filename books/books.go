@@ -40,7 +40,7 @@ func Index(g *gas.Gas) {
 		return
 	}
 
-	news.User = user
+	n.User = u
 
 	g.Render("books", "index", &struct {
 		Releases []*Release

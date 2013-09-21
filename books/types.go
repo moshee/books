@@ -48,7 +48,7 @@ func (s Sex) String() string {
 		"Male",
 		"Female",
 		"Other",
-	}[self]
+	}[s]
 }
 
 const (
@@ -401,15 +401,15 @@ type Character struct {
 	Picture     bool
 }
 
-func (self *Character) CastIn() []CharacterRole {
+func (self *Character) CastIn() []CharacterAppearance {
 	panic("unimplemented")
 }
 
-type CharacterRole struct {
+type CharacterAppearance struct {
 	*Character
 	*BookSeries
 	CharacterType
-	Role
+	CharacterRole
 }
 
 type RelatedCharacter struct {
