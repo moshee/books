@@ -208,6 +208,14 @@ func (self *BookSeries) Credits() []ProductionCredit {
 	panic("unimplemented")
 }
 
+func (self *BookSeries) LimitedTags(n int) pg.StringArray {
+	if self.Tags == nil || n > len(self.Tags) {
+		return self.Tags
+	} else {
+		return self.Tags[:n]
+	}
+}
+
 func (self *BookSeries) RatingStars() []string {
 	if !self.AvgRating.Valid {
 		return nil

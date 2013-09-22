@@ -41,7 +41,8 @@ func slugify(in string) string {
 		if unicode.IsLetter(ch) || unicode.IsNumber(ch) {
 			sym = false
 			out = append(out, ch)
-		} else if sym {
+		} else if sym || ch == '\'' || ch == '’' {
+			// skip apostrophes
 			continue
 		} else {
 			out = append(out, '-')

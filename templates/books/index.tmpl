@@ -1,83 +1,77 @@
 {{ define "index" }}<!doctype html>
 <head>
-<meta charset=utf-8>
-<meta name=viewport content="initial-scale=1.0">
-<meta name=description content="A place to discover and opinionate on Japanese print-based entertainment.">
-<!-- <link href='http://fonts.googleapis.com/css?family=Share&subset=latin,latin-ext' rel='stylesheet' type='text/css'> -->
-<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Acme&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
-<title>title placeholder</title>
-<link rel=stylesheet href=/static/style.css><!-- TODO: CDN -->
+	<meta charset=utf-8>
+	<meta name=viewport content="initial-scale=1.0">
+	<meta name=description content="A place to discover and opinionate on Japanese print-based entertainment.">
+	<!-- <link href='http://fonts.googleapis.com/css?family=Share&subset=latin,latin-ext' rel='stylesheet' type='text/css'> -->
+	<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Acme&amp;subset=latin,latin-ext" rel=stylesheet type=text/css>
+	<title>title placeholder</title>
+	<link rel=stylesheet href=/static/style.css><!-- TODO: CDN -->
 </head>
 <body>
-<section id=main>
-	<header>
-	</header>
-	<nav id=browse>
-		<ul>
-			<li><a href=#>Series</a></li>
-			<li><a href=#>Authors</a></li>
-			<li><a href=#>Magazines</a></li>
-			<li><a href=#>Publishers</a></li>
-			<li><a href=#>Translators</a></li>
-			<li><a href=#>Releases</a></li>
-		</ul>
-	</nav>
-	<nav id=filters>
-		<ul>
-			<li><a href=#>Demographics</a></li>
-			<li><a href=#>Tags</a></li>
-		</ul>
-	</nav>
-	<section id=search>
-    <ul class=filter-entry>
-      <li>
-        <select class=filter-type>
-          <option value=title>Title</option>
-          <option value=tags>Tags</option>
-          <option value=demographic>Demographic</option>
-          <option value=author>Author</option>
-          <option value=magazine>Magazine</option>
-          <option value=publisher>Publisher</option>
-        </select>
-        <input type=text class=filter-content>
-        <button class=remove-filter>-</button>
-      </li>
-    </ul>
-    <button class=add-filter>+</button>
+	<section id=main>
+		<header>
+		</header>
+		<nav id=browse>
+			<ul>
+				<li><a href=#>Series</a></li>
+				<li><a href=#>Authors</a></li>
+				<li><a href=#>Magazines</a></li>
+				<li><a href=#>Publishers</a></li>
+				<li><a href=#>Translators</a></li>
+				<li><a href=#>Releases</a></li>
+			</ul>
+		</nav>
+		<nav id=filters>
+			<ul>
+				<li><a href=#>Demographics</a></li>
+				<li><a href=#>Tags</a></li>
+			</ul>
+		</nav>
+		<section id=search>
+			<ul class=filter-entry>
+				<li>
+					<select class=filter-type>
+						<option value=title>Title</option>
+						<option value=tags>Tags</option>
+						<option value=demographic>Demographic</option>
+						<option value=author>Author</option>
+						<option value=magazine>Magazine</option>
+						<option value=publisher>Publisher</option>
+					</select>
+					<input type=text class=filter-content>
+					<button class=remove-filter>-</button>
+				</li>
+			</ul>
+			<button class=add-filter>+</button>
+		</section>
+		<section id=latest>
+			<section id=latest-releases>
+				<h1>Fresh Out Of Photoshop</h1>
+				{{ template "release-list-by-added" .Releases }}
+			</section>
+			<section id=latest-books>
+				<h1>Recently Added Titles</h1>
+				{{ template "series-list-by-added" .Series }}
+			</section>
+		</section>
+		<section id=news>
+			{{ with .News }}
+			<h1>Site news</h1>
+			{{ template "news-post" . }}
+			{{ else }}
+			<p>No news at this time.</p>
+			{{ end }}
+		</section>
+		<hr class=clear>
 	</section>
-	<section id=latest>
-    <section id=latest-releases>
-      <h1>Fresh Out Of Photoshop</h1>
-      {{ template "release-list-by-added" .Releases }}
-    </section>
-    <section id=latest-books>
-      <h1>Recently Added Titles</h1>
-      {{ template "series-list-by-added" .Series }}
-    </section>
-	</section>
-	<section id=news>
-    {{ with .News }}
-    <h1>Site news</h1>
-    <article id=news-{{ .Id }}>
-      <h2><a href="/news/{{ .Id }}/{{ slugify .Title }}">{{ .Title }}</a></h2>
-      <div class=news-meta>Posted by <a href="/user/{{ .User.Id }}/{{ slugify .User.Name }}">{{ .User.Name }}</a> on <time datetime="{{ .DatePosted.Format "2006-01-02T15:04:05-0700" }}">{{ .DatePosted.Format "2 Jan 2006" }}</time> under <a href="/news/category/{{ .Category }}">{{ .Category }}s</a></div>
-      <div class=post-body>
-      {{ smarkdown .Body }}
-    </div>
-    </article>
-	  {{ else }}
-    <p>No news at this time.</p>
-    {{ end }}
-	</section>
-  <hr class=clear>
 	<footer>
-    <section id=copyright>
-      <h1>Copyright © 2013 <code><a href="http://displaynone.us">display: none;</a></code>. All rights reserved.</h1>
-    </section>
-    <section id=wordswordswords>
-      <p id=footer-links><a href="/about">About</a> — <a href="/legal">Legal</a> — <a href="https://github.com/moshee/books">Hacking</a></p>
-      <p>This site is provided under a BSD-style license that can be found on the <a href="https://github.com/moshee/books">GitHub page</a>.</p>
-    </section>
+		<section id=copyright>
+			<h1>Copyright © 2013 <code><a href="http://displaynone.us">display: none;</a></code>.&nbsp;&nbsp;&nbsp;All rights reserved.</h1>
+		</section>
+		<section id=wordswordswords>
+			<p id=footer-links><a href="/about">About</a> — <a href="/legal">Legal</a> — <a href="https://github.com/moshee/books">Hacking</a></p>
+		</section>
 	</footer>
 </body>
 {{ end }}

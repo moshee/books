@@ -19,7 +19,7 @@ a {
 a:hover {
 	color: #88d;
 }
-a.tag {
+.tag {
 	font-size: 12px;
 	border: 1px solid #ccc;
 	padding: 0 2px;
@@ -47,7 +47,6 @@ th {
 	text-transform: uppercase;
 	padding: 2px 8px;
 }
-
 table td {
 	padding: 0 8px;
 	height: 24px;
