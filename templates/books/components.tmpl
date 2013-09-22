@@ -1,11 +1,12 @@
 {{ define "release-list-by-added" }}<table>
 	<thead>
-		<tr><th class=lt>Title</th><th>Chapter</th><th>Group</th><th>Added</th></tr>
+		<tr><th class=lt>Title</th><th><img src=/static/volume.svg width=16 height=16></th><th><img src=/static/chapter.svg width=16 height=16></th><th>Group</th><th>Added</th></tr>
 	</thead>
 	<tbody>
 		{{ range . }}
 		<tr>
 			<td class=lt><a href="/series/{{ .BookSeries.Id }}/{{ .BookSeries.Title | slugify | urlquery }}">{{ .BookSeries.Title }}</a></td>
+			<td>{{ if .Volume.Valid }}{{ .Volume.Int64 }}{{ end }}</td>
 			<td>{{ .ChapterRange }}</td>
 			<td>({{ .Language }}) {{ .TranslationGroup.Name }}</td>
 			<td>{{ .ReleaseDate | ago }}</td>
@@ -17,15 +18,13 @@
 
 {{ define "series-list-by-added" }}<table>
 	<thead>
-		<tr><th class=lt>Title</th><th>Tags</th><th>Year</th><th>Added</th></tr>
+		<tr><th class=lt>Title</th><th><!--rating--></th><th>Tags</th><th>Year</th><th>Added</th></tr>
 	</thead>
 	<tbody>
 		{{ range . }}
 		<tr{{ if .NSFW }} class=nsfw {{ end }}>
-			<td class=lt>
-				<a href="/series/{{ .Id }}/{{ .Title | slugify | urlquery }}">{{ .Title }}</a>
-				<ul title="{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }}/5{{ else }}Not rated{{ end }}" class=rating-stars>{{ range .RatingStars }}<li class={{ . }}></li>{{ end }}</ul>
-			</td>
+			<td class=lt><a href="/series/{{ .Id }}/{{ .Title | slugify | urlquery }}">{{ .Title }}</a></td>
+			<td><ul title="{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }}/5{{ else }}Not rated{{ end }}" class=rating-stars>{{ range .RatingStars }}<li class={{ . }}></li>{{ end }}</ul></td>
 			<td>{{ $s := len .Tags }}{{ with .LimitedTags 3 }}{{ range . }}<a class=tag href="/tag/{{ urlquery . }}">{{ . }}</a>{{ end }}{{ if len . | gt $s }}<span class=tag>···</span>{{ end }}{{ end }}</td>
 			<td>{{ .Vintage }}</td>
 			<td>{{ .DateAdded.Format "02 Jan" }}</td>

@@ -1,0 +1,10 @@
+#latest {
+	float: none;
+	padding: 32px;
+	width: auto;
+}
+#news {
+	width: auto;
+	padding: 0 32px 64px;
+	float: none;
+}

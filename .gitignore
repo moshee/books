@@ -1,6 +1,6 @@
 .*.swp
 .*.swo
-./main
+main
 datagen/*.txt
 datagen/namedb
 datagen/scratch*

@@ -7,6 +7,7 @@
 	<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Acme&amp;subset=latin,latin-ext" rel=stylesheet type=text/css>
 	<title>title placeholder</title>
 	<link rel=stylesheet href=/static/style.css><!-- TODO: CDN -->
+	<link rel=stylesheet href=/static/mobile.css media="only screen and (max-width: 1024px)">
 </head>
 <body>
 	<section id=main>
@@ -67,11 +68,10 @@
 	</section>
 	<footer>
 		<section id=copyright>
-			<h1>Copyright © 2013 <code><a href="http://displaynone.us">display: none;</a></code>.&nbsp;&nbsp;&nbsp;All rights reserved.</h1>
-		</section>
-		<section id=wordswordswords>
+			<h1>Copyright © 2013 <code><a href="http://displaynone.us">display: <b>none</b>;</a></code>.&nbsp;&nbsp;&nbsp;All rights reserved.</h1>
 			<p id=footer-links><a href="/about">About</a> — <a href="/legal">Legal</a> — <a href="https://github.com/moshee/books">Hacking</a></p>
 		</section>
+		<section id=footer-logo><a href="http://displaynone.us"></a></section>
 	</footer>
 </body>
 {{ end }}
