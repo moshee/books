@@ -1,3 +1,161 @@
 @charset "utf-8";
 
 * { margin: 0; padding: 0; box-sizing: border-box }
+
+body {
+	font-family: source sans pro, sans-serif;
+	color: #444;
+}
+
+h1,h2,h3,h4,h5,h6 {
+	font-family: acme, sans-serif;
+	font-weight: 400;
+}
+
+a {
+	color: #338;
+	text-decoration: none;
+}
+a:hover {
+	color: #88d;
+}
+a.tag {
+	font-size: 12px;
+	border: 1px solid #ccc;
+	padding: 0 2px;
+	height: 18px;
+	line-height: 16px;
+	border-radius: 2px;
+	margin-right: 4px;
+	display: inline-block;
+}
+
+hr.clear {
+	border-width: 0;
+	height: 0;
+	clear: both;
+}
+
+table {
+	font-size: 14px;
+	border-collapse: collapse;
+	width: 100%;
+}
+
+th {
+	text-align: left;
+	text-transform: uppercase;
+	padding: 2px 8px;
+}
+
+table td {
+	padding: 0 8px;
+	height: 24px;
+	line-height: 24px;
+}
+
+table tr:nth-of-type(2n+1) td {
+	background: #fafafa;
+}
+
+ul.rating-stars {
+	list-style-type: none;
+	display: block;
+	float: right;
+}
+
+ul.rating-stars li {
+	display: inline-block;
+	width: 3px;
+	height: 14px;
+	position: relative;
+	top: 2px;
+	margin-right: 1px;
+}
+ul.rating-stars li.on {
+	background: #338;
+}
+ul.rating-stars li.off {
+	background: #ccc;
+}
+
+#latest {
+	float: left;
+	padding: 0 16px 64px 32px;
+	width: calc(100% - 384px);
+}
+
+#latest h1 {
+	font-size: 26px;
+	font-weight: 400;
+	margin-bottom: 1em;
+}
+
+#latest section {
+	margin-bottom: 64px;
+}
+
+#news {
+	width: 384px;
+	padding: 0 32px 64px 16px;
+	float: right;
+}
+#news h1 {
+	font-family: source sans pro, sans-serif;
+	text-transform: uppercase;
+	font-weight: 700;
+	font-size: 14px;
+	color: #888;
+	margin-bottom: 8px;
+}
+#news h2 {
+	font-size: 18px;
+}
+.news-meta {
+	font-size: 12px;
+	color: #888;
+	margin: 8px 0;
+	text-transform: uppercase;
+}
+#news .post-body {
+	font-size: 14px;
+}
+
+footer {
+	clear: both;
+	padding: 32px 0;
+	background: #fafafa;
+	border-top: 1px solid #ccc;
+	color: #888;
+	position: relative;
+	text-shadow: 0 1px 0 #fff;
+	text-align: center;
+}
+footer a {
+	color: #66a;
+}
+footer section {
+	display: inline-block;
+	vertical-align: middle;
+	line-height: 1.25em;
+}
+#copyright {
+	text-align: right;
+	margin-right: 16px;
+}
+#copyright h1 {
+	font-size: 16px;
+}
+#copyright h1 code {
+	font-size: 14px;
+}
+#wordswordswords {
+	margin-left: 16px;
+	text-align: left;
+}
+#wordswordswords p {
+	font-size: 13px;
+}
+#footer-links a {
+	font-weight: 700;
+}

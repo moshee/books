@@ -214,16 +214,14 @@ func (self *BookSeries) RatingStars() []string {
 	}
 
 	s := make([]string, 5)
-	round_max := self.AvgRating.Float64 + 0.5
+	round_max := int(self.AvgRating.Float64 + 0.5)
 
-	n := 0.0
 	for i := range s {
-		if n < round_max {
+		if i < round_max {
 			s[i] = "on"
 		} else {
 			s[i] = "off"
 		}
-		n += 1.0
 	}
 	return s
 }

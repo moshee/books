@@ -1,35 +1,40 @@
-{{ define "release-list" }}<table>
+{{ define "release-list-by-added" }}<table>
   <thead>
-    <tr><th>Title</th><th>Chapter</th><th>Group</th><th>Date Added</th></tr>
+    <tr><th>Title</th><th>Chapter</th><th>Group</th><th>Added</th></tr>
   </thead>
   <tbody>
     {{ range .}}
-    <tr><td><a href=/series/{{ .BookSeries.Id }}/{{ slugify .BookSeries.Title }}>{{ .BookSeries.Title }}</a></td><td>{{ .ChapterRange }}</td><td>({{ .Language }}) {{ .TranslationGroup.Name }}</td><td>{{ .ReleaseDate }}</td></tr>
+    <tr><td><a href=/series/{{ .BookSeries.Id }}/{{ slugify .BookSeries.Title }}>{{ .BookSeries.Title }}</a></td><td>{{ .ChapterRange }}</td><td>({{ .Language }}) {{ .TranslationGroup.Name }}</td><td>{{ .ReleaseDate | ago }}</td></tr>
     {{ end }}
   </tbody>
 </table>
 {{ end }}
 
-{{ define "series-list" }}<table>
+{{ define "series-list-by-added" }}<table>
   <thead>
-    <tr><th>Title</th><th>Vintage</th><th>Authors</th><th>Date Added</th></tr>
+		<tr><th>Title</th><th>Tags</th><th>Year</th><th>Added</th></tr>
   </thead>
   <tbody>
-    {{ range .}}
-	<tr{{ if .NSFW }} class=nsfw {{ end }}>
-      <td><a href=#>{{ .Title }}</a></td>
-	  <td>
-		  <ul class=rating-stars>
-			  {{ range .RatingStars }}
-			  <li class={{ . }}></li>
-			  {{ end }}
-		  </ul>
-	  </td>
-	  <td>{{ range .Tags }}<a class=tag href="/tag/{{ urlquery . }}">{{ . }}</a>{{ end }}</td>
-      <td>{{ .Vintage }}<td>
-      <td>{{ .DateAdded }}</td>
-    </tr>
+    {{ range . }}
+		<tr{{ if .NSFW }} class=nsfw {{ end }}>
+			<td>
+				<a href=#>{{ .Title }}</a>
+				<ul title="{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }}/5{{ else }}Not rated{{ end }}" class=rating-stars>{{ range .RatingStars }}<li class={{ . }}></li>{{ end }}</ul>
+			</td>
+			<td>{{ range .Tags }}<a class=tag href="/tag/{{ urlquery . }}">{{ . }}</a>{{ end }}</td>
+			<td>{{ .Vintage }}</td>
+			<td>{{ .DateAdded.Format "02 Jan" }}</td>
+			</tr>
     {{ end }}
   </tbody>
 </table>
 {{ end }}
+
+{{ define "news-list-by-added" }}{{ range . }}<article id=news-{{ .Id }}>
+	<h2><a href="/news/{{ .Id }}/{{ slugify .Title }}">{{ .Title }}</a></h2>
+	<div class=news-meta>Posted by <a href="/user/{{ .User.Id }}/{{ slugify .User.Name }}">{{ .User.Name }}</a> on <time datetime="{{ .DatePosted.Format "2006-01-02T15:04:05-0700" }}">{{ .DatePosted.Format "2 Jan 2006" }}</time> under <a href="/news/category/{{ .Category }}">{{ .Category }}s</a></div>
+	<div class=post-body>
+		{{ smarkdown .Body }}
+	</div>
+</article>
+{{ end }}{{ end }}

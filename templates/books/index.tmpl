@@ -3,6 +3,8 @@
 <meta charset=utf-8>
 <meta name=viewport content="initial-scale=1.0">
 <meta name=description content="A place to discover and opinionate on Japanese print-based entertainment.">
+<!-- <link href='http://fonts.googleapis.com/css?family=Share&subset=latin,latin-ext' rel='stylesheet' type='text/css'> -->
+<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Acme&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
 <title>title placeholder</title>
 <link rel=stylesheet href=/static/style.css><!-- TODO: CDN -->
 </head>
@@ -45,28 +47,37 @@
 	</section>
 	<section id=latest>
     <section id=latest-releases>
-      <h1>Latest Releases</h1>
-      {{ template "release-list" .Releases }}
+      <h1>Fresh Out Of Photoshop</h1>
+      {{ template "release-list-by-added" .Releases }}
     </section>
     <section id=latest-books>
       <h1>Recently Added Titles</h1>
-      {{ template "series-list" .Series }}
+      {{ template "series-list-by-added" .Series }}
     </section>
 	</section>
 	<section id=news>
-    {{ if .News }}
     {{ with .News }}
+    <h1>Site news</h1>
     <article id=news-{{ .Id }}>
-      <h2>{{ .Title }}</h2>
-      <div class=news-meta>Posted by <a href="/user/{{ .User.Id }}/{{ slugify .User.Name }}">{{ .User.Name }}</a> on <time datetime="{{ .DatePosted.Format "2006-01-02T15:04:05-0700" }}">{{ .DatePosted.Format "2 Jan., 2006" }}</time> under {{ .Category }}</div>
+      <h2><a href="/news/{{ .Id }}/{{ slugify .Title }}">{{ .Title }}</a></h2>
+      <div class=news-meta>Posted by <a href="/user/{{ .User.Id }}/{{ slugify .User.Name }}">{{ .User.Name }}</a> on <time datetime="{{ .DatePosted.Format "2006-01-02T15:04:05-0700" }}">{{ .DatePosted.Format "2 Jan 2006" }}</time> under <a href="/news/category/{{ .Category }}">{{ .Category }}s</a></div>
+      <div class=post-body>
       {{ smarkdown .Body }}
+    </div>
     </article>
-    {{ end }}
 	  {{ else }}
-    <h2 class=no-news>No news at this time.</h2>
+    <p>No news at this time.</p>
     {{ end }}
 	</section>
+  <hr class=clear>
 	<footer>
+    <section id=copyright>
+      <h1>Copyright © 2013 <code><a href="http://displaynone.us">display: none;</a></code>. All rights reserved.</h1>
+    </section>
+    <section id=wordswordswords>
+      <p id=footer-links><a href="/about">About</a> — <a href="/legal">Legal</a> — <a href="https://github.com/moshee/books">Hacking</a></p>
+      <p>This site is provided under a BSD-style license that can be found on the <a href="https://github.com/moshee/books">GitHub page</a>.</p>
+    </section>
 	</footer>
 </body>
 {{ end }}
