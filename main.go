@@ -35,6 +35,7 @@ func slugify(in string) string {
 	if len(in) == 0 {
 		return in
 	}
+	in = strings.ToLower(in)
 
 	var (
 		out = make([]rune, 0, len(in))
@@ -66,15 +67,13 @@ func ago(t time.Time) string {
 
 	switch {
 	case dur > time_Year:
-		return fmt.Sprintf("%dy%dd ago",
+		return fmt.Sprintf("%dyrs, %dd ago",
 			dur/time_Year,
 			(dur%time_Year)/time_Day)
 	case dur > time_Day:
 		return fmt.Sprintf("%d days ago", (dur%time_Year)/time_Day)
 	case dur > time.Hour:
-		return fmt.Sprintf("%dh%dm ago",
-			(dur%time_Day)/time.Hour,
-			(dur%time.Hour)/time.Minute)
+		return fmt.Sprintf("%d hours ago", (dur%time_Day)/time.Hour)
 	case dur > time.Minute:
 		return fmt.Sprintf("%d mins ago", (dur%time.Hour)/time.Minute)
 	default:

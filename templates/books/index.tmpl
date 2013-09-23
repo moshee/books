@@ -3,49 +3,59 @@
 	<meta charset=utf-8>
 	<meta name=viewport content="initial-scale=1.0">
 	<meta name=description content="A place to discover and opinionate on Japanese print-based entertainment.">
-	<!-- <link href='http://fonts.googleapis.com/css?family=Share&subset=latin,latin-ext' rel='stylesheet' type='text/css'> -->
 	<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Acme&amp;subset=latin,latin-ext" rel=stylesheet type=text/css>
-	<title>title placeholder</title>
+	<title>True story</title>
 	<link rel=stylesheet href=/static/style.css><!-- TODO: CDN -->
 	<link rel=stylesheet href=/static/mobile.css media="only screen and (max-width: 1024px)">
+  <script src="/static/books.js"></script>
 </head>
 <body>
 	<section id=main>
 		<header>
+      <h1>本物語。</h1>
 		</header>
-		<nav id=browse>
-			<ul>
-				<li><a href=#>Series</a></li>
-				<li><a href=#>Authors</a></li>
-				<li><a href=#>Magazines</a></li>
-				<li><a href=#>Publishers</a></li>
-				<li><a href=#>Translators</a></li>
-				<li><a href=#>Releases</a></li>
-			</ul>
-		</nav>
-		<nav id=filters>
-			<ul>
-				<li><a href=#>Demographics</a></li>
-				<li><a href=#>Tags</a></li>
-			</ul>
-		</nav>
-		<section id=search>
-			<ul class=filter-entry>
-				<li>
-					<select class=filter-type>
-						<option value=title>Title</option>
-						<option value=tags>Tags</option>
-						<option value=demographic>Demographic</option>
-						<option value=author>Author</option>
-						<option value=magazine>Magazine</option>
-						<option value=publisher>Publisher</option>
-					</select>
-					<input type=text class=filter-content>
-					<button class=remove-filter>-</button>
-				</li>
-			</ul>
-			<button class=add-filter>+</button>
-		</section>
+		<aside class=sidebar id=find>
+      <section id=search>
+        <ul class=filter-entry>
+          <li>
+            <label>
+              <select class=filter-type>
+                <option value=title>Title</option>
+                <option value=tags>Tags</option>
+                <option value=demographic>Demographic</option>
+                <option value=author>Author</option>
+                <option value=magazine>Magazine</option>
+                <option value=publisher>Publisher</option>
+              </select>
+            </label>
+            <input type=text class=filter-content placeholder="Search...">
+            <button class=remove-filter title="Remove this search filter">×</button>
+          </li>
+        </ul>
+        <button id=search-button title="Execute search">Search →</button>
+        <button id=add-filter title="Add search filter">+</button>
+        <hr class=clear>
+      </section>
+      <nav id=browse>
+        <h1>Browse</h1>
+        <ul>
+          <li><a href=/series>Series</a></li>
+          <li><a href=/authors>Authors</a></li>
+          <li><a href=/magazines>Magazines</a></li>
+          <li><a href=/publishers>Publishers</a></li>
+          <li><a href=/translators>Translators</a></li>
+          <li><a href=/releases>Releases</a></li>
+        </ul>
+      </nav>
+      <nav id=filters>
+        <h1>Filter by...</h1>
+        <ul>
+          <li><a href=/demographics>Demographics</a></li>
+          <li><a href=/tags>Tags</a></li>
+        </ul>
+      </nav>
+      <hr class=clear>
+    </aside>
 		<section id=latest>
 			<section id=latest-releases>
 				<h1>Fresh Out Of Photoshop</h1>
@@ -56,14 +66,14 @@
 				{{ template "series-list-by-added" .Series }}
 			</section>
 		</section>
-		<section id=news>
-			{{ with .News }}
-			<h1>Site news</h1>
-			{{ template "news-post" . }}
-			{{ else }}
-			<p>No news at this time.</p>
-			{{ end }}
-		</section>
+    <aside class=sidebar id=news>
+      <h1>Site news</h1>
+      {{ with .News }}
+      {{ template "news-post" . }}
+      {{ else }}
+      <p>No news at this time.</p>
+      {{ end }}
+		</aside>
 		<hr class=clear>
 	</section>
 	<footer>

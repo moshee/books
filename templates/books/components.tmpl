@@ -2,15 +2,16 @@
 {{ if . }}
 <table>
 	<thead>
-		<tr><th class=lt>Title</th><th><img src=/static/volume.svg width=16 height=16></th><th><img src=/static/chapter.svg width=16 height=16></th><th>Group</th><th>Added</th></tr>
+    <tr><th class=lt>Title</th><th class=lv><img src=/static/volume.svg width=16 height=16></th><th class=lc><img src=/static/chapter.svg width=16 height=16></th><th class=ll><!--language--></th><th class=lg>Group</th><th class=ld>Added</th></tr>
 	</thead>
 	<tbody>
 		{{ range . }}
 		<tr>
-			<td class=lt><a href="/series/{{ .BookSeries.Id }}/{{ .BookSeries.Title | slugify | urlquery }}">{{ .BookSeries.Title }}</a></td>
-      <td>{{ collapse_range .Chapters.Volumes }}</td>
-			<td>{{ collapse_range .Chapters.Nums }}</td>
-      <td>({{ .Language }})
+			<td class=la><a href="/series/{{ .BookSeries.Id }}/{{ .BookSeries.Title | slugify | urlquery }}">{{ .BookSeries.Title }}</a></td>
+      <td class=lv>{{ collapse_range .Chapters.Volumes }}</td>
+			<td class=lc>{{ collapse_range .Chapters.Nums }}</td>
+      <td class=ll><span class=lang-code>{{ .Language }}</span></td>
+      <td class=lg>
         {{ $len := len .TranslationGroups.Ids | add -1 }}
         {{ $groups := .TranslationGroups }}
         {{ range $k, $name := .TranslationGroups.Names }}
@@ -18,7 +19,7 @@
         {{ if lt $k $len }} &amp; {{ end }}
         {{ end }}
       </td>
-			<td>{{ .ReleaseDate | ago }}</td>
+      <td class=ld><time datetime="{{ .ReleaseDate.Format "2006-01-02T15:04:05-0700" }}">{{ .ReleaseDate | ago }}</time></td>
 		</tr>
 		{{ end }}
 	</tbody>
@@ -30,16 +31,16 @@
 
 {{ define "series-list-by-added" }}<table>
 	<thead>
-		<tr><th class=lt>Title</th><th><!--rating--></th><th>Tags</th><th>Year</th><th>Added</th></tr>
+		<tr><th class=la>Title</th><th class=ll><!--rating--></th><th class=lt>Tags</th><th class=ly>Year</th><th class=ld>Added</th></tr>
 	</thead>
 	<tbody>
 		{{ range . }}
 		<tr{{ if .NSFW }} class=nsfw {{ end }}>
-			<td class=lt><a href="/series/{{ .Id }}/{{ .Title | slugify | urlquery }}">{{ .Title }}</a></td>
-			<td><ul title="{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }}/5{{ else }}Not rated{{ end }}" class=rating-stars>{{ range .RatingStars }}<li class={{ . }}></li>{{ end }}</ul></td>
-			<td>{{ $s := len .Tags }}{{ with .LimitedTags 3 }}{{ range . }}<a class=tag href="/tag/{{ urlquery . }}">{{ . }}</a>{{ end }}{{ if len . | gt $s }}<span class=tag>···</span>{{ end }}{{ end }}</td>
-			<td>{{ .Vintage }}</td>
-			<td>{{ .DateAdded.Format "02 Jan" }}</td>
+			<td class=la><a href="/series/{{ .Id }}/{{ .Title | slugify | urlquery }}">{{ .Title }}</a></td>
+			<td class=ll><ul title="{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }}/5{{ else }}Not rated{{ end }}" class=rating-stars>{{ range .RatingStars }}<li class={{ . }}></li>{{ end }}</ul></td>
+			<td class=lt>{{ $s := len .Tags }}{{ with .LimitedTags 3 }}{{ range . }}<a class=tag href="/tag/{{ urlquery . }}">{{ . }}</a>{{ end }}{{ if len . | gt $s }}<span class=tag>···</span>{{ end }}{{ end }}</td>
+			<td class=ly>{{ .Vintage }}</td>
+      <td class=ld><time datetime="{{ .DateAdded.Format "2006-01-02T15:04:05-0700" }}">{{ .DateAdded.Format "02 Jan" }}</time></td>
 			</tr>
 		{{ end }}
 	</tbody>
@@ -48,7 +49,7 @@
 
 {{ define "news-post" }}<article id=news-{{ .Id }}>
 	<h2><a href="/news/{{ .Id }}/{{ slugify .Title }}">{{ .Title }}</a></h2>
-	<div class=news-meta>Posted by <a href="/user/{{ .User.Id }}/{{ slugify .User.Name }}">{{ .User.Name }}</a> on <time datetime="{{ .DatePosted.Format "2006-01-02T15:04:05-0700" }}">{{ .DatePosted.Format "2 Jan 2006" }}</time> under <a href="/news/category/{{ .Category }}">{{ .Category }}s</a></div>
+	<div class=news-meta>Posted by <a href="/user/{{ .User.Id }}/{{ slugify .User.Name }}">{{ .User.Name }}</a> on <time datetime="{{ .DatePosted.Format "2006-01-02T15:04:05-0700" }}">{{ .DatePosted.Format "2 Jan 2006" }}</time> under <a href="/news/category/{{ .Category | urlquery }}">{{ .Category }}</a></div>
 	<div class=post-body>
 	{{ smarkdown .Body }}
 	</div>
