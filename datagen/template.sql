@@ -78,26 +78,6 @@ INSERT INTO translation_groups VALUES
 	( DEFAULT, 'Duwang', 'A feeling so complicated.', NULL, 0, 0 ),
     <%= rec(50) { ['DEFAULT', sample(:companies), longstring, nil, 0, 0] } %>
 
-INSERT INTO translation_projects
-	( series_id )
-	VALUES
-	(1), (2), (3), (4), (5), (6), (9),
-    <%= rec(90) { |n| [n+9] } %> -- we're not doing all of them here because I wanna see series that haven't been picked up
-
-INSERT INTO translation_project_groups
-	( project_id, translator_id )
-	VALUES
-	( 1, 1 ),
-	( 2, 4 ),
-	( 3, 1 ),
-	( 3, 2 ),
-	( 3, 3 ),
-	( 4, 1 ),
-	( 5, 4 ),
-	( 6, 1 ),
-	( 7, 1 ),
-    <%= rec(90) { |n| [n+7, rand(5..54)] } %>
-
 --==--==--==--==--==--==--==--==--==--
 
 -- real world chapters
@@ -114,34 +94,41 @@ INSERT INTO chapters
 	( 7, 1 ), ( 7, 2 ), ( 7, 3 ), ( 7, 4 ), ( 7, 5 ), ( 7, 6 ),
     ( 9, 1 ), ( 9, 2 ), ( 9, 3 ), ( 9, 4 ), ( 9, 5 ), ( 9, 6 ), ( 9, 7 ), ( 9, 8 ), ( 9, 9 ), ( 9, 10 );
 
-
 -- random chapters
 
+<% chapters = [] %>
+<% chap_count = 1 %>
+<% (10..159).each do |series| %>
+    <% if rand < 0.9 # 10% of series will be empty %>
+        <% chaps_per = rand(3..15) %>
+        <% count = rand(1..30) %>
 INSERT INTO chapters VALUES
-<%= rec(500) { ['DEFAULT', tstz, rand(10..159), rand(1..200), (null or rand(30)), (null(0.99) or string)] } %>
-
---==--==--==--==--==--==--==--==--==--
-
--- real-world data releases+chapters
-
-INSERT INTO releases VALUES
-<%= rec(50) { ['DEFAULT', rand(1..9), rand(1..4), rand(1..7), lang('en', 0.9), tstz, (null(0.99) or string), bool(0.01), (null or rand(1..50)), (null(0.8) or rand(1))] } %>
-
-INSERT INTO chapters_releases VALUES
-<%= rec(200) { ['DEFAULT', rand(1..295), rand(1..50)] } %>
-
--- random data releases+chapters
+<%= rec(count) { |n| ['DEFAULT', tstz, series, n, (n-1)/chaps_per + 1, (null(0.99) or string)] } %>
+        <% chapters << (chap_count..(chap_count += count)) %>
+    <% else %>
+        <% chapters << nil %>
+    <% end %>
+<% end %>
 
 INSERT INTO releases VALUES
-<%= rec(300) { ['DEFAULT', rand(10..159), rand(5..54), rand(8..97), lang('en', 0.9), tstz, (null(0.99) or string), bool(0.01), (null or rand(1..50)), (null(0.8) or rand(1))] } %>
+<%= rec(300) { ['DEFAULT', rand(1..159), lang, tstz, (null(0.95) or string), bool(0.05), (null(0.9) or text(%w(Extra Omake).sample))] } %>
 
-INSERT INTO chapters_releases VALUES
-<%= rec(200) { ['DEFAULT', rand(296..795), rand(51..350)] } %>
+<% 300.times do |release| %>
+    <% s = chapters.sample %>
+    <% next if s.nil? %>
+    <% max = s.max %>
+    <% start = rand s %>
+    <% next if start == max # then zero rows would be generated and it would generate a semicolon by itself (syntax error in psql) %>
+    <% ct = rand(1 .. [max-start, 15].min) %>
+INSERT INTO releases_chapters VALUES
+<%= rec(ct) { |n| ['DEFAULT', release+1, start+n-1] } %>
+<% end %>
 
---==--==--==--==--==--==--==--==--==--
+INSERT INTO releases_translators VALUES
+<%= rec(300, 0.1, 1..2, true) { |n| ['DEFAULT', n, rand(1..54)] } %>
 
 INSERT INTO user_chapters VALUES
-<%= rec(100) { ['DEFAULT', rand(1..103), rand(1..295), rand(2), tstz] } %>
+<%= rec(100) { ['DEFAULT', rand(1..103), rand(1..chap_count), rand(2), tstz] } %>
 
 INSERT INTO user_releases VALUES
 <%= rec(30) { ['DEFAULT', rand(1..103), rand(1..50), rand(2), tstz] } %>

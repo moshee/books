@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	// "github.com/moshee/gas"
 	pg "github.com/moshee/pgtypes"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -266,12 +265,30 @@ type RelatedSeries struct {
 }
 
 type TranslationGroup struct {
-	Id               int
-	Name             string
-	Summary          sql.NullString
-	AvgRating        sql.NullFloat64
-	AvgProjectRating sql.NullFloat64
-	AvgReleaseRate   time.Duration
+	Id             int
+	Name           string
+	Summary        sql.NullString
+	AvgRating      sql.NullFloat64
+	AvgReleaseRate time.Duration
+}
+
+// used for scanning from releases query
+type TranslationGroups struct {
+	Ids   pg.IntArray
+	Names pg.StringArray
+}
+
+func (self TranslationGroups) Len() int {
+	return len(self.Ids)
+}
+
+func (self TranslationGroups) Less(i, j int) bool {
+	return self.Ids[i] < self.Ids[j]
+}
+
+func (self TranslationGroups) Swap(i, j int) {
+	self.Ids[i], self.Ids[j] = self.Ids[j], self.Ids[i]
+	self.Names[i], self.Names[j] = self.Names[j], self.Names[i]
 }
 
 type Chapter struct {
@@ -283,82 +300,24 @@ type Chapter struct {
 	Notes  sql.NullString
 }
 
-type Chapters []*Chapter
-
-// create a representation of the list of chapters with ranges, using display
-// names as necessary
-func (self Chapters) String() string {
-	panic("unimplemented")
+// used for scanning from releases query
+type Chapters struct {
+	Volumes pg.IntArray
+	Nums    pg.IntArray
 }
 
 type Release struct {
 	Id int
 	*BookSeries
 	*TranslationGroup
-	*TranslationProject
 	Language      string
 	ReleaseDate   time.Time
 	Notes         sql.NullString
 	IsLastRelease bool
-	Volume        sql.NullInt64
 	Extra         sql.NullString
 
-	Chapters pg.IntArray
-}
-
-func (self *Release) ChapterRange() string {
-	switch len(self.Chapters) {
-	case 0:
-		return ""
-	case 1:
-		return strconv.Itoa(self.Chapters[0])
-	}
-	sort.Ints(self.Chapters)
-
-	var (
-		this  = self.Chapters[1]
-		last  = self.Chapters[0]
-		lower = last
-		upper = last
-		out   = make([]string, 0)
-	)
-	for _, this = range self.Chapters[1:] {
-		switch this - last {
-		case 0:
-			continue
-		case 1:
-			upper = this
-			last = this
-			continue
-		}
-		// not consecutive
-		s := strconv.Itoa(lower)
-		if lower != upper {
-			s += "-" + strconv.Itoa(upper)
-		}
-		out = append(out, s)
-		upper = this
-		lower = this
-		last = this
-	}
-	s := strconv.Itoa(lower)
-	if lower != upper {
-		s += "-" + strconv.Itoa(upper)
-	}
-	out = append(out, s)
-
-	return strings.Join(out, ", ")
-}
-
-type TranslationProject struct {
-	Id int
-	*BookSeries
-	StartDate time.Time
-	EndDate   time.Time
-}
-
-func (self *TranslationProject) Members() []*User {
-	panic("unimplemented")
+	Chapters
+	TranslationGroups
 }
 
 type User struct {

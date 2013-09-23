@@ -101,24 +101,12 @@ CREATE TABLE related_series (
 --
 
 CREATE TABLE translation_groups (
-    id               serial PRIMARY KEY,
-    name             text   NOT NULL,
+    id               serial  PRIMARY KEY,
+    name             text    NOT NULL,
     summary          text,
     avg_rating       real,
     rating_count     integer NOT NULL DEFAULT 0,
     avg_release_rate bigint -- seconds
-);
-
-CREATE TABLE translation_projects (
-    id         serial      PRIMARY KEY,
-    series_id  integer     NOT NULL REFERENCES book_series,
-    start_date timestamptz NOT NULL DEFAULT 'now'::timestamptz,
-    end_date   timestamptz
-);
-
-CREATE TABLE translation_project_groups (
-    project_id    integer NOT NULL REFERENCES translation_projects,
-    translator_id integer NOT NULL REFERENCES translation_groups
 );
 
 CREATE TABLE chapters (
@@ -133,22 +121,25 @@ CREATE TABLE chapters (
 CREATE TABLE releases (
     id              serial      PRIMARY KEY,
     series_id       integer     NOT NULL REFERENCES book_series,
-    translator_id   integer     NOT NULL REFERENCES translation_groups,
-    project_id      integer     NOT NULL REFERENCES translation_projects,
     language        text        NOT NULL DEFAULT 'en',
     release_date    timestamptz NOT NULL DEFAULT 'now'::timestamptz,
     notes           text,
     is_last_release boolean     NOT NULL DEFAULT false,
-    volume          integer,
     extra           text
+);
+
+CREATE TABLE releases_translators (
+    id            serial PRIMARY KEY,
+    release_id    integer NOT NULL REFERENCES releases,
+    translator_id integer NOT NULL REFERENCES translation_groups
 );
 
 -- Keeps track of which releases a chapter is included in
 -- (may be multiple releases for a given chapter)
-CREATE TABLE chapters_releases (
+CREATE TABLE releases_chapters (
     id         serial  PRIMARY KEY,
-    chapter_id integer NOT NULL REFERENCES chapters,
-    release_id integer NOT NULL REFERENCES releases
+    release_id integer NOT NULL REFERENCES releases,
+    chapter_id integer NOT NULL REFERENCES chapters
 );
 
 CREATE VIEW recent_releases AS
@@ -157,31 +148,32 @@ CREATE VIEW recent_releases AS
         r.language,
         r.release_date,
         r.is_last_release,
-        r.volume,
         r.extra,
-        array_agg(ch.num),
+        array_agg(ch.volume) AS volumes,
+        array_agg(ch.num) AS chapters,
         s.id AS series_id, s.title,
-        t.id AS translator_id, t.name
+        array_agg(DISTINCT t.id) AS translator_ids,
+        array_agg(DISTINCT t.name) AS translators
     FROM
         releases r,
         book_series s,
         translation_groups t,
-        chapters_releases cr,
+        releases_chapters rc,
+        releases_translators rt,
         chapters ch
-   WHERE r.series_id     = s.id
-     AND r.translator_id = t.id
-     AND cr.release_id   = r.id
-     AND cr.chapter_id   = ch.id
+    WHERE r.series_id      = s.id
+    AND   rt.release_id    = r.id
+    AND   rt.translator_id = t.id
+    AND   rc.release_id    = r.id
+    AND   rc.chapter_id    = ch.id
     GROUP BY
         r.id,
         r.language,
         r.release_date,
         r.is_last_release,
-        r.volume,
         r.extra,
-        s.id, s.title,
-        t.id, t.name
-ORDER BY r.release_date DESC;
+        s.id, s.title
+    ORDER BY r.release_date DESC;
 --
 -- Users
 --
@@ -685,7 +677,7 @@ CREATE FUNCTION do_update_user_chapters() RETURNS trigger AS $$
     BEGIN
         INSERT INTO user_chapters (user_id, chapter_id, status)
             SELECT NEW.user_id, c.id, NEW.status
-                FROM chapters c, chapters_releases r
+                FROM chapters c, releases_chapters r
                 WHERE r.chapter_id = c.id
                 AND r.release_id = NEW.release_id;
         RETURN NEW;

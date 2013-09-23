@@ -64,31 +64,43 @@ def tuple(*args)
   "( #{args.map { |b| if b.nil? then 'NULL' else b end }.join(', ')} )"
 end
 
-def rec(n, repeat_chance=0.0, repeat_range=1..2)
+def rec(n, repeat_chance=0.0, repeat_range=1..2, n_is_max=false)
   if repeat_chance == 0.0
     n.times.map { |n| tuple *(yield n+1) }.join(",\n") + ';'
   else
     i = 1
-    display = 1
-    arr = Array.new(n)
-    loop do
-      break if i > n
-      t = rand repeat_range
-      if rand > repeat_chance and t == 1
-        arr[i-1] = yield display, false
-        i += 1
-        display += 1
-        next
+    if not n_is_max
+      display = 1
+      arr = Array.new(n)
+      while i <= n
+        t = rand repeat_range
+        if rand > repeat_chance and t == 1
+          arr[i-1] = yield(display, false)
+          i += 1
+        else
+          t.times do
+            arr[i-1] = yield(display, true)
+            i += 1
+            break if i > n
+          end
+        end
       end
-      
-      t.times do
-        arr[i-1] = yield display, true
-        i += 1
-        break if i > n
+      arr
+    else
+      arr = []
+      while i <= n
+        t = rand repeat_range
+        if rand > repeat_chance and t == 1
+          arr << yield(i, false)
+        else
+          t.times do
+            arr << yield(i, true)
+            i += 1
+          end
+        end
       end
-      display += 1
-    end
-    arr.map(&method(:tuple)).join(",\n") + ';'
+      arr
+    end.map(&method(:tuple)).join(",\n") + ';'
   end
 end
 
@@ -102,7 +114,9 @@ def text(*args)
   "'#{args.map { |s| s.gsub("'", "''") }.join(' ')}'" end
 
 def randdate
-  Time.at(rand Time.now.to_i) end
+  now = Time.now.to_i
+  # get some relatively recent times instead of all the way back to epoch
+  Time.at(now - rand(now/32)) end
 
 def date
   d = randdate

@@ -1,4 +1,6 @@
-{{ define "release-list-by-added" }}<table>
+{{ define "release-list-by-added" }}
+{{ if . }}
+<table>
 	<thead>
 		<tr><th class=lt>Title</th><th><img src=/static/volume.svg width=16 height=16></th><th><img src=/static/chapter.svg width=16 height=16></th><th>Group</th><th>Added</th></tr>
 	</thead>
@@ -6,14 +8,24 @@
 		{{ range . }}
 		<tr>
 			<td class=lt><a href="/series/{{ .BookSeries.Id }}/{{ .BookSeries.Title | slugify | urlquery }}">{{ .BookSeries.Title }}</a></td>
-			<td>{{ if .Volume.Valid }}{{ .Volume.Int64 }}{{ end }}</td>
-			<td>{{ .ChapterRange }}</td>
-			<td>({{ .Language }}) {{ .TranslationGroup.Name }}</td>
+      <td>{{ collapse_range .Chapters.Volumes }}</td>
+			<td>{{ collapse_range .Chapters.Nums }}</td>
+      <td>({{ .Language }})
+        {{ $len := len .TranslationGroups.Ids | add -1 }}
+        {{ $groups := .TranslationGroups }}
+        {{ range $k, $name := .TranslationGroups.Names }}
+        <a href="/group/{{ index $groups.Ids $k }}/{{ $name | slugify | urlquery }}">{{ $name }}</a>
+        {{ if lt $k $len }} &amp; {{ end }}
+        {{ end }}
+      </td>
 			<td>{{ .ReleaseDate | ago }}</td>
 		</tr>
 		{{ end }}
 	</tbody>
 </table>
+{{ else }}
+<p class=tumbleweed>Nothing to see here.</p>
+{{ end }}
 {{ end }}
 
 {{ define "series-list-by-added" }}<table>

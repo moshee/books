@@ -6,6 +6,8 @@ import (
 	"github.com/moshee/gas"
 	"net/http"
 	"path/filepath"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -14,6 +16,8 @@ import (
 func main() {
 	gas.TemplateFunc("books", "slugify", slugify)
 	gas.TemplateFunc("books", "ago", ago)
+	gas.TemplateFunc("books", "collapse_range", collapse_range)
+	gas.TemplateFunc("books", "add", add)
 
 	gas.New().
 		Get("/static/{path}", StaticHandler).
@@ -76,4 +80,52 @@ func ago(t time.Time) string {
 	default:
 		return "Just now"
 	}
+}
+
+func collapse_range(a []int) string {
+	switch len(a) {
+	case 0:
+		return ""
+	case 1:
+		return strconv.Itoa(a[0])
+	}
+	sort.Ints(a)
+
+	var (
+		this  = a[1]
+		last  = a[0]
+		lower = last
+		upper = last
+		out   = make([]string, 0)
+	)
+	for _, this = range a[1:] {
+		switch this - last {
+		case 0:
+			continue
+		case 1:
+			upper = this
+			last = this
+			continue
+		}
+		// not consecutive
+		s := strconv.Itoa(lower)
+		if lower != upper {
+			s += "-" + strconv.Itoa(upper)
+		}
+		out = append(out, s)
+		upper = this
+		lower = this
+		last = this
+	}
+	s := strconv.Itoa(lower)
+	if lower != upper {
+		s += "-" + strconv.Itoa(upper)
+	}
+	out = append(out, s)
+
+	return strings.Join(out, ", ")
+}
+
+func add(a, b int) int {
+	return a + b
 }

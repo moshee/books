@@ -4,6 +4,7 @@ import (
 	//"database/sql"
 	"github.com/moshee/gas"
 	//"github.com/argusdusty/Ferret"
+	"sort"
 	"time"
 )
 
@@ -18,16 +19,20 @@ func Index(g *gas.Gas) {
 	for rows.Next() {
 		r := new(Release)
 		s := new(BookSeries)
-		t := new(TranslationGroup)
+		var cs Chapters
+		var gs TranslationGroups
 
-		err = rows.Scan(&r.Id, &r.Language, &r.ReleaseDate, &r.IsLastRelease, &r.Volume, &r.Extra, &r.Chapters, &s.Id, &s.Title, &t.Id, &t.Name)
+		err = rows.Scan(&r.Id, &r.Language, &r.ReleaseDate, &r.IsLastRelease, &r.Extra, &cs.Volumes, &cs.Nums, &s.Id, &s.Title, &gs.Ids, &gs.Names)
 		if err != nil {
 			g.Render("books", "index-error", err)
 			return
 		}
 
 		r.BookSeries = s
-		r.TranslationGroup = t
+		r.Chapters = cs
+		sort.Sort(gs)
+		r.TranslationGroups = gs
+
 		releases = append(releases, r)
 	}
 
