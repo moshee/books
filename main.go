@@ -126,6 +126,9 @@ func collapse_range(a []int) string {
 	return strings.Join(out, ", ")
 }
 
-func add(a, b int) int {
-	return a + b
+func add(n ...int) (sum int) {
+	for _, i := range n {
+		sum += i
+	}
+	return
 }
