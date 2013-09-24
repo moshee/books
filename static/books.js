@@ -16,9 +16,14 @@
 		s = [];
 		var lis = $$('li', searchFilter);
 		for (var i = 0, li; li = lis[i]; i++) {
-			var select = $('select', li).value;
 			var input = $('input', li).value;
-			s.push({ select: input });
+			if (input.length == 0) {
+				continue;
+			}
+			var select = $('select', li).value;
+			var o = {};
+			o[select] = input;
+			s.push(o);
 		}
 		console.log(s);
 	}
@@ -33,7 +38,8 @@
 		$('select', node).selectedIndex = 0;
 
 		searchFilter.appendChild(node);
-		$('button.remove-filter', node).addEventListener('click', delSearchFilterItem, false);
+		$('button.remove-filter', node)
+			.addEventListener('click', delSearchFilterItem, false);
 	}
 
 	function delSearchFilterItem(e) {
@@ -42,11 +48,12 @@
 	}
 
 	function main() {
-		searchFilter = $('#search ul')
+		searchFilter = $('#search ul');
 		searchFilterItem = $('li', searchFilter); 
 
 		$('#add-filter').addEventListener('click', addSearchFilterItem, false);
-		$('button.remove-filter', searchFilterItem).addEventListener('click', delSearchFilterItem, false);
+		$('button.remove-filter', searchFilterItem)
+			.addEventListener('click', delSearchFilterItem, false);
 		$('#search-button').addEventListener('click', doSearch, false);
 	}
 

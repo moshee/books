@@ -10,13 +10,13 @@ html {
 	background: #f5f5f5;
 }
 body {
-	font-family: source sans pro, sans-serif;
+	font-family: source sans pro, meiryo, sans-serif;
 	color: #444;
 	background: #fff;
 }
 
 h1,h2,h3,h4,h5,h6 {
-	font-family: acme, sans-serif;
+	font-family: share, sans-serif;
 	font-weight: 400;
 }
 
@@ -37,6 +37,9 @@ a:hover {
 	margin-right: 4px;
 	display: inline-block;
 }
+.important {
+	display: none;
+}
 
 hr.clear {
 	border-width: 0;
@@ -44,18 +47,31 @@ hr.clear {
 	clear: both;
 }
 
+header {
+	margin-bottom: 32px;
+}
 header h1 {
 	font-family: ryo gothic plusn uh, kozuka gothic pr6n h, hiragino kaku gothic std w8, meiryo, sans-serif;
 	font-weight: 900;
-	padding: 32px 0 0;
 	font-size: 42px;
-	width: 192px;
-	line-height: 192px;
+	width: 64px;
+	line-height: 64px;
 	margin: 0 auto;
 	-webkit-writing-mode: vertical-rl;
 	-moz-writing-mode: vertical-rl;
 	writing-mode: vertical-rl;
+	position: relative;
 }
+header h1 a {
+	color: #444;
+	padding-top: 32px;
+	display: block;
+}
+header h1 a:hover {
+	background: #5a1;
+	color: #fff;
+}
+
 table {
 	font-size: 14px;
 	border-collapse: collapse;
@@ -68,21 +84,18 @@ th {
 	padding: 2px 8px;
 }
 table td {
-	padding: 0 8px;
+	padding: 3px 8px;
 	height: 24px;
-	line-height: 24px;
+	line-height: 18px;
+	/*
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	*/
 	max-width: 0;
 }
 table tr:nth-of-type(2n+1) td {
 	background: #fafafa;
-}
-table .ll {
-	width: 28px;
-	padding: 0 4px;
-	text-align: center;
 }
 .lang-code {
 	font-size: 12px;
@@ -97,6 +110,14 @@ table .ll {
 	text-align: center;
 	display: block;
 	border-radius: 3px;
+}
+table .ll {
+	width: 28px;
+	padding: 0 4px;
+	text-align: center;
+}
+table .lm {
+	width: 110px;
 }
 table .lg {
 	max-width: 150px;
@@ -151,9 +172,11 @@ ul.rating-stars li.off {
 }
 
 #latest h1 {
-	font-size: 30px;
+	font-size: 36px;
+	letter-spacing: -1px;
 	line-height: 64px;
 	font-weight: 400;
+	text-align: center;
 }
 
 #latest section {
@@ -206,19 +229,18 @@ aside.sidebar h1 {
 #search select {
 	-webkit-appearance: none;
 	-moz-appearance: none;
-	border-top-right-radius: 0;
-	border-bottom-right-radius: 0;
+	border-radius: 0;
 	border: none;
 	outline: none;
-	font-size: 12px;
+	font-family: source sans pro, sans-serif;
+	font-size: 13px;
 	font-weight: 700;
 	text-transform: uppercase;
 	text-align: right;
-	padding-left: 8px;
 	height: 32px;
+	padding: 0 24px 0 8px;
 	background: #444;
 	color: #fff;
-	padding-right: 24px;
 }
 #search label {
 	height: 32px;
@@ -250,7 +272,7 @@ aside.sidebar h1 {
 	padding: 0 8px;
 	border: none;
 	background: #f5f5f5;
-	font-family: source sans pro, sans-serif;
+	font-family: source sans pro, meiryo, sans-serif;
 	font-size: 18px;
 	outline: none;
 	flex: 1 1 auto;
@@ -263,15 +285,15 @@ aside.sidebar h1 {
 	font-weight: 700;
 	flex: 0 1 auto;
 	color: #444;
-	font-family: source sans pro, sans-serif;
+	font-family: source sans pro, meiryo, sans-serif;
 }
 #search button.remove-filter, #add-filter {
 	width: 32px;
 	font-size: 18px;
 }
-#search ul li select,
-#search ul li input,
-#search ul li button {
+#search select,
+#search input,
+#search button {
 	border-bottom: 1px solid #ccc;
 	height: 33px;
 }
@@ -285,11 +307,18 @@ aside.sidebar h1 {
 #search input:hover, #search button {
 	background: #f0f0f0;
 }
-#search button:hover, #search input:focus {
+#search input:focus {
 	background: #e8e8e8;
 }
-#search button:active, #search input:active {
+#search input:active {
 	background: #e0e0e0;
+}
+#search button:hover {
+	background: #5a1;
+	color: #fff;
+}
+#search button:active {
+	background: #490;
 }
 #search ul li:first-child button.remove-filter {
 	display: none;
@@ -298,8 +327,14 @@ aside.sidebar h1 {
 	padding: 0 8px;
 	text-transform: uppercase;
 	font-size: 16px;
+	line-height: 32px;
 	float: right;
 	margin-top: 8px;
+}
+#search-button em {
+	font-style: normal;
+	font-size: 20px;
+	line-height: 0;
 }
 #add-filter {
 	position: absolute;
@@ -308,11 +343,12 @@ aside.sidebar h1 {
 }
 #news h2 {
 	font-size: 20px;
+	font-family: source sans pro, meiryo, sans-serif;
 }
 .news-meta {
 	font-size: 12px;
 	color: #888;
-	margin-bottom: 8px;
+	margin: 8px 0;
 }
 #news .post-body {
 	font-size: 16px;

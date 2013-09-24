@@ -33,11 +33,11 @@ func (self SeriesKind) String() string {
 
 func (d Demographic) String() string {
 	return []string{
-		"Shounen",
-		"Shoujo",
+		"Shōnen",
+		"Shōjo",
 		"Seinen",
 		"Josei",
-		"Kodomomuke",
+		"Kodomo",
 		"Seijin",
 	}[d]
 }

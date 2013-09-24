@@ -31,14 +31,16 @@
 
 {{ define "series-list-by-added" }}<table>
 	<thead>
-		<tr><th class=la>Title</th><th class=ll><!--rating--></th><th class=lt>Tags</th><th class=ly>Year</th><th class=ld>Added</th></tr>
+    <tr><th class=la>Title</th><th class=ll><!--rating--></th><th class=lm><abbr title="Demographic">Dem<span class=unimportant>ographic</span><span class=important>.</span></abbr></th><th class=lt>Tags</th><th class=ly>Year</th><th class=ld>Added</th></tr>
 	</thead>
 	<tbody>
 		{{ range . }}
 		<tr{{ if .NSFW }} class=nsfw {{ end }}>
 			<td class=la><a href="/series/{{ .Id }}/{{ .Title | slugify | urlquery }}">{{ .Title }}</a></td>
-			<td class=ll><ul title="{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }}/5{{ else }}Not rated{{ end }}" class=rating-stars>{{ range .RatingStars }}<li class={{ . }}></li>{{ end }}</ul></td>
-			<td class=lt>{{ $s := len .Tags }}{{ with .LimitedTags 3 }}{{ range . }}<a class=tag href="/tag/{{ urlquery . }}">{{ . }}</a>{{ end }}{{ if len . | gt $s }}<span class=tag>···</span>{{ end }}{{ end }}</td>
+			<td class=ll><ul title="{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }} / 5{{ else }}Not rated{{ end }}" class=rating-stars>{{ range .RatingStars }}<li class={{ . }}></li>{{ end }}</ul></td>
+      <td class=lm>{{ .Demographic }}</td>
+			<!-- <td class=lt>{{ $s := len .Tags }}{{ with .LimitedTags 3 }}{{ range . }}<a class=tag href="/tag/{{ urlquery . }}">{{ . }}</a>{{ end }}{{ if len . | gt $s }}<span class=tag>···</span>{{ end }}{{ end }}</td> -->
+      <td class=lt>{{ range .Tags }}<a class=tag href="/tag/{{ urlquery . }}">{{ . }}</a>{{ end }}</td>
 			<td class=ly>{{ .Vintage }}</td>
       <td class=ld><time datetime="{{ .DateAdded.Format "2006-01-02T15:04:05-0700" }}">{{ .DateAdded.Format "02 Jan" }}</time></td>
 			</tr>
@@ -49,7 +51,7 @@
 
 {{ define "news-post" }}<article id=news-{{ .Id }}>
 	<h2><a href="/news/{{ .Id }}/{{ slugify .Title }}">{{ .Title }}</a></h2>
-	<div class=news-meta>Posted by <a href="/user/{{ .User.Id }}/{{ slugify .User.Name }}">{{ .User.Name }}</a> on <time datetime="{{ .DatePosted.Format "2006-01-02T15:04:05-0700" }}">{{ .DatePosted.Format "2 Jan 2006" }}</time> under <a href="/news/category/{{ .Category | urlquery }}">{{ .Category }}</a></div>
+	<div class=news-meta>by <a href="/user/{{ .User.Id }}/{{ slugify .User.Name }}">{{ .User.Name }}</a> on <time datetime="{{ .DatePosted.Format "2006-01-02T15:04:05-0700" }}">{{ .DatePosted.Format "2006-01-02" }}</time> under <a href="/news/category/{{ .Category | urlquery }}">{{ .Category }}</a></div>
 	<div class=post-body>
 	{{ smarkdown .Body }}
 	</div>

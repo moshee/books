@@ -303,6 +303,7 @@ CREATE VIEW latest_series AS
         s.date_added,
         s.nsfw,
         s.avg_rating,
+        s.demographic,
         array_agg(n.name)
     FROM 
         book_series s,
@@ -318,7 +319,8 @@ CREATE VIEW latest_series AS
         s.vintage,
         s.date_added,
         s.nsfw,
-        s.avg_rating
+        s.avg_rating,
+        s.demographic
     ORDER BY s.date_added DESC;
 
 CREATE TABLE character_tag_names (

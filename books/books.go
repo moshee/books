@@ -45,7 +45,7 @@ func Index(g *gas.Gas) {
 
 	for rows.Next() {
 		s := new(BookSeries)
-		err := rows.Scan(&s.Id, &s.Title, &s.SeriesKind, &s.Vintage, &s.DateAdded, &s.NSFW, &s.AvgRating, &s.Tags)
+		err := rows.Scan(&s.Id, &s.Title, &s.SeriesKind, &s.Vintage, &s.DateAdded, &s.NSFW, &s.AvgRating, &s.Demographic, &s.Tags)
 		if err != nil {
 			g.Render("books", "index-error", err)
 			return

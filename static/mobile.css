@@ -1,10 +1,107 @@
+
 #latest {
 	float: none;
-	padding: 32px;
+	padding: 32px 16px;
 	width: auto;
+}
+table td {
+	padding: 8px;
 }
 #news {
 	width: auto;
 	padding: 0 32px 64px;
 	float: none;
+}
+aside.sidebar {
+	padding-bottom: 32px;
+}
+#find {
+	width: 100%;
+	float: none;
+}
+#find nav h1 {
+	margin: 0;
+}
+#find nav {
+	float: none;
+	margin: 0 0 16px;
+}
+#find nav ul {
+	font-size: 22px;
+}
+#find nav ul li {
+	display: inline-block;
+	margin-right: 16px;
+}
+#find label:after {
+	top: 16px;
+	line-height: 14px;
+	font-size: 20px;
+}
+#find select,
+#find label,
+#find input,
+#find button {
+	height: 48px;
+}
+#find select {
+	font-size: 14px;
+}
+#find input {
+	font-size: 20px;
+}
+#search button.remove-filter, #add-filter {
+	width: 48px;
+	font-size: 20px;
+}
+#search-button {
+	font-size: 18px;
+}
+#search-button em {
+	font-size: 22px;
+}
+#news h2 {
+	font-size: 24px;
+}
+.news-meta {
+	font-size: 14px;
+}
+#news .post-body {
+	font-size: 18px;
+}
+
+@media screen and (max-width: 768px) {
+	#latest-releases table .ld,
+	#latest-books table .lt,
+	.unimportant {
+		display: none;
+	}
+	span.important {
+		display: inline;
+	}
+	div.important {
+		display: block;
+	}
+
+	#latest {
+		padding: 16px;
+	}
+	table {
+		font-size: 16px;
+	}
+	table td, table th {
+		padding: 8px 4px;
+	}
+	table .lc {
+		width: 70px;
+	}
+	table .lg {
+		width: 50%;
+	}
+	table .lv {
+		width: 30px;
+	}
+	aside.sidebar h1 {
+		font-size: 18px;
+	}
 }
