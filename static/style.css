@@ -24,8 +24,9 @@ a {
 	color: #338;
 	text-decoration: none;
 }
-a:hover {
-	color: #88d;
+a:hover, a:focus {
+	outline: none;
+	color: #5a1;
 }
 .tag {
 	font-size: 12px;
@@ -66,8 +67,10 @@ header h1 a {
 	color: #444;
 	padding-top: 32px;
 	display: block;
+	transition: all 0.05s ease-out;
 }
-header h1 a:hover {
+header h1 a:hover, header h1 a:focus {
+	outline: none;
 	background: #5a1;
 	color: #fff;
 }
@@ -87,12 +90,6 @@ table td {
 	padding: 3px 8px;
 	height: 24px;
 	line-height: 18px;
-	/*
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	*/
-	max-width: 0;
 }
 table tr:nth-of-type(2n+1) td {
 	background: #fafafa;
@@ -293,16 +290,20 @@ aside.sidebar h1 {
 }
 #search select,
 #search input,
-#search button {
+#search button.remove-filter {
 	border-bottom: 1px solid #ccc;
+	line-height: 33px;
 	height: 33px;
 }
 #search select {
 	border-bottom-color: #000;
+	line-height: 32px;
 }
 #search ul li:last-child select,
-#search ul li:last-child input {
+#search ul li:last-child input,
+#search ul li:last-child button.remove-filter {
 	border-bottom: none;
+	height: 32px;
 }
 #search input:hover, #search button {
 	background: #f0f0f0;
@@ -319,9 +320,6 @@ aside.sidebar h1 {
 }
 #search button:active {
 	background: #490;
-}
-#search ul li:first-child button.remove-filter {
-	display: none;
 }
 #search-button {
 	padding: 0 8px;
