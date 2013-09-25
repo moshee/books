@@ -183,7 +183,7 @@ CREATE VIEW recent_releases AS
 CREATE TABLE users (
     id            serial      PRIMARY KEY,
     email         text        NOT NULL,
-    name          text        NOT NULL,
+    name          text        NOT NULL UNIQUE,
     pass          bytea       NOT NULL,
     salt          bytea       NOT NULL,
     rights        integer     NOT NULL DEFAULT 0,
@@ -200,6 +200,15 @@ CREATE TABLE sessions (
     user_id     integer     NOT NULL REFERENCES users,
     expire_date timestamptz NOT NULL DEFAULT 'epoch'::timestamptz
 );
+
+CREATE VIEW user_sessions AS
+    SELECT
+        s.expire_date,
+        u.name
+    FROM
+        users u,
+        sessions s
+    WHERE s.user_id = u.id;
 
 -- keeps track of which chapters a user has read/owns
 CREATE TABLE user_chapters (

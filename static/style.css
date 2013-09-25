@@ -13,6 +13,7 @@ body {
 	font-family: source sans pro, meiryo, sans-serif;
 	color: #444;
 	background: #fff;
+	min-width: 480px;
 }
 
 h1,h2,h3,h4,h5,h6 {
@@ -38,6 +39,18 @@ a:hover, a:focus {
 	margin-right: 4px;
 	display: inline-block;
 }
+a.look-more {
+	margin-top: 16px;
+	font-size: 16px;
+	font-weight: 700;
+	text-transform: uppercase;
+	display: block;
+	text-align: center;
+}
+a.look-more:after {
+	content: " →";
+}
+
 .important {
 	display: none;
 }
@@ -126,7 +139,6 @@ table .lt {
 	max-width: 150px;
 }
 table .ld {
-	width: 90px;
 	text-align: right;
 }
 table td.ld {
@@ -338,6 +350,11 @@ aside.sidebar h1 {
 	position: absolute;
 	top: 0;
 	right: 0;
+}
+.sidebar.auth {
+	position: absolute;
+	right: 0;
+	top: 32px;
 }
 #news h2 {
 	font-size: 20px;

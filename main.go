@@ -25,6 +25,11 @@ func main() {
 
 	gas.InitDB("postgres", "user=postgres dbname=postgres sslmode=disable")
 
+	// set to 9 because the apple tv is a piece of shit
+	// don't forget to remove this line in production
+	gas.HashCost = 9
+	gas.UseCookies(books.DBStore{})
+
 	gas.Ignition()
 }
 

@@ -58,14 +58,30 @@
       </nav>
       <hr class=clear>
     </aside>
+    {{ with .User }}
+    <aside id=logged-in class="sidebar auth">
+      <p>Logged in as {{ .Name }}</p>
+      <p><a href=/logout>Log out</a></p>
+    </aside>
+    {{ else }}
+    <aside id=login class="sidebar auth">
+      <h1>Sign in</h1>
+      <input id=user type=text placeholder="Username or email">
+      <input id=pass type=password placeholder="Password">
+      <button id=do-login>Let me in!</button>
+    </aside>
+    {{ end }}
+      
 		<section id=latest>
 			<section id=latest-releases>
 				<h1>Fresh Out Of Photoshop</h1>
 				{{ template "release-list-by-added" .Releases }}
+        <a class=look-more href=/releases/sort/release+date>Browse all releases</a>
 			</section>
 			<section id=latest-books>
 				<h1>Recently Added Titles</h1>
 				{{ template "series-list-by-added" .Series }}
+        <a class=look-more href=/series/sort/date+added>Browse all titles</a>
 			</section>
 		</section>
     <aside class=sidebar id=news>
@@ -75,6 +91,7 @@
       {{ else }}
       <p>No news at this time.</p>
       {{ end }}
+      <a class=look-more href=/news>View past news posts</a>
 		</aside>
 		<hr class=clear>
 	</section>

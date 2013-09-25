@@ -39,8 +39,8 @@
 			<td class=la><a href="/series/{{ .Id }}/{{ .Title | slugify | urlquery }}">{{ .Title }}</a></td>
 			<td class=ll><ul title="{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }} / 5{{ else }}Not rated{{ end }}" class=rating-stars>{{ range .RatingStars }}<li class={{ . }}></li>{{ end }}</ul></td>
       <td class=lm>{{ .Demographic }}</td>
-			<!-- <td class=lt>{{ $s := len .Tags }}{{ with .LimitedTags 3 }}{{ range . }}<a class=tag href="/tag/{{ urlquery . }}">{{ . }}</a>{{ end }}{{ if len . | gt $s }}<span class=tag>···</span>{{ end }}{{ end }}</td> -->
-      <td class=lt>{{ range .Tags }}<a class=tag href="/tag/{{ urlquery . }}">{{ . }}</a>{{ end }}</td>
+			<td class=lt>{{ $s := len .Tags }}{{ with .LimitedTags 3 }}{{ range . }}<a class=tag href="/tag/{{ urlquery . }}">{{ . }}</a>{{ end }}{{ if len . | gt $s }}<span class=tag>···</span>{{ end }}{{ end }}</td>
+      <!-- <td class=lt>{{ range .Tags }}<a class=tag href="/tag/{{ urlquery . }}">{{ . }}</a>{{ end }}</td> -->
 			<td class=ly>{{ .Vintage }}</td>
       <td class=ld><time datetime="{{ .DateAdded.Format "2006-01-02T15:04:05-0700" }}">{{ .DateAdded.Format "02 Jan" }}</time></td>
 			</tr>

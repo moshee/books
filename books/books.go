@@ -30,15 +30,27 @@ func Index(g *gas.Gas) {
 		return
 	}
 
+	var user *User
+
+	if sess, err := g.Session(); sess != nil {
+		user = new(User)
+		err = gas.QueryRow(user, "SELECT * FROM books.users WHERE name = $1", sess.Who)
+		if err != nil {
+			g.Error(500, err)
+		}
+	}
+
 	g.Render("books", "index", &struct {
 		Releases []Release
 		Series   []BookSeries
 		News     *NewsPost
 		Now      time.Time
+		User     *User
 	}{
 		releases,
 		series,
 		news,
 		time.Now(),
+		user,
 	})
 }

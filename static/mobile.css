@@ -1,8 +1,15 @@
-
+a.look-more {
+	font-size: 20px;
+	margin-top: 32px;
+}
 #latest {
 	float: none;
 	padding: 32px 16px;
 	width: auto;
+}
+#latest h1 {
+	font-size: 48px;
+	line-height: 64px;
 }
 table td {
 	padding: 8px;
@@ -103,14 +110,14 @@ aside.sidebar {
 	table td, table th {
 		padding: 8px 4px;
 	}
-	table .lc {
-		width: 70px;
-	}
 	table .lg {
-		width: 50%;
+		display: none;
 	}
-	table .lv {
-		width: 30px;
+	.lang-code {
+		height: 20px;
+		width: 28px;
+		line-height: 18px;
+		font-size: 15px;
 	}
 	aside.sidebar h1 {
 		font-size: 18px;
