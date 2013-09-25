@@ -62,11 +62,13 @@ aside.sidebar {
 }
 #search-button {
 	font-size: 18px;
+	padding: 0 16px;
+	margin-top: 16px;
 }
 #search-button em {
 	font-size: 22px;
 }
-#add-filter {
+#add-filter, #search-button {
 	height: 48px !important;
 }
 #news h2 {
