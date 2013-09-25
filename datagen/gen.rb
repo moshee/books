@@ -94,6 +94,7 @@ def rec(n, repeat_chance=0.0, repeat_range=1..2, n_is_max=false)
           arr << yield(i, false)
         else
           t.times do
+            break if i > n
             arr << yield(i, true)
             i += 1
           end

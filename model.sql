@@ -145,15 +145,16 @@ CREATE TABLE releases_chapters (
 CREATE VIEW recent_releases AS
     SELECT
         r.id AS release_id,
+        s.id AS series_id,
+        s.title,
         r.language,
         r.release_date,
         r.is_last_release,
         r.extra,
-        array_agg(ch.volume) AS volumes,
-        array_agg(ch.num) AS chapters,
-        s.id AS series_id, s.title,
-        array_agg(DISTINCT t.id) AS translator_ids,
-        array_agg(DISTINCT t.name) AS translators
+        array_agg(ch.volume)       AS chapter_volumes,
+        array_agg(ch.num)          AS chapter_nums,
+        array_agg(DISTINCT t.id)   AS translator_ids,
+        array_agg(DISTINCT t.name) AS translator_names
     FROM
         releases r,
         book_series s,
@@ -168,11 +169,12 @@ CREATE VIEW recent_releases AS
     AND   rc.chapter_id    = ch.id
     GROUP BY
         r.id,
+        s.id,
+        s.title,
         r.language,
         r.release_date,
         r.is_last_release,
-        r.extra,
-        s.id, s.title
+        r.extra
     ORDER BY r.release_date DESC;
 --
 -- Users
@@ -304,7 +306,7 @@ CREATE VIEW latest_series AS
         s.nsfw,
         s.avg_rating,
         s.demographic,
-        array_agg(n.name)
+        array_agg(n.name) AS tags
     FROM 
         book_series s,
         book_tags t,
@@ -476,8 +478,8 @@ CREATE TABLE translator_links (
 --
 
 CREATE TABLE news_categories (
-    id    serial PRIMARY KEY,
-    name text    NOT NULL
+    id   serial PRIMARY KEY,
+    name text   NOT NULL
 );
 
 CREATE TABLE news_posts (

@@ -180,19 +180,19 @@ type Magazine struct {
 }
 
 type BookSeries struct {
-	Id          int
-	Title       string
+	Id          int    `sql:"series_id"`
+	Title       string `sql:"series_title"`
 	NativeTitle string
 	OtherTitles pg.StringArray
-	SeriesKind
-	Summary     sql.NullString
+	SeriesKind  `sql:"kind"`
+	Summary     sql.NullString `sql:"series_summary"`
 	Vintage     int
 	DateAdded   time.Time
 	LastUpdated time.Time
 	Finished    bool
 	NSFW        bool
-	AvgRating   sql.NullFloat64
-	RatingCount int
+	AvgRating   sql.NullFloat64 `sql:"series_avg_rating"`
+	RatingCount int             `sql:"series_rating_count"`
 	Demographic
 	*Magazine
 
@@ -274,8 +274,8 @@ type TranslationGroup struct {
 
 // used for scanning from releases query
 type TranslationGroups struct {
-	Ids   pg.IntArray
-	Names pg.StringArray
+	Ids   pg.IntArray    `sql:"translator_ids"`
+	Names pg.StringArray `sql:"translator_names"`
 }
 
 func (self TranslationGroups) Len() int {
@@ -302,33 +302,33 @@ type Chapter struct {
 
 // used for scanning from releases query
 type Chapters struct {
-	Volumes pg.IntArray
-	Nums    pg.IntArray
+	Volumes pg.IntArray `sql:"chapter_volumes"`
+	Nums    pg.IntArray `sql:"chapter_nums"`
 }
 
 type Release struct {
-	Id int
+	Id int `sql:"release_id"`
 	*BookSeries
-	*TranslationGroup
 	Language      string
 	ReleaseDate   time.Time
-	Notes         sql.NullString
+	Notes         sql.NullString `sql:"release_notes"`
 	IsLastRelease bool
 	Extra         sql.NullString
 
-	Chapters
-	TranslationGroups
+	*Chapters
+	Padding int
+	*TranslationGroups
 }
 
 type User struct {
-	Id    int
+	Id    int `sql:"user_id"`
 	Email string
-	Name  string
+	Name  string `sql:"user_name"`
 	Pass  []byte
 	Salt  []byte
 	Privileges
 	VoteWeight   int
-	Summary      sql.NullString
+	Summary      sql.NullString `sql:"user_summary"`
 	RegisterDate time.Time
 	LastActive   time.Time
 	Avatar       bool
@@ -467,7 +467,7 @@ type TranslatorRating struct {
 }
 
 type NewsPost struct {
-	Id int
+	Id int `sql:"post_id"`
 	*User
 	Category   string
 	DatePosted time.Time

@@ -23,6 +23,8 @@ func main() {
 		Get("/static/{path}", StaticHandler).
 		Get("/", books.Index)
 
+	gas.InitDB("postgres", "user=postgres dbname=postgres sslmode=disable")
+
 	gas.Ignition()
 }
 
