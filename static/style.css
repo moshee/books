@@ -410,3 +410,9 @@ footer section {
 		padding-left: 16px;
 	}
 }
+
+@media screen and (max-width: 1280px) and (min-width: 1025px) {
+	table .lt {
+		display: none;
+	}
+}
