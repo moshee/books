@@ -21,7 +21,7 @@ h1,h2,h3,h4,h5,h6 {
 	font-weight: 400;
 }
 
-p {
+#main p {
 	line-height: 1.5em;
 	margin-bottom: 1em;
 }
@@ -55,7 +55,7 @@ a.look-more:after {
 	content: " →";
 }
 
-input {
+input, input:disabled:hover {
 	-webkit-appearance: none;
 	-moz-appearance: none;
 	color: #444;
@@ -64,6 +64,29 @@ input {
 	background: #f5f5f5;
 	font-family: source sans pro, meiryo, sans-serif;
 	outline: none;
+}
+input:hover, button, button:disabled:hover {
+	background: #f0f0f0;
+	color: #444;
+}
+button:disabled, input:disabled {
+	pointer-events: none;
+}
+input:focus {
+	background: #e8e8e8;
+}
+input:active {
+	background: #e0e0e0;
+}
+button:hover {
+	background: #5a1;
+	color: #fff;
+}
+button:active {
+	background: #490;
+}
+button:disabled, input:disabled {
+	opacity: 0.6;
 }
 
 .important {
@@ -196,11 +219,9 @@ ul.rating-stars li.off {
 }
 
 #latest h1 {
-	font-size: 38px;
-	letter-spacing: -1px;
-	line-height: 64px;
+	font-size: 20px;
 	font-weight: 400;
-	text-align: center;
+	margin-bottom: 16px;
 }
 
 #latest section {
@@ -226,11 +247,6 @@ aside.sidebar h1 em {
 }
 aside.sidebar section {
 	margin-bottom: 32px;
-}
-aside.sidebar nav {
-	display: block;
-	float: left;
-	margin-right: 32px;
 }
 aside.sidebar nav ul {
 	list-style-type: none;
@@ -330,28 +346,15 @@ button {
 	border-bottom: none;
 	height: 32px;
 }
-#search input:hover, button {
-	background: #f0f0f0;
-}
-#search input:focus {
-	background: #e8e8e8;
-}
-#search input:active {
-	background: #e0e0e0;
-}
-button:hover {
-	background: #5a1;
-	color: #fff;
-}
-button:active {
-	background: #490;
-}
-#search-button, #login-button {
+#search-button, #login-button, #register-button {
+	margin-left: 8px;
 	padding: 0 8px;
 	text-transform: uppercase;
 	font-size: 16px;
 	line-height: 32px;
 	float: right;
+}
+#search-button {
 	margin-top: 8px;
 }
 #search-button em {
@@ -363,6 +366,15 @@ button:active {
 	position: absolute;
 	top: 0;
 	right: 0;
+}
+#browse-links {
+	text-align: center;
+}
+#browse-links nav {
+	text-align: left;
+	display: inline-block;
+	margin: 0 16px;
+	vertical-align: top;
 }
 #login input {
 	height: 24px;

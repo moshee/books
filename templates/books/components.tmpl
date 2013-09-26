@@ -57,3 +57,24 @@
 	</div>
 </article>
 {{ end }}
+
+{{ define "login-pane"}}{{ with . }}
+      <section id=logged-in class=auth>
+        <h1>You are logged in as <em>{{ .Name }}</em>.</h1>
+        <nav>
+          <ul>
+            <li><a href="/user/{{ .Id }}/{{ .Name | slugify }}">Your profile</a></li>
+            <li><a href=/logout>Log out</a></li>
+          </ul>
+        </nav>
+      </section>
+      {{ else }}
+      <section id=login class=auth>
+        <h1>Sign in</h1>
+        <input required id=user type=text placeholder="Username or email">
+        <input required id=pass type=password placeholder="Password">
+        <button id=login-button>Let me in!</button>
+        <button id=register-button>Register an account</button>
+      </section>
+      {{ end }}
+{{ end }}
