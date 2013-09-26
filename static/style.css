@@ -17,10 +17,14 @@ body {
 }
 
 h1,h2,h3,h4,h5,h6 {
-	font-family: share, sans-serif;
+	font-family: magra, sans-serif;
 	font-weight: 400;
 }
 
+p {
+	line-height: 1.5em;
+	margin-bottom: 1em;
+}
 a {
 	color: #338;
 	text-decoration: none;
@@ -49,6 +53,17 @@ a.look-more {
 }
 a.look-more:after {
 	content: " →";
+}
+
+input {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	color: #444;
+	padding: 0 8px;
+	border: none;
+	background: #f5f5f5;
+	font-family: source sans pro, meiryo, sans-serif;
+	outline: none;
 }
 
 .important {
@@ -181,7 +196,7 @@ ul.rating-stars li.off {
 }
 
 #latest h1 {
-	font-size: 36px;
+	font-size: 38px;
 	letter-spacing: -1px;
 	line-height: 64px;
 	font-weight: 400;
@@ -194,7 +209,7 @@ ul.rating-stars li.off {
 
 aside.sidebar {
 	width: 448px;
-	padding: 0 32px 64px 32px;
+	padding: 0 32px 32px;
 	float: right;
 }
 aside.sidebar h1 {
@@ -205,17 +220,23 @@ aside.sidebar h1 {
 	color: #888;
 	margin-bottom: 8px;
 }
-#find nav {
+aside.sidebar h1 em {
+	color: #444;
+	font-style: normal;
+}
+aside.sidebar section {
+	margin-bottom: 32px;
+}
+aside.sidebar nav {
 	display: block;
 	float: left;
 	margin-right: 32px;
 }
-#find nav ul {
+aside.sidebar nav ul {
 	list-style-type: none;
 	font-size: 20px;
 }
 #search {
-	margin-bottom: 32px;
 	position: relative;
 }
 #search ul {
@@ -274,19 +295,11 @@ aside.sidebar h1 {
 	pointer-events: none;
 }
 #search input {
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	color: #444;
 	height: 32px;
-	padding: 0 8px;
-	border: none;
-	background: #f5f5f5;
-	font-family: source sans pro, meiryo, sans-serif;
 	font-size: 18px;
-	outline: none;
 	flex: 1 1 auto;
 }
-#search button {
+button {
 	-webkit-appearance: none;
 	-moz-appearance: none;
 	border: none;
@@ -317,7 +330,7 @@ aside.sidebar h1 {
 	border-bottom: none;
 	height: 32px;
 }
-#search input:hover, #search button {
+#search input:hover, button {
 	background: #f0f0f0;
 }
 #search input:focus {
@@ -326,14 +339,14 @@ aside.sidebar h1 {
 #search input:active {
 	background: #e0e0e0;
 }
-#search button:hover {
+button:hover {
 	background: #5a1;
 	color: #fff;
 }
-#search button:active {
+button:active {
 	background: #490;
 }
-#search-button {
+#search-button, #login-button {
 	padding: 0 8px;
 	text-transform: uppercase;
 	font-size: 16px;
@@ -351,11 +364,15 @@ aside.sidebar h1 {
 	top: 0;
 	right: 0;
 }
-.sidebar.auth {
-	position: absolute;
-	right: 0;
-	top: 32px;
+#login input {
+	height: 24px;
+	width: 100%;
+	display: block;
+	margin-bottom: 8px;
+	font-size: 16px;
+	font-family: source sans pro, sans-serif
 }
+
 #news h2 {
 	font-size: 20px;
 	font-family: source sans pro, meiryo, sans-serif;
