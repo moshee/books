@@ -55,6 +55,11 @@
 		$('button.remove-filter', searchFilterItem)
 			.addEventListener('click', delSearchFilterItem, false);
 		$('#search-button').addEventListener('click', doSearch, false);
+
+		var lr = document.createElement('script');
+		lr.async = true;
+		lr.src = 'http://' + document.domain + ':8080/livereload.js';
+		$('head').appendChild(lr);
 	}
 
 	window.addEventListener('load', main, true);
