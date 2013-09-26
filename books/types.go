@@ -355,6 +355,11 @@ func (self *User) Online() bool {
 	panic("unimplemented")
 }
 
+// interface gas.User
+func (self *User) Allowed(privileges interface{}) bool {
+	return self.Privileges.Is(privileges.(Privileges))
+}
+
 type OwnedChapter struct {
 	Id int
 	*User
