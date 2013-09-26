@@ -442,7 +442,7 @@ footer section {
 	background-image: url('/static/displaynone-logomark.svg');
 }
 #footer-logo a:hover {
-	background-position: 42px 0;
+	background-position: -42px 0;
 }
 
 @media screen and (min-width: 1920px) {
