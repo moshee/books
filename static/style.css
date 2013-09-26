@@ -437,11 +437,12 @@ footer section {
 	display: block;
 	width: 42px;
 	height: 40px;
-	background-size: 42px 40px;
+	background-position: 0 0;
+	background-size: 84px 40px;
 	background-image: url('/static/displaynone-logomark.svg');
 }
 #footer-logo a:hover {
-	background-image: url('/static/displaynone-logomark-hover.svg');
+	background-position: 42px 0;
 }
 
 @media screen and (min-width: 1920px) {
