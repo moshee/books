@@ -321,12 +321,12 @@ type Release struct {
 }
 
 type User struct {
-	Id    int `sql:"user_id"`
-	Email string
-	Name  string `sql:"user_name"`
-	Pass  []byte
-	Salt  []byte
-	Privileges
+	Id           int `sql:"user_id"`
+	Email        string
+	Name         string `sql:"user_name"`
+	Pass         []byte
+	Salt         []byte
+	Privileges   `sql:"rights"`
 	VoteWeight   int
 	Summary      sql.NullString `sql:"user_summary"`
 	RegisterDate time.Time

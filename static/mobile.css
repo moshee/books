@@ -8,7 +8,7 @@ a.look-more {
 	width: auto;
 }
 #latest h1 {
-	font-size: 48px;
+	font-size: 32px;
 	line-height: 64px;
 }
 table td {
@@ -22,61 +22,68 @@ table td {
 aside.sidebar {
 	padding-bottom: 32px;
 }
-#find {
+#sidebar-top {
 	width: 100%;
 	float: none;
 }
-#find nav h1 {
+#sidebar-top nav h1 {
 	margin: 0;
 }
-#find nav {
+#sidebar-top nav {
 	float: none;
 	margin: 0 0 16px;
 }
-#find nav ul {
+#sidebar-top nav ul {
 	font-size: 22px;
 }
-#find nav ul li {
+#sidebar-top nav ul li {
 	display: inline-block;
 	margin-right: 16px;
 }
-#find label:after {
+#sidebar-top label:after {
 	top: 16px;
 	line-height: 14px;
 	font-size: 20px;
 }
-#find select,
-#find label,
-#find input,
+#sidebar-top select,
+#sidebar-top label,
+#search input,
 #search button.remove-filter {
 	line-height: 49px;
 	height: 49px;
 }
 #search ul li:last-child select,
 #search ul li:last-child input,
-#search ul li:last-child button.remove-filter {
+button {
 	height: 48px;
 }
-#find select {
+#sidebar-top select {
 	font-size: 14px;
 }
-#find input {
+#sidebar-top input {
 	font-size: 20px;
 }
 #search button.remove-filter, #add-filter {
 	width: 48px;
 	font-size: 20px;
 }
-#search-button {
+#login input {
+	height: 32px;
+	margin-bottom: 16px;
+}
+#search-button, .auth button {
 	font-size: 18px;
 	padding: 0 16px;
-	margin-top: 16px;
+	margin-left: 16px;
 }
 #search-button em {
 	font-size: 22px;
 }
 #add-filter, #search-button {
 	height: 48px !important;
+}
+#browse-links {
+	text-align: left;
 }
 #news h2 {
 	font-size: 24px;

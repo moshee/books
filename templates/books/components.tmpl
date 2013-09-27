@@ -60,21 +60,23 @@
 
 {{ define "login-pane"}}{{ with . }}
       <section id=logged-in class=auth>
-        <h1>You are logged in as <em>{{ .Name }}</em>.</h1>
+        <h1>You are logged in as:</h1>
+        <button id=logout-button>Log out</button>
         <nav>
           <ul>
-            <li><a href="/user/{{ .Id }}/{{ .Name | slugify }}">Your profile</a></li>
-            <li><a href=/logout>Log out</a></li>
+            <li id=profile-link>{{ if .Avatar }}<img href="/img/u/t/{{ .Id }}.jpg" width=32 height=32>{{ end }}<a href="/user/{{ .Id }}/{{ .Name | slugify }}">{{ .Name }}</a></li>
           </ul>
         </nav>
       </section>
       {{ else }}
       <section id=login class=auth>
         <h1>Sign in</h1>
+        <form>
         <input required id=user type=text placeholder="Username or email">
         <input required id=pass type=password placeholder="Password">
         <button id=login-button>Let me in!</button>
-        <button id=register-button>Register an account</button>
+        <button name=submit id=register-button>Register an account</button>
+        </form>
       </section>
       {{ end }}
 {{ end }}

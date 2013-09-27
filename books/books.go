@@ -4,7 +4,9 @@ import (
 	//"database/sql"
 	"github.com/moshee/gas"
 	//"github.com/argusdusty/Ferret"
+	//	"path"
 	"sort"
+	//"strconv"
 	"time"
 )
 
@@ -32,11 +34,22 @@ func Index(g *gas.Gas) {
 
 	var user *User
 
-	if sess, err := g.Session(); sess != nil {
+	var (
+		sess *gas.Session
+		err  error
+	)
+
+	if sess, err = g.Session(); sess != nil {
 		user = new(User)
 		err = gas.QueryRow(user, "SELECT * FROM books.users WHERE name = $1", sess.Who)
 		if err != nil {
 			g.Error(500, err)
+			return
+		}
+	} else if err != nil {
+		gas.Log(gas.Warning, "index: %v", err)
+		if err := g.SignOut(); err != nil {
+			gas.Log(gas.Warning, "index: %v", err)
 		}
 	}
 
@@ -46,11 +59,42 @@ func Index(g *gas.Gas) {
 		News     *NewsPost
 		Now      time.Time
 		User     *User
+		Error    error
 	}{
 		releases,
 		series,
 		news,
 		time.Now(),
 		user,
+		err,
 	})
+}
+
+func SeriesIndex(g *gas.Gas) {
+
+}
+
+func SeriesPage(g *gas.Gas) {
+	/*
+		id, err := strconv.Atoi(g.Args["id"])
+		if err != nil {
+			g.Error(404, err)
+		}
+
+		if g.Args["slug"] == "" {
+			// get slug
+			slug := ""
+			g.Redirect(path.Join("/series/", g.Args["id"], slug), 303)
+			return
+		}
+	*/
+	panic("unimplemented")
+}
+
+func AuthorsIndex(g *gas.Gas) {
+
+}
+
+func AuthorPage(g *gas.Gas) {
+
 }

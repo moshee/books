@@ -11,10 +11,18 @@
 		return base.querySelectorAll(sel);
 	}
 
-	function ajax_post(path, data, async, callback) {
+	function ajax_post(path, data, async, callbacks) {
 		var x = new XMLHttpRequest();
-		if (typeof callback !== 'undefined') {
-			x.addEventListener('load', callback, true);
+		switch (typeof callbacks) {
+		case 'object':
+			for (var evt in callbacks) {
+				x.addEventListener(evt, callbacks[evt]);
+			}
+			break;
+
+		case 'function':
+			x.addEventListener('load', callbacks, true);
+			break;
 		}
 
 		x.open('post', path, async);
@@ -29,6 +37,23 @@
 		} else {
 			x.send(data);
 		}
+	}
+
+	function make(tag, attrs, text) {
+		var elem = document.createElement(tag);
+		if (attrs) {
+			for (var attr in attrs) {
+				if (attrs[attr] == null) {
+					elem.setAttribute(attr);
+				} else {
+					elem.setAttribute(attr, attrs[attr]);
+				}
+			}
+		}
+		if (text) {
+			elem.innerText = text;
+		}
+		return elem;
 	}
 
 	// search
@@ -85,11 +110,119 @@
 	// login
 	
 	function login(e) {
-		e.target.setAttribute('disabled');
-		e.target.innerText = 'Logging in...';
+		var loginButton = e.target;
+		loginButton.setAttribute('disabled');
+		var old = loginButton.innerHTML;
+		loginButton.innerText = 'Logging in...';
 
-		var form = e.target.parentElement;
-		
+		var form = $('section.auth');
+		var registerButton = $('#register-button', form);
+		registerButton.setAttribute('disabled');
+
+		var user = $('#user', form);
+		if (user.value.length == 0) {
+			user.classList.add('invalid');
+			form.classList.add('invalid');
+			return;
+		}
+
+		var password = $('#pass', form);
+		if (password.value.length == 0) {
+			input.classList.add('invalid');
+			form.classList.add('invalid');
+			return;
+		}
+
+		user.classList.remove('invalid');
+		password.classList.remove('invalid');	
+		form.classList.remove('invalid');
+
+		ajax_post('/login', {
+			'user': user.value,
+			'pass': password.value
+		}, true, function(e) {
+			// get rid of any errors that might be there from the last attempt
+			var errors = $$('.error', form);
+			for (var i = 0, error; error = errors[i]; i++) {
+				form.removeChild(error);
+			}
+
+			var x = e.srcElement;
+			switch (x.status) {
+			case 200:
+				// okay, replace contents
+				form.outerHTML = x.response;
+				$('#logout-button')
+					.addEventListener('click', logout, false);
+				break;
+			case 400:
+				// bad password probably
+				var resp = JSON.parse(x.response);
+				var p = make('p', {'class': 'error'}, 'Error: ' + resp.msg);
+
+				form.insertBefore(p, user);
+				break;
+			case 500:
+				// something wrong with the server
+				var resp = JSON.parse(x.response);
+				var p = make('p', {'class': 'error'},
+							 'Server error: ' + resp.msg);
+				form.insertBefore(p, user);
+
+				var m = make('p', {'class': 'error'},
+							 'This should not happen. ' +
+							 'You should probably report this error.');
+				form.insertBefore(m, p.nextSibling);
+				break;
+			}
+
+			loginButton.innerHTML = old;
+			loginButton.removeAttribute('disabled');
+			registerButton.removeAttribute('disabled');
+		});
+	}
+
+	function logout(e) {
+		var button = e.target;
+		button.setAttribute('disabled');
+		var old = button.innerText;
+		button.innerText = 'Logging out...';
+		var form = $('section.auth');
+
+		ajax_post('/logout', null, true, function(e) {
+			var x = e.srcElement;
+			console.log(e);
+			switch (x.status) {
+			case 200:
+				// okay, replace contents
+				form.outerHTML = x.response;
+				$('#login-button')
+					.addEventListener('click', login, false);
+				break;
+			case 400:
+				// bad password probably
+				var resp = JSON.parse(x.response);
+				var p = make('p', {'class': 'error'}, 'Error: ' + resp.msg);
+				form.appendChild(p);
+
+				break;
+			case 500:
+				// something wrong with the server
+				var resp = JSON.parse(x.response);
+				var p = make('p', {'class': 'error'},
+							 'Server error: ' + resp.msg);
+				var m = make('p', {'class': 'error'},
+							 'This should not happen. ' +
+							 'You should probably report this error.');
+
+				form.appendChild(p);
+				form.appendChild(m);
+				break;
+			}
+
+			button.removeAttribute('disabled');
+			button.innerText = old;
+		});
 	}
 
 	function main() {
@@ -101,7 +234,15 @@
 			.addEventListener('click', delSearchFilterItem, false);
 		$('#search-button').addEventListener('click', doSearch, false);
 
-		$('#login-button').addEventListener('click', login, false);
+		var loginButton = $('#login-button');
+		if (loginButton != null) {
+			loginButton.addEventListener('click', login, false);
+		}
+
+		var logoutButton = $('#logout-button');
+		if (logoutButton != null) {
+			logoutButton.addEventListener('click', logout, false);
+		}
 
 		var lr = document.createElement('script');
 		lr.async = true;

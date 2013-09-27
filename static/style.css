@@ -25,6 +25,11 @@ h1,h2,h3,h4,h5,h6 {
 	line-height: 1.5em;
 	margin-bottom: 1em;
 }
+p.error {
+	font-size: 14px;
+	font-weight: 700;
+	color: #c00;
+}
 a {
 	color: #338;
 	text-decoration: none;
@@ -64,6 +69,16 @@ input, input:disabled:hover {
 	background: #f5f5f5;
 	font-family: source sans pro, meiryo, sans-serif;
 	outline: none;
+}
+button {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	border: none;
+	height: 32px;
+	font-weight: 700;
+	flex: 0 1 auto;
+	color: #444;
+	font-family: source sans pro, meiryo, sans-serif;
 }
 input:hover, button, button:disabled:hover {
 	background: #f0f0f0;
@@ -257,6 +272,7 @@ aside.sidebar nav ul {
 }
 #search ul {
 	list-style-type: none;
+	margin-bottom: 8px;
 }
 #search ul li {
 	position: relative;
@@ -315,16 +331,6 @@ aside.sidebar nav ul {
 	font-size: 18px;
 	flex: 1 1 auto;
 }
-button {
-	-webkit-appearance: none;
-	-moz-appearance: none;
-	border: none;
-	height: 32px;
-	font-weight: 700;
-	flex: 0 1 auto;
-	color: #444;
-	font-family: source sans pro, meiryo, sans-serif;
-}
 #search button.remove-filter, #add-filter {
 	width: 32px;
 	font-size: 18px;
@@ -346,13 +352,25 @@ button {
 	border-bottom: none;
 	height: 32px;
 }
-#search-button, #login-button, #register-button {
+#search-button, .auth button {
 	margin-left: 8px;
 	padding: 0 8px;
 	text-transform: uppercase;
 	font-size: 16px;
 	line-height: 32px;
 	float: right;
+}
+.auth #profile-link {
+	line-height: 32px;
+	height: 32px;
+	font-size: 22px;
+}
+.auth #profile-link a {
+	display: inline-block;
+	vertical-align: top;
+}
+.auth #profile-link img {
+	margin-right: 8px;
 }
 #search-button {
 	margin-top: 8px;
@@ -367,13 +385,10 @@ button {
 	top: 0;
 	right: 0;
 }
-#browse-links {
-	text-align: center;
-}
 #browse-links nav {
 	text-align: left;
 	display: inline-block;
-	margin: 0 16px;
+	margin-right: 32px;
 	vertical-align: top;
 }
 #login input {

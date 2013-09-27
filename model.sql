@@ -203,6 +203,7 @@ CREATE TABLE sessions (
 
 CREATE VIEW user_sessions AS
     SELECT
+        s.id,
         s.expire_date,
         u.name
     FROM

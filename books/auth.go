@@ -25,8 +25,8 @@ func exec(query string, args ...interface{}) error {
 }
 
 func (DBStore) CreateSession(name, id []byte, expires time.Time, username string) error {
-	return exec(`INSERT INTO books.session VALUES
-		( $1, (SELECT id FROM books.users WHERE name = $2), $3 )`, id, username, expires)
+	return exec(`INSERT INTO books.sessions VALUES
+		( $1, (SELECT id FROM books.users WHERE name = $2 OR email = $2), $3 )`, id, username, expires)
 }
 
 func (DBStore) ReadSession(name, id []byte) (*gas.Session, error) {
@@ -35,9 +35,13 @@ func (DBStore) ReadSession(name, id []byte) (*gas.Session, error) {
 		username string
 	)
 
-	row := gas.DB.QueryRow("SELECT * FROM user_sessions WHERE id = $1", id)
-	err := row.Scan(&expires, &username)
+	gas.Log(gas.Debug, "Sessname: %x", name)
+	gas.Log(gas.Debug, "Sessid: %x", id)
+
+	row := gas.DB.QueryRow("SELECT * FROM books.user_sessions WHERE id = $1", name)
+	err := row.Scan(&id, &expires, &username)
 	if err != nil {
+		gas.Log(gas.Debug, "read session: %v", err)
 		return nil, err
 	}
 
@@ -54,18 +58,18 @@ func (DBStore) UpdateSession(name, id []byte) error {
 }
 
 func (DBStore) DeleteSession(name, id []byte) error {
-	return exec("DELETE FROM books.sessions WHERE id = $1", id)
+	return exec("DELETE FROM books.sessions WHERE id = $1", name)
 }
 
 func (DBStore) UserAuthData(username string) (pass, salt []byte, err error) {
-	row := gas.DB.QueryRow("SELECT pass, salt FROM books.users WHERE name = $1", username)
+	row := gas.DB.QueryRow("SELECT pass, salt FROM books.users WHERE name = $1 OR email = $1", username)
 	err = row.Scan(&pass, &salt)
 	return
 }
 
 func (DBStore) User(username string) (gas.User, error) {
 	user := new(User)
-	err := gas.QueryRow(user, "SELECT * FROM users WHERE name = $1", username)
+	err := gas.QueryRow(user, "SELECT * FROM books.users WHERE name = $1 OR email = $1", username)
 	if err != nil {
 		return nil, err
 	}

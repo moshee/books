@@ -21,6 +21,10 @@ func main() {
 
 	gas.New().
 		Get("/static/{path}", StaticHandler).
+		Post("/login", books.Login).
+		Get("/login", goHome).
+		Post("/logout", books.Logout).
+		Get("/logout", goHome).
 		Get("/", books.Index)
 
 	gas.InitDB("postgres", "user=postgres dbname=postgres sslmode=disable")
@@ -36,6 +40,10 @@ func main() {
 func StaticHandler(g *gas.Gas) {
 	name := filepath.Join("./static", g.Args["path"])
 	http.ServeFile(g.ResponseWriter, g.Request, name)
+}
+
+func goHome(g *gas.Gas) {
+	g.Redirect("/", 303)
 }
 
 func slugify(in string) string {
