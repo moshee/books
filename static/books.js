@@ -111,31 +111,41 @@
 	
 	function login(e) {
 		var loginButton = e.target;
-		loginButton.setAttribute('disabled');
-		var old = loginButton.innerHTML;
-		loginButton.innerText = 'Logging in...';
 
-		var form = $('section.auth');
-		var registerButton = $('#register-button', form);
-		registerButton.setAttribute('disabled');
+		var section = $('section.auth');
+		var form = $('form', section);
 
 		var user = $('#user', form);
+		var password = $('#pass', form);
+		var bad = false;
+
 		if (user.value.length == 0) {
 			user.classList.add('invalid');
-			form.classList.add('invalid');
-			return;
+			bad = true;
+		} else {
+			user.classList.remove('invalid');
 		}
 
-		var password = $('#pass', form);
 		if (password.value.length == 0) {
-			input.classList.add('invalid');
-			form.classList.add('invalid');
+			password.classList.add('invalid');
+			bad = true;
+		} else {
+			password.classList.remove('invalid');
+		}
+
+		if (bad) {
 			return;
 		}
 
 		user.classList.remove('invalid');
 		password.classList.remove('invalid');	
 		form.classList.remove('invalid');
+
+		loginButton.setAttribute('disabled');
+		var old = loginButton.innerHTML;
+		loginButton.innerText = 'Logging in...';
+		var registerButton = $('#register-button', form);
+		registerButton.setAttribute('disabled');
 
 		ajax_post('/login', {
 			'user': user.value,
@@ -151,7 +161,7 @@
 			switch (x.status) {
 			case 200:
 				// okay, replace contents
-				form.outerHTML = x.response;
+				section.outerHTML = x.response;
 				$('#logout-button')
 					.addEventListener('click', logout, false);
 				break;
