@@ -1,0 +1,13 @@
+{{ define "404" }}<!doctype html>
+<html>
+  <head>
+    <meta charset=utf-8>
+    <title>Come again?</title>
+  </head>
+  <body>
+    <h1>404 File Not Found</h1>
+    <p>You were looking for <strong>{{ .Path }}</strong>. I'm sorry to say, but you're looking in the wrong place.</p>
+    <p>Try going <a href="/">home</a> and looking from there?</p>
+  </body>
+</html>
+{{ end }}
