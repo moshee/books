@@ -21,6 +21,7 @@ func main() {
 
 	gas.New().
 		Get("/static/{path}", StaticHandler).
+		Get("/series/{id}", books.SeriesPage).
 		Post("/login", books.Login).
 		Get("/login", goHome).
 		Post("/logout", books.Logout).

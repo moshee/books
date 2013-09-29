@@ -71,7 +71,15 @@ func (DBStore) User(username string) (gas.User, error) {
 	user := new(User)
 	err := gas.QueryRow(user, "SELECT * FROM books.users WHERE name = $1 OR email = $1", username)
 	if err != nil {
-		return nil, err
+		// instead of returning nil, return an interface containing nil. This
+		// will allow us to always do a type assertion, which can yield a nil
+		// concrete type. Useful for condensing logic dealing with passing a
+		// user into a template, etc.
+		return gas.User((*User)(nil)), err
 	}
 	return user, nil
+}
+
+func (DBStore) NilUser() gas.User {
+	return gas.User((*User)(nil))
 }

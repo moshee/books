@@ -31,13 +31,13 @@ CREATE TABLE publishers (
 );
 
 CREATE TABLE magazines (
-    id          serial      PRIMARY KEY,
-    title       text        NOT NULL,
-    publisher   integer     NOT NULL REFERENCES publishers,
-    language    text        NOT NULL,
-    date_added  timestamptz NOT NULL DEFAULT 'now'::timestamptz,
-    demographic integer,
-    summary     text
+    id           serial      PRIMARY KEY,
+    title        text        NOT NULL,
+    publisher_id integer     NOT NULL REFERENCES publishers,
+    language     text        NOT NULL,
+    date_added   timestamptz NOT NULL DEFAULT 'now'::timestamptz,
+    demographic  integer,
+    summary      text
 );
 
 CREATE TABLE book_series (
@@ -55,7 +55,8 @@ CREATE TABLE book_series (
     avg_rating   real, -- NULL means not rated (as opposed to a zero rating)
     rating_count integer     NOT NULL DEFAULT 0,
     demographic  integer     NOT NULL,
-    magazine_id  integer     REFERENCES magazines
+    magazine_id  integer     REFERENCES magazines,
+    has_cover    boolean     NOT NULL DEFAULT false
 );
 
 -- This table glues book_series and publishers to indicate if a series is
@@ -95,6 +96,20 @@ CREATE TABLE related_series (
     related_series_id integer NOT NULL REFERENCES book_series,
     relation          integer NOT NULL
 );
+
+CREATE TABLE related_series_view AS
+    SELECT
+        s.id     series_id,
+        rs.id    related_id,
+        rs.title related_title,
+        r.relation
+    FROM
+        book_series    s,
+        book_series    rs,
+        related_series r
+    WHERE s.id  = r.series_id
+      AND rs.id = r.related_series_id;
+
 
 --
 -- Releases and Translators
@@ -277,6 +292,23 @@ CREATE TABLE related_characters (
     relation             integer NOT NULL REFERENCES characters_relation_kinds
 );
 
+CREATE VIEW series_characters AS
+    SELECT
+        c.id,
+        c.name,
+        c.native_name,
+        c.sex,
+        c.picture,
+        cr.type character_type,
+        cr.role character_role,
+        s.id series_id
+    FROM
+        characters c,
+        characters_roles cr,
+        book_series s
+    WHERE c.id = cr.character_id
+      AND s.id = cr.series_id;
+
 --
 -- User-submitted tags and voting
 --
@@ -316,7 +348,7 @@ CREATE VIEW latest_series AS
         s.nsfw,
         s.avg_rating,
         s.demographic,
-        array_agg(n.name) AS tags
+        array_agg(n.name) AS tag_names
     FROM 
         book_series s,
         book_tags t,
@@ -334,6 +366,69 @@ CREATE VIEW latest_series AS
         s.avg_rating,
         s.demographic
     ORDER BY s.date_added DESC;
+
+CREATE VIEW series_page AS
+    SELECT
+        s.id,
+        s.title,
+        s.native_title,
+        s.other_titles,
+        s.kind,
+        s.summary,
+        s.vintage,
+        s.date_added,
+        s.last_updated,
+        s.finished,
+        s.nsfw,
+        s.avg_rating,
+        s.rating_count,
+        s.demographic,
+        COALESCE(m.magazine_id, 0)           magazine_id,
+        COALESCE(m.magazine_title, '(none)') magazine_title,
+        COALESCE(m.publisher_id, 0)          publisher_id,
+        COALESCE(m.publisher_name, '(none)') publisher_name,
+        s.has_cover,
+        array_agg(btn.name   ORDER BY bt.weight DESC) tag_names,
+        array_agg(bt.weight  ORDER BY bt.weight DESC) tag_weights,
+        array_agg(bt.spoiler ORDER BY bt.weight DESC) tag_spoilers
+    FROM
+        book_series s
+        LEFT JOIN (
+            SELECT
+                ms.id    magazine_id,
+                ms.title magazine_title,
+                p.id     publisher_id,
+                p.name   publisher_name
+            FROM
+                magazines  ms,
+                publishers p
+            WHERE p.id = ms.publisher_id
+        ) m USING ( magazine_id ),
+        book_tags       bt,
+        book_tag_names  btn
+    WHERE bt.tag_id = btn.id
+      AND s.id      = bt.series_id
+    GROUP BY
+        s.id,
+        s.title,
+        s.native_title,
+        s.other_titles,
+        s.kind,
+        s.summary,
+        s.vintage,
+        s.date_added,
+        s.last_updated,
+        s.finished,
+        s.nsfw,
+        s.avg_rating,
+        s.rating_count,
+        s.demographic,
+        m.magazine_id,
+        m.magazine_title,
+        m.publisher_id,
+        m.publisher_name,
+        s.has_cover;
+
 
 CREATE TABLE character_tag_names (
     id   serial PRIMARY KEY,
@@ -517,6 +612,28 @@ CREATE VIEW latest_news AS
     WHERE c.id = p.category_id
       AND u.id = p.user_id
     ORDER BY p.date_posted DESC;
+
+--
+-- Feeds
+--
+
+CREATE TABLE books.feeds (
+    id           serial      PRIMARY KEY,
+    kind         integer     NOT NULL DEFAULT 0, -- Predefined, user, ...
+    feed_id      bytea       NOT NULL UNIQUE, -- A random string of bytes that identifies this feed (don't use the id)
+    feedspec     text        NOT NULL, -- Could be in any format. Dunno yet. Description of feed contents.
+    creator      integer     NOT NULL REFERENCES books.users,
+    date_created timestamptz NOT NULL DEFAULT 'now'::timestamptz,
+    name         text,
+    description  text
+);
+
+CREATE TABLE books.feed_permissions (
+    id      serial  PRIMARY KEY,
+    feed_id integer NOT NULL REFERENCES books.feeds,
+    user_id integer NOT NULL REFERENCES books.users,
+    action  integer NOT NULL -- allow, disallow, ...
+);
 
 --
 -- Triggers and rules

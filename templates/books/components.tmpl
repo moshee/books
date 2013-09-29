@@ -7,7 +7,7 @@
 	<tbody>
 		{{ range . }}
 		<tr>
-			<td class=la><a href="/series/{{ .BookSeries.Id }}/{{ .BookSeries.Title | slugify | urlquery }}">{{ .BookSeries.Title }}</a></td>
+			<td class=la><a href="/series/{{ .BookSeries.Id }}">{{ .BookSeries.Title }}</a></td>
       <td class=lv>{{ collapse_range .Chapters.Volumes }}</td>
 			<td class=lc>{{ collapse_range .Chapters.Nums }}</td>
       <td class=ll><span class=lang-code>{{ .Language }}</span></td>
@@ -15,7 +15,7 @@
         {{ $len := len .TranslationGroups.Ids | add -1 }}
         {{ $groups := .TranslationGroups }}
         {{ range $k, $name := .TranslationGroups.Names }}
-        <a href="/group/{{ index $groups.Ids $k }}/{{ $name | slugify | urlquery }}">{{ $name }}</a>
+        <a href="/group/{{ index $groups.Ids $k }}">{{ $name }}</a>
         {{ if lt $k $len }} &amp; {{ end }}
         {{ end }}
       </td>
@@ -36,11 +36,10 @@
 	<tbody>
 		{{ range . }}
 		<tr{{ if .NSFW }} class=nsfw {{ end }}>
-			<td class=la><a href="/series/{{ .Id }}/{{ .Title | slugify | urlquery }}">{{ .Title }}</a></td>
+			<td class=la><a href="/series/{{ .Id }}">{{ .Title }}</a></td>
 			<td class=ll><ul title="{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }} / 5{{ else }}Not rated{{ end }}" class=rating-stars>{{ range .RatingStars }}<li class={{ . }}></li>{{ end }}</ul></td>
       <td class=lm>{{ .Demographic }}</td>
-			<td class=lt>{{ $s := len .Tags }}{{ with .LimitedTags 3 }}{{ range . }}<a class=tag href="/tag/{{ urlquery . }}">{{ . }}</a>{{ end }}{{ if len . | gt $s }}<span class=tag>···</span>{{ end }}{{ end }}</td>
-      <!-- <td class=lt>{{ range .Tags }}<a class=tag href="/tag/{{ urlquery . }}">{{ . }}</a>{{ end }}</td> -->
+			<td class=lt>{{ $s := len .Tags.Ids }}{{ with $tags := .LimitedTags 3 }}{{ range $k, $v := $tags.Ids }}<a class=tag href="/tag/{{ index $tags.Names $k | urlquery }}">{{ index $tags.Names $k }}</a>{{ end }}{{ if len $tags.Ids | gt $s }}<span class=tag>···</span>{{ end }}{{ end }}</td>
 			<td class=ly>{{ .Vintage }}</td>
       <td class=ld><time datetime="{{ .DateAdded.Format "2006-01-02T15:04:05-0700" }}">{{ .DateAdded.Format "02 Jan" }}</time></td>
 			</tr>
@@ -50,8 +49,8 @@
 {{ end }}
 
 {{ define "news-post" }}<article id=news-{{ .Id }}>
-	<h2><a href="/news/{{ .Id }}/{{ slugify .Title }}">{{ .Title }}</a></h2>
-	<div class=news-meta>by <a href="/user/{{ .User.Id }}/{{ slugify .User.Name }}">{{ .User.Name }}</a> on <time datetime="{{ .DatePosted.Format "2006-01-02T15:04:05-0700" }}">{{ .DatePosted.Format "2006-01-02" }}</time> under <a href="/news/category/{{ .Category | urlquery }}">{{ .Category }}</a></div>
+	<h2><a href="/news/{{ .Id }}">{{ .Title }}</a></h2>
+	<div class=news-meta>by <a href="/user/{{ .User.Id }}">{{ .User.Name }}</a> on <time datetime="{{ .DatePosted.Format "2006-01-02T15:04:05-0700" }}">{{ .DatePosted.Format "2006-01-02" }}</time> under <a href="/news/category/{{ .Category | urlquery }}">{{ .Category }}</a></div>
 	<div class=post-body>
 	{{ smarkdown .Body }}
 	</div>
@@ -64,7 +63,7 @@
         <button id=logout-button>Log out</button>
         <nav>
           <ul>
-            <li id=profile-link>{{ if .Avatar }}<img href="/img/u/t/{{ .Id }}.jpg" width=32 height=32>{{ end }}<a href="/user/{{ .Id }}/{{ .Name | slugify }}">{{ .Name }}</a></li>
+            <li id=profile-link>{{ if .Avatar }}<img href="/img/u/t/{{ .Id }}.jpg" width=32 height=32>{{ end }}<a href="/user/{{ .Id }}">{{ .Name }}</a></li>
           </ul>
         </nav>
       </section>
@@ -79,4 +78,50 @@
         </form>
       </section>
       {{ end }}
+{{ end }}
+
+{{ define "search-browse" }}
+      <section id=search>
+        <ul class=filter-entry>
+          <li>
+            <label>
+              <select class=filter-type dir=rtl>
+                <option value=title>Title</option>
+                <option value=tags>Tags</option>
+                <option value=demographic>Demographic</option>
+                <option value=author>Author</option>
+                <option value=magazine>Magazine</option>
+                <option value=publisher>Publisher</option>
+              </select>
+            </label>
+            <input type=search class=filter-content placeholder="Keywords...">
+            <button class=remove-filter title="Remove this search filter">×</button>
+          </li>
+        </ul>
+        <button id=search-button title="Execute search">Search <em>→</em></button>
+        <button id=add-filter title="Add search filter">+</button>
+        <hr class=clear>
+      </section>
+      <section id=browse-links>
+        <nav id=browse>
+          <h1>Browse</h1>
+          <ul>
+            <li><a href=/series>Series</a></li>
+            <li><a href=/authors>Authors</a></li>
+            <li><a href=/magazines>Magazines</a></li>
+            <li><a href=/publishers>Publishers</a></li>
+            <li><a href=/translators>Translators</a></li>
+            <li><a href=/releases>Releases</a></li>
+          </ul>
+        </nav>
+        <nav id=filters>
+          <h1>Filter by...</h1>
+          <ul>
+            <li><a href=/demographics>Demographics</a></li>
+            <li><a href=/tags>Tags</a></li>
+            <li><a href=/vintages>Vintage</a></li>
+          </ul>
+        </nav>
+        <hr class=clear>
+      </section>
 {{ end }}

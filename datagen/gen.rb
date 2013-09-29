@@ -74,7 +74,7 @@ def rec(n, repeat_chance=0.0, repeat_range=1..2, n_is_max=false)
       arr = Array.new(n)
       while i <= n
         t = rand repeat_range
-        if rand > repeat_chance and t == 1
+        if rand < repeat_chance and t == 1
           arr[i-1] = yield(display, false)
           i += 1
         else
@@ -84,21 +84,22 @@ def rec(n, repeat_chance=0.0, repeat_range=1..2, n_is_max=false)
             break if i > n
           end
         end
+        display += 1
       end
       arr
     else
       arr = []
       while i <= n
         t = rand repeat_range
-        if rand > repeat_chance and t == 1
+        if rand < repeat_chance and t == 1
           arr << yield(i, false)
         else
           t.times do
             break if i > n
             arr << yield(i, true)
-            i += 1
           end
         end
+        i += 1
       end
       arr
     end.map(&method(:tuple)).join(",\n") + ';'

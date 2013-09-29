@@ -6,7 +6,7 @@ import (
 	//"github.com/argusdusty/Ferret"
 	//	"path"
 	"sort"
-	//"strconv"
+	"strconv"
 	"time"
 )
 
@@ -32,41 +32,18 @@ func Index(g *gas.Gas) {
 		return
 	}
 
-	var user *User
-
-	var (
-		sess *gas.Session
-		err  error
-	)
-
-	if sess, err = g.Session(); sess != nil {
-		user = new(User)
-		err = gas.QueryRow(user, "SELECT * FROM books.users WHERE name = $1", sess.Who)
-		if err != nil {
-			g.Error(500, err)
-			return
-		}
-	} else if err != nil {
-		gas.Log(gas.Warning, "index: %v", err)
-		if err := g.SignOut(); err != nil {
-			gas.Log(gas.Warning, "index: %v", err)
-		}
-	}
-
 	g.Render("books", "index", &struct {
 		Releases []Release
 		Series   []BookSeries
 		News     *NewsPost
 		Now      time.Time
 		User     *User
-		Error    error
 	}{
 		releases,
 		series,
 		news,
 		time.Now(),
-		user,
-		err,
+		g.User().(*User),
 	})
 }
 
@@ -75,20 +52,24 @@ func SeriesIndex(g *gas.Gas) {
 }
 
 func SeriesPage(g *gas.Gas) {
-	/*
-		id, err := strconv.Atoi(g.Args["id"])
-		if err != nil {
-			g.Error(404, err)
-		}
+	id, err := strconv.Atoi(g.Args["id"])
+	if err != nil {
+		g.Error(404, err)
+	}
 
-		if g.Args["slug"] == "" {
-			// get slug
-			slug := ""
-			g.Redirect(path.Join("/series/", g.Args["id"], slug), 303)
-			return
-		}
-	*/
-	panic("unimplemented")
+	series := new(BookSeries)
+	if err = gas.QueryRow(series, "SELECT * FROM books.series_page WHERE id = $1", id); err != nil {
+		g.Error(500, err)
+		return
+	}
+
+	g.Render("books", "series", &struct {
+		Series *BookSeries
+		User   *User
+	}{
+		series,
+		g.User().(*User),
+	})
 }
 
 func AuthorsIndex(g *gas.Gas) {

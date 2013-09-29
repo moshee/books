@@ -9,55 +9,13 @@
 	<link rel=stylesheet href=/static/mobile.css media="only screen and (max-width: 1024px)">
   <script src="/static/books.js"></script>
 </head>
-<body>
+<body class=front>
 	<section id=main>
 		<header>
       <h1><a href="/">本物語。</a></h1>
 		</header>
 		<aside class=sidebar id=sidebar-top>
-      <section id=search>
-        <ul class=filter-entry>
-          <li>
-            <label>
-              <select class=filter-type dir=rtl>
-                <option value=title>Title</option>
-                <option value=tags>Tags</option>
-                <option value=demographic>Demographic</option>
-                <option value=author>Author</option>
-                <option value=magazine>Magazine</option>
-                <option value=publisher>Publisher</option>
-              </select>
-            </label>
-            <input type=search class=filter-content placeholder="Keywords...">
-            <button class=remove-filter title="Remove this search filter">×</button>
-          </li>
-        </ul>
-        <button id=search-button title="Execute search">Search <em>→</em></button>
-        <button id=add-filter title="Add search filter">+</button>
-        <hr class=clear>
-      </section>
-      <section id=browse-links>
-        <nav id=browse>
-          <h1>Browse</h1>
-          <ul>
-            <li><a href=/series>Series</a></li>
-            <li><a href=/authors>Authors</a></li>
-            <li><a href=/magazines>Magazines</a></li>
-            <li><a href=/publishers>Publishers</a></li>
-            <li><a href=/translators>Translators</a></li>
-            <li><a href=/releases>Releases</a></li>
-          </ul>
-        </nav>
-        <nav id=filters>
-          <h1>Filter by...</h1>
-          <ul>
-            <li><a href=/demographics>Demographics</a></li>
-            <li><a href=/tags>Tags</a></li>
-            <li><a href=/vintages>Vintage</a></li>
-          </ul>
-        </nav>
-        <hr class=clear>
-      </section>
+      {{ template "search-browse" }}
       {{ template "login-pane" .User }}
     </aside>
 		<section id=latest>

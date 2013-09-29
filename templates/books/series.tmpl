@@ -1,0 +1,138 @@
+{{ define "series" }}<!doctype html>
+<head>
+	<meta charset=utf-8>
+	<meta name=viewport content="initial-scale=1.0">
+	<meta name=description content="A place to discover and opinionate on Japanese print-based entertainment.">
+  <link rel=stylesheet href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Magra&subset=latin,latin-ext">
+  <title>{{ .Series.Title }}</title>
+	<link rel=stylesheet href=/static/style.css><!-- TODO: CDN -->
+	<link rel=stylesheet href=/static/mobile.css media="only screen and (max-width: 1024px)">
+  <script src="/static/books.js"></script>
+</head>
+<body>
+	<section id=main>
+		<header>
+      <h1><a href="/">本物語。</a></h1>
+		</header>
+		<aside class=sidebar id=sidebar-top>
+      {{ template "search-browse" }}
+      {{ template "login-pane" .User }}
+    </aside>
+    {{ with .Series }}
+    <section id=series-info {{ if .NSFW }}class=nsfw {{ end }}>
+      <hgroup>
+        <h1 id=title>{{ .Title }}</h1>
+        <h2 id=native-title>{{ .NativeTitle }}</h2>
+      </hgroup>
+      <aside id=series-meta>
+        {{ if .HasCover }}
+        <img class=cover src="/img/c/{{ .Id }}.jpg" alt=Cover>
+        {{ else }}
+        <div class="cover missing">No cover</div>
+        {{ end }}
+        {{ if .OtherTitles }}
+        <section id=other-titles>
+          <h3>Also known as:</h3>
+          <ul class=titles>
+            {{ range .OtherTitles }}
+            <li>{{ . }}</li>
+            {{ end }}
+          </ul>
+        </section>
+        {{ end }}
+        <section id=tags>
+          <h3>Tags</h3>
+          {{ if len .Tags.Names | lt 0 }}
+          {{ if .Tags.HasSpoilers }}<a href="javascript:toggleTags()">Show spoiler tag(s)</a>
+          {{ end }}
+          <ul class=tags>
+            {{ $tags := .Tags }}
+            {{ range $i, $tag := .Tags.Names }}
+            <li class="{{ if index $tags.Weights $i | ge 0 }}conflicted {{ end }} {{ if index $tags.Spoilers $i }}spoiler{{ end }}">
+              <a style="color:#4444{{ $tags.WeightClass $i | printf "%x" }}" href="/tag/{{ $tag | urlquery }}">{{ $tag }}</a>
+            {{ if $.User }}
+              (<a href="javascript:voteTag({{ $i }}, {{ $.User.VoteWeight }})">+</a>
+              / <a href="javascript:voteTag({{ $i }}, -{{ $.User.VoteWeight }}">–</a>)
+              {{ end }}
+            </li>
+            {{ end }}
+          </ul>
+          {{ else }}
+          <p>No tags have been added.</p>
+            {{ if $.User }}
+          <p><a href="/series/{{ .Id }}/tags">Add some?</a></p>
+            {{ else }}
+          <p>Log in to add some.</p>
+            {{ end }}
+          {{ end }}
+        </section>
+        <table>
+          <tr><th>Kind</th><td>{{ .SeriesKind }}</td></tr>
+          <tr><th>Vintage</th><td>{{ .Vintage }}</td></tr>
+          <tr><th>Demographic</th><td>{{ .Demographic }}</td></tr>
+          <tr><th>Average rating</th><td>{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }} / 5 ({{ .RatingCount }}){{ else }}n/a{{ end }}</td></tr>
+          <tr><th>Complete?</th><td>{{ .Finished }}</td></tr>
+          <tr><th>Serialized in</th><td>
+          {{ if ne .Magazine.Id 0 }}
+            <a href=/magazine/{{ .Magazine.Id }}>{{ .Magazine.Title }}</a>
+            (by <a href=/publisher/{{ .Magazine.Publisher.Id }}>{{ .Magazine.Publisher.Name }}</a>)
+          {{ else }}
+            <span class=none>(none)</span>
+          {{ end }}
+          </td></tr>
+        </table>
+        <table>
+          <tr><th>Added</th><td class=ld>{{ .DateAdded.Format "02 Jan 2006" }}</td></tr>
+          <tr><th>Updated</th><td class=ld>{{ .LastUpdated.Format "02 Jan 2006 15:04" }}</td></tr>
+        </table>
+      </aside>
+      <section id=series-detail>
+        <section id=summary>
+          <h1>Summary</h1>
+          {{ smarkdown .Summary }}
+        </section>
+        <section id=characters>
+          <h1>Characters</h1>
+          {{ with .Characters }}
+          <ul>
+            {{ range . }}
+            <li{{ if .IsMain }} class=main-chara {{ end }}>
+              <a href=/character/{{ .Id }}>
+                {{ if .Picture }}<img alt="{{ .Name }}" src=/img/c/t/{{ .Id }}>{{ end }}
+                <h2>{{ .Name }}</h2><small>{{ .NativeName }}</small>
+                {{/* CharacterType 0 is unknown */}}
+                <p>{{ .CharacterType }}{{ if ne .CharacterRole 0 }} — {{ .CharacterRole }}{{ end }}</p>
+              </a>
+            </li>
+            {{ end }}
+          </ul>
+          {{ if $.User }}<p><a href="/series/{{ .Id }}/characters">Add more characters</a></p>{{ end }}
+          {{ else }}
+          <p>No characters added for this series yet.{{ if $.User }} <a href="/series/{{ .Id }}/characters">Add some?</a>{{ end }}</p>
+          {{ end }}
+        </section>
+        {{ with .Related }}
+        <section id=related>
+          <h1>Related Series</h1>
+          <ul>
+            {{ range . }}
+            <li><a href=/series/{{ .Id }}>{{ .Title }}</a> — {{ .Relation }}</li>
+            {{ end }}
+          </ul>
+        </section>
+        {{ end }}
+      </section>
+    </section>
+    {{ end }}
+	</section>
+	<footer>
+		<section id=copyright>
+			<h1>Copyright © 2013 <code><a href="http://displaynone.us">display: <b>none</b>;</a></code>.&nbsp;&nbsp;&nbsp;All rights reserved.</h1>
+      <p id=footer-links><a href="/about">About</a> — <a href="/legal">Legal</a> — <a href="https://github.com/moshee/books">Hacking</a> — <a href=#>IRC</a> — <a href="/help">Help</a></p>
+		</section>
+		<section id=footer-logo><a href="http://displaynone.us"></a></section>
+	</footer>
+</body>
+{{ end }}
+
+{{ define "series-error" }}{{ .Error }}{{ end }}

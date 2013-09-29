@@ -58,6 +58,8 @@ a.look-more {
 }
 a.look-more:after {
 	content: " →";
+	font-size: 20px;
+	line-height: 0;
 }
 
 input, input:disabled:hover {
