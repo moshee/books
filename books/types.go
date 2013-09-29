@@ -50,6 +50,23 @@ func (s Sex) String() string {
 	}[s]
 }
 
+func (s Sex) Scan(src interface{}) error {
+	switch v := src.(type) {
+	case nil:
+		s = 2
+		return nil
+
+	case []byte:
+		n, err := strconv.Atoi(string(v))
+		if err != nil {
+			return err
+		}
+		s = Sex(n)
+		return nil
+	}
+	return nil
+}
+
 const (
 	Scenario Credit = 1 << iota
 	Art
@@ -190,6 +207,9 @@ type Tags struct {
 
 func (self *Tags) WeightClass(i int) int {
 	w := float64(self.Weights[i])
+	if w < 0.0 {
+		return 0
+	}
 
 	// this should give a graph with a horizontal asymptote at y = 255, with
 	// y being very close to this at around x = 20. The y-intercept is very
@@ -244,13 +264,15 @@ func (self *BookSeries) Related() (r []RelatedSeries) {
 	return
 }
 
-func (self *BookSeries) Characters() (cs []Character) {
+func (self *BookSeries) Characters() []Character {
+	cs := make([]Character, 3)
 	err := gas.Query(&cs, "SELECT * FROM series_characters WHERE series_id = $1", self.Id)
 	if err != nil {
 		gas.Log(gas.Warning, "BookSeries.Characters: %v", err)
 		return nil
 	}
-	return
+	println(len(cs))
+	return cs
 }
 
 func (self *BookSeries) Credits() []ProductionCredit {
@@ -445,21 +467,23 @@ type Character struct {
 	NativeName  string
 	Aliases     pg.StringArray
 	Nationality string
-	Birthday    string
-	Age         int
+	Birthday    time.Time
 	Sex
 	Weight int
 	Height int
-	Bust   int
-	Waist  int
-	Hips   int
+	Sizes  string
 	BloodType
 	Description string
 	Picture     bool
 
 	// only valid for the series it's being queried for
-	CharacterType
-	CharacterRole
+	SeriesId      int
+	CharacterType `sql:"type"`
+	CharacterRole `sql:"role"`
+}
+
+func (self *Character) Age() int {
+	return 0
 }
 
 func (self *Character) IsMain() bool {
@@ -471,10 +495,12 @@ func (self *Character) CastIn() []CharacterAppearance {
 }
 
 type CharacterAppearance struct {
+	Id int
 	*Character
 	*BookSeries
-	CharacterType
-	CharacterRole
+	CharacterType `sql:"type"`
+	CharacterRole `sql:"role"`
+	Appearances   pg.IntArray
 }
 
 type RelatedCharacter struct {

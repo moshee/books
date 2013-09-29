@@ -9,7 +9,7 @@
 	<link rel=stylesheet href=/static/mobile.css media="only screen and (max-width: 1024px)">
   <script src="/static/books.js"></script>
 </head>
-<body>
+<body id=series {{ if .User }}class=logged-in {{ end }}>
 	<section id=main>
 		<header>
       <h1><a href="/">本物語。</a></h1>
@@ -19,7 +19,7 @@
       {{ template "login-pane" .User }}
     </aside>
     {{ with .Series }}
-    <section id=series-info {{ if .NSFW }}class=nsfw {{ end }}>
+    <section class=info {{ if .NSFW }}class=nsfw {{ end }}>
       <hgroup>
         <h1 id=title>{{ .Title }}</h1>
         <h2 id=native-title>{{ .NativeTitle }}</h2>
@@ -48,12 +48,11 @@
           <ul class=tags>
             {{ $tags := .Tags }}
             {{ range $i, $tag := .Tags.Names }}
-            <li class="{{ if index $tags.Weights $i | ge 0 }}conflicted {{ end }} {{ if index $tags.Spoilers $i }}spoiler{{ end }}">
-              <a style="color:#4444{{ $tags.WeightClass $i | printf "%x" }}" href="/tag/{{ $tag | urlquery }}">{{ $tag }}</a>
-            {{ if $.User }}
-              (<a class=upboat href="javascript:voteTag({{ $i }}, {{ $.User.VoteWeight }})">+</a>
-              / <a class=downboat href="javascript:voteTag({{ $i }}, -{{ $.User.VoteWeight }})">–</a>)
-              {{ end }}
+            {{ $conflict := index $tags.Weights $i | ge 0 }}
+            <li class="{{ if $conflict }}conflicted {{ end }} {{ if index $tags.Spoilers $i }}spoiler{{ end }}">
+              {{ if $.User }}
+              <button class=upboat href="javascript:voteTag({{ $i }}, {{ $.User.VoteWeight }})">+</button><button class=downboat href="javascript:voteTag({{ $i }}, -{{ $.User.VoteWeight }})">–</button>{{ end }}<a style="color:#4444{{ $tags.WeightClass $i | printf "%.2x" }}" href="/tag/{{ $tag | urlquery }}" {{ if $conflict }}title="This tag is controversial."{{ end }}>{{ $tag }}</a>
+              ({{ index $tags.Weights $i | printf "%+d" }})
             </li>
             {{ end }}
           </ul>
@@ -71,11 +70,11 @@
           <tr><th>Vintage</th><td>{{ .Vintage }}</td></tr>
           <tr><th>Demographic</th><td>{{ .Demographic }}</td></tr>
           <tr><th>Average rating</th><td>{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }} / 5 ({{ .RatingCount }} votes){{ else }}n/a{{ end }}</td></tr>
-          <tr><th>Complete?</th><td>{{ .Finished }}</td></tr>
+          <tr><th>Complete?</th><td>{{ if .Finished }}Yes{{ else }}No{{ end }}</td></tr>
           <tr><th>Serialized in</th><td>
           {{ if ne .Magazine.Id 0 }}
             <a href=/magazine/{{ .Magazine.Id }}>{{ .Magazine.Title }}</a>
-            (by <a href=/publisher/{{ .Magazine.Publisher.Id }}>{{ .Magazine.Publisher.Name }}</a>)
+            <small>(by <a href=/publisher/{{ .Magazine.Publisher.Id }}>{{ .Magazine.Publisher.Name }}</a>)</small>
           {{ else }}
             <span class=none>(none)</span>
           {{ end }}
@@ -104,7 +103,7 @@
             </li>
             {{ end }}
           </ul>
-          {{ if $.User }}<p><a href="/series/{{ .Id }}/characters">Add more characters</a></p>{{ end }}
+          {{ if $.User }}<p><a href="/series/{{ $.Series.Id }}/characters">Add more characters</a></p>{{ end }}
           {{ else }}
           <p>No characters added for this series yet.{{ if $.User }} <a href="/series/{{ .Id }}/characters">Add some?</a>{{ end }}</p>
           {{ end }}
@@ -123,6 +122,7 @@
     </section>
     {{ end }}
 	</section>
+      <hr class=clear>
 	<footer>
 		<section id=copyright>
 			<h1>Copyright © 2013 <code><a href="http://displaynone.us">display: <b>none</b>;</a></code>.&nbsp;&nbsp;&nbsp;All rights reserved.</h1>

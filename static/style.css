@@ -30,10 +30,75 @@ hgroup h2 {
 .detail h1 {
 	font-size: 32px;
 }
+.cover {
+	background: #fafafa;
+	padding: 32px;
+	width: 384px;
+	height: 545px;
+	margin-bottom: 32px;
+}
+.cover.missing {
+	line-height: 481px;
+	text-align: center;
+	font-size: 52px;
+	color: #ddd;
+	text-transform: uppercase;
+}
+.cover img {
+	width: 320px;
+	height: auto;
+	max-height: 481px;
+}
+aside.meta {
+	float: left;
+	width: 448px;
+	padding-left: 64px;
+	border-left: none;
+	margin: 0 64px 64px 0;
+}
+aside.meta table {
+	margin: 0 -8px;
+	font-size: 20px;
+}
+aside.meta table small {
+	color: #888;
+	font-size: 14px;
+	display: block;
+}
+aside.meta h3 {
+	margin-bottom: 16px;
+	font-size: 22px;
+}
 
+ul.tags {
+	list-style-type: none;
+	margin-bottom: 32px;
+}
+ul.tags li {
+	height: 28px;
+	font-size: 20px;
+	margin-bottom: 8px;
+}
+ul.tags li.conflicted a {
+	opacity: 0.5;
+}
+ul.tags li a {
+	display: inline-block;
+}
+.logged-in ul.tags li a {
+	margin-left: 8px;
+}
+ul.tags li.spoiler {
+	color: #888;
+	background: #888;
+}
 .upboat, .downboat {
-	font-size: 18px;
+	font-size: 20px;
 	font-weight: 700;
+	height: 20px;
+	width: 20px;
+	line-height: 20px;
+	margin: 4px;
 }
 
 #main p {
@@ -159,6 +224,7 @@ header h1 a:hover, header h1 a:focus {
 }
 table {
 	border-collapse: collapse;
+	width: 100%;
 }
 
 table td, table th {
@@ -167,7 +233,6 @@ table td, table th {
 
 .front table {
 	font-size: 14px;
-	width: 100%;
 }
 
 th {

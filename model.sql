@@ -280,7 +280,23 @@ CREATE TABLE characters_roles (
     appearances  integer[] --           REFERENCES chapters
 );
 
-CREATE TABLE characters_relation_kinds (
+CREATE VIEW series_characters AS
+    SELECT
+        c.id,
+        c.name,
+        c.native_name,
+        c.sex,
+        c.picture,
+        r.series_id,
+        r.type,
+        r.role
+    FROM
+        books.characters c,
+        books.characters_roles r
+    WHERE c.id = r.character_id
+    ORDER BY r.type;
+
+cREATE TABLE characters_relation_kinds (
     id   serial PRIMARY KEY,
     name text   NOT NULL
 );
