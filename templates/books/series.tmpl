@@ -24,7 +24,7 @@
         <h1 id=title>{{ .Title }}</h1>
         <h2 id=native-title>{{ .NativeTitle }}</h2>
       </hgroup>
-      <aside id=series-meta>
+      <aside class=meta>
         {{ if .HasCover }}
         <img class=cover src="/img/c/{{ .Id }}.jpg" alt=Cover>
         {{ else }}
@@ -51,8 +51,8 @@
             <li class="{{ if index $tags.Weights $i | ge 0 }}conflicted {{ end }} {{ if index $tags.Spoilers $i }}spoiler{{ end }}">
               <a style="color:#4444{{ $tags.WeightClass $i | printf "%x" }}" href="/tag/{{ $tag | urlquery }}">{{ $tag }}</a>
             {{ if $.User }}
-              (<a href="javascript:voteTag({{ $i }}, {{ $.User.VoteWeight }})">+</a>
-              / <a href="javascript:voteTag({{ $i }}, -{{ $.User.VoteWeight }}">–</a>)
+              (<a class=upboat href="javascript:voteTag({{ $i }}, {{ $.User.VoteWeight }})">+</a>
+              / <a class=downboat href="javascript:voteTag({{ $i }}, -{{ $.User.VoteWeight }})">–</a>)
               {{ end }}
             </li>
             {{ end }}
@@ -70,7 +70,7 @@
           <tr><th>Kind</th><td>{{ .SeriesKind }}</td></tr>
           <tr><th>Vintage</th><td>{{ .Vintage }}</td></tr>
           <tr><th>Demographic</th><td>{{ .Demographic }}</td></tr>
-          <tr><th>Average rating</th><td>{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }} / 5 ({{ .RatingCount }}){{ else }}n/a{{ end }}</td></tr>
+          <tr><th>Average rating</th><td>{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }} / 5 ({{ .RatingCount }} votes){{ else }}n/a{{ end }}</td></tr>
           <tr><th>Complete?</th><td>{{ .Finished }}</td></tr>
           <tr><th>Serialized in</th><td>
           {{ if ne .Magazine.Id 0 }}
@@ -80,13 +80,11 @@
             <span class=none>(none)</span>
           {{ end }}
           </td></tr>
-        </table>
-        <table>
           <tr><th>Added</th><td class=ld>{{ .DateAdded.Format "02 Jan 2006" }}</td></tr>
           <tr><th>Updated</th><td class=ld>{{ .LastUpdated.Format "02 Jan 2006 15:04" }}</td></tr>
         </table>
       </aside>
-      <section id=series-detail>
+      <section class=detail>
         <section id=summary>
           <h1>Summary</h1>
           {{ smarkdown .Summary }}

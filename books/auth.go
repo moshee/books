@@ -24,32 +24,31 @@ func exec(query string, args ...interface{}) error {
 	return nil
 }
 
-func (DBStore) CreateSession(name, id []byte, expires time.Time, username string) error {
+func (DBStore) CreateSession(id []byte, expires time.Time, username string) error {
 	return exec(`INSERT INTO books.sessions VALUES
 		( $1, (SELECT id FROM books.users WHERE name = $2 OR email = $2), $3 )`, id, username, expires)
 }
 
-func (DBStore) ReadSession(name, id []byte) (*gas.Session, error) {
+func (DBStore) ReadSession(id []byte) (*gas.Session, error) {
 	var (
 		expires  time.Time
 		username string
 	)
 
-	gas.Log(gas.Debug, "Sessname: %x", name)
 	gas.Log(gas.Debug, "Sessid: %x", id)
 
-	row := gas.DB.QueryRow("SELECT * FROM books.user_sessions WHERE id = $1", name)
+	row := gas.DB.QueryRow("SELECT * FROM books.user_sessions WHERE id = $1", id)
 	err := row.Scan(&id, &expires, &username)
 	if err != nil {
 		gas.Log(gas.Debug, "read session: %v", err)
 		return nil, err
 	}
 
-	return &gas.Session{string(name), id, []byte{}, expires, username}, nil
+	return &gas.Session{id, expires, username}, nil
 }
 
-func (DBStore) UpdateSession(name, id []byte) error {
-	sess, err := DBStore{}.ReadSession(id, name)
+func (DBStore) UpdateSession(id []byte) error {
+	sess, err := DBStore{}.ReadSession(id)
 	if err != nil {
 		return err
 	}
@@ -57,8 +56,9 @@ func (DBStore) UpdateSession(name, id []byte) error {
 		time.Now().Add(gas.MaxCookieAge), sess.Sessid)
 }
 
-func (DBStore) DeleteSession(name, id []byte) error {
-	return exec("DELETE FROM books.sessions WHERE id = $1", name)
+func (DBStore) DeleteSession(id []byte) error {
+	gas.Log(gas.Debug, "deleting session %x", id)
+	return exec("DELETE FROM books.sessions WHERE id = $1", id)
 }
 
 func (DBStore) UserAuthData(username string) (pass, salt []byte, err error) {

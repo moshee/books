@@ -31,13 +31,13 @@
 
 {{ define "series-list-by-added" }}<table>
 	<thead>
-    <tr><th class=la>Title</th><th class=ll><!--rating--></th><th class=lm><abbr title="Demographic">Dem<span class=unimportant>ographic</span><span class=important>.</span></abbr></th><th class=lt>Tags</th><th class=ly>Year</th><th class=ld>Added</th></tr>
+    <tr><th class=la>Title</th><th><!--rating--></th><th class=lm><abbr title="Demographic">Dem<span class=unimportant>ographic</span><span class=important>.</span></abbr></th><th class=lt>Tags</th><th class=ly>Year</th><th class=ld>Added</th></tr>
 	</thead>
 	<tbody>
 		{{ range . }}
 		<tr{{ if .NSFW }} class=nsfw {{ end }}>
 			<td class=la><a href="/series/{{ .Id }}">{{ .Title }}</a></td>
-			<td class=ll><ul title="{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }} / 5{{ else }}Not rated{{ end }}" class=rating-stars>{{ range .RatingStars }}<li class={{ . }}></li>{{ end }}</ul></td>
+			<td><ul title="{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }} / 5{{ else }}Not rated{{ end }}" class=rating-stars>{{ range .RatingStars }}<li class={{ . }}></li>{{ end }}</ul></td>
       <td class=lm>{{ .Demographic }}</td>
 			<td class=lt>{{ $s := len .Tags.Ids }}{{ with $tags := .LimitedTags 3 }}{{ range $k, $v := $tags.Ids }}<a class=tag href="/tag/{{ index $tags.Names $k | urlquery }}">{{ index $tags.Names $k }}</a>{{ end }}{{ if len $tags.Ids | gt $s }}<span class=tag>···</span>{{ end }}{{ end }}</td>
 			<td class=ly>{{ .Vintage }}</td>
