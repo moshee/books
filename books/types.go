@@ -271,7 +271,6 @@ func (self *BookSeries) Characters() []Character {
 		gas.Log(gas.Warning, "BookSeries.Characters: %v", err)
 		return nil
 	}
-	println(len(cs))
 	return cs
 }
 
