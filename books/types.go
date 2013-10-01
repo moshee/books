@@ -256,7 +256,7 @@ type BookSeries struct {
 }
 
 func (self *BookSeries) Related() (r []RelatedSeries) {
-	err := gas.Query(&r, "SELECT * FROM related_series_view WHERE series_id = $1", self.Id)
+	err := gas.Query(&r, "SELECT * FROM books.related_series_view WHERE series_id = $1", self.Id)
 	if err != nil {
 		gas.Log(gas.Warning, "BookSeries.Related: %v", err)
 		return nil
@@ -265,8 +265,8 @@ func (self *BookSeries) Related() (r []RelatedSeries) {
 }
 
 func (self *BookSeries) Characters() []Character {
-	cs := make([]Character, 3)
-	err := gas.Query(&cs, "SELECT * FROM series_characters WHERE series_id = $1", self.Id)
+	cs := make([]Character, 0)
+	err := gas.Query(&cs, "SELECT * FROM books.series_characters WHERE series_id = $1", self.Id)
 	if err != nil {
 		gas.Log(gas.Warning, "BookSeries.Characters: %v", err)
 		return nil

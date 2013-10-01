@@ -97,7 +97,7 @@ CREATE TABLE related_series (
     relation          integer NOT NULL
 );
 
-CREATE TABLE related_series_view AS
+CREATE VIEW related_series_view AS
     SELECT
         s.id     series_id,
         rs.id    related_id,
@@ -109,7 +109,6 @@ CREATE TABLE related_series_view AS
         related_series r
     WHERE s.id  = r.series_id
       AND rs.id = r.related_series_id;
-
 
 --
 -- Releases and Translators
@@ -291,8 +290,8 @@ CREATE VIEW series_characters AS
         r.type,
         r.role
     FROM
-        books.characters c,
-        books.characters_roles r
+        characters c,
+        characters_roles r
     WHERE c.id = r.character_id
     ORDER BY r.type;
 
@@ -307,23 +306,6 @@ CREATE TABLE related_characters (
     related_character_id integer NOT NULL REFERENCES characters,
     relation             integer NOT NULL REFERENCES characters_relation_kinds
 );
-
-CREATE VIEW series_characters AS
-    SELECT
-        c.id,
-        c.name,
-        c.native_name,
-        c.sex,
-        c.picture,
-        cr.type character_type,
-        cr.role character_role,
-        s.id series_id
-    FROM
-        characters c,
-        characters_roles cr,
-        book_series s
-    WHERE c.id = cr.character_id
-      AND s.id = cr.series_id;
 
 --
 -- User-submitted tags and voting

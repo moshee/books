@@ -21,6 +21,9 @@ func main() {
 
 	gas.New().
 		Get("/static/{path}", StaticHandler).
+		Get("/img/u/t/{img}", placeholdit(48, 48)).
+		Get("/img/c/{img}", placeholdit(320, 481)).
+		Get("/img/char/t/{img}", placeholdit(64, 64)).
 		Get("/series/{id}", books.SeriesPage).
 		Post("/login", books.Login).
 		Get("/login", goHome).
@@ -146,4 +149,10 @@ func add(n ...int) (sum int) {
 		sum += i
 	}
 	return
+}
+
+func placeholdit(w, h int) func(*gas.Gas) {
+	return func(g *gas.Gas) {
+		g.Redirect(fmt.Sprintf("http://placehold.it/%dx%d", w, h), 303)
+	}
 }
