@@ -1,0 +1,64 @@
+#series {
+	#main {
+		h1 {
+			font-size: 32px;
+			text-align: center;
+		}
+		h2 {
+			font-size: 18px;
+			text-align: center;
+			font-family: ryo gothic plusn m, kozuka gothic pr6n m, meiryo, sans-serif;
+			margin-bottom: 64px;
+		}
+	}
+
+	#info {
+		padding-right: 32px;
+
+		.cover {
+			width: 160px;
+			height: 240px;
+			display: inline-block;
+			margin-right: 32px;
+		}
+
+		.cover.missing {
+			@include emphasis;
+			color: #ddd;
+			line-height: 240px;
+			text-align: center;
+			background: $grey0;
+		}
+
+		table {
+			display: inline-block;
+			width: calc(100% - 195px);
+			vertical-align: top;
+
+			th {
+				@include emphasis;
+				color: #666;
+				font-size: 14px;
+				text-align: right;
+				padding: 2px 8px 2px 0;
+			}
+			td {
+				padding: 2px 0 2px 8px;
+			}
+
+			td small {
+				display: block;
+				color: #888;
+				font-size: 13px;
+			}
+		}
+		#summary {
+			margin-top: 1px;
+		}
+	}
+
+	#info, #details {
+		float: left;
+		width: 50%;
+	}
+}

@@ -1,0 +1,29 @@
+{{ define "feed" }}
+<div class=feed>
+  <div class=feed-title-block>
+    <h2>{{ .Title }}</h2>
+  </div>
+  <ul>
+  {{ range $i, $item := .Items }}
+    <li>{{ $.Render $i }}</li>
+  {{ end }}
+  </ul>
+</div>
+{{ end }}
+
+{{ define "feed-release" }}
+<h3><a href=/series/{{ .BookSeries.Id }}>{{ .Title }}</a>{{ if .Permalink }}<a class=feed-permalink href="{{ .Permalink }}"></a>{{ end }}</h3>
+<div class=release-item>
+  {{ if index .Chapters.Volumes 0 }}<div class="volume flex-shrink"><span class=hidden>v. </span>{{ collapse_range .Chapters.Volumes }}</div>{{ end }}
+  <div class="chapter flex-shrink"><span class=hidden>c. </span>{{ collapse_range .Chapters.Nums }}</div>
+  <div class="group-names flex-grow">
+    by
+    {{ $l := len .TranslationGroups.Ids | add -1 }}
+    {{ range $i, $id := .TranslationGroups.Ids }}
+    <a href=/group/{{ $id }}>{{ index $.TranslationGroups.Names $i }}</a>
+    {{ if ne $i $l }}+{{ end }}
+    {{ end }}
+  </div>
+  <time class=flex-shrink>{{ ago .ReleaseDate }}</time>
+</div>
+{{ end }}

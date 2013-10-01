@@ -391,6 +391,7 @@ type Release struct {
 	Notes         sql.NullString `sql:"release_notes"`
 	IsLastRelease bool
 	Extra         sql.NullString
+	Permalink     string
 
 	*Chapters
 	Padding int

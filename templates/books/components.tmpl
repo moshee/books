@@ -1,127 +1,70 @@
-{{ define "release-list-by-added" }}
-{{ if . }}
-<table>
-	<thead>
-    <tr><th class=la>Title</th><th class=lv><img src=/static/volume.svg width=16 height=16></th><th class=lc><img src=/static/chapter.svg width=16 height=16></th><th class=ll><!--language--></th><th class=lg>Group</th><th class=ld>Added</th></tr>
-	</thead>
-	<tbody>
-		{{ range . }}
-		<tr>
-			<td class=la><a href="/series/{{ .BookSeries.Id }}">{{ .BookSeries.Title }}</a></td>
-      <td class=lv>{{ collapse_range .Chapters.Volumes }}</td>
-			<td class=lc>{{ collapse_range .Chapters.Nums }}</td>
-      <td class=ll><span class=lang-code>{{ .Language }}</span></td>
-      <td class=lg>
-        {{ $len := len .TranslationGroups.Ids | add -1 }}
-        {{ $groups := .TranslationGroups }}
-        {{ range $k, $name := .TranslationGroups.Names }}
-        <a href="/group/{{ index $groups.Ids $k }}">{{ $name }}</a>
-        {{ if lt $k $len }} &amp; {{ end }}
-        {{ end }}
-      </td>
-      <td class=ld><time datetime="{{ .ReleaseDate.Format "2006-01-02T15:04:05-0700" }}">{{ .ReleaseDate | ago }}</time></td>
-		</tr>
-		{{ end }}
-	</tbody>
-</table>
-{{ else }}
-<p class=tumbleweed>Nothing to see here.</p>
-{{ end }}
-{{ end }}
-
-{{ define "series-list-by-added" }}<table>
-	<thead>
-    <tr><th class=la>Title</th><th><!--rating--></th><th class=lm><abbr title="Demographic">Dem<span class=unimportant>ographic</span><span class=important>.</span></abbr></th><th class=lt>Tags</th><th class=ly>Year</th><th class=ld>Added</th></tr>
-	</thead>
-	<tbody>
-		{{ range . }}
-		<tr{{ if .NSFW }} class=nsfw {{ end }}>
-			<td class=la><a href="/series/{{ .Id }}">{{ .Title }}</a></td>
-			<td><ul title="{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }} / 5{{ else }}Not rated{{ end }}" class=rating-stars>{{ range .RatingStars }}<li class={{ . }}></li>{{ end }}</ul></td>
-      <td class=lm>{{ .Demographic }}</td>
-			<td class=lt>{{ $s := len .Tags.Ids }}{{ with $tags := .LimitedTags 3 }}{{ range $k, $v := $tags.Ids }}<a class=tag href="/tag/{{ index $tags.Names $k | urlquery }}">{{ index $tags.Names $k }}</a>{{ end }}{{ if len $tags.Ids | gt $s }}<span class=tag>···</span>{{ end }}{{ end }}</td>
-			<td class=ly>{{ .Vintage }}</td>
-      <td class=ld><time datetime="{{ .DateAdded.Format "2006-01-02T15:04:05-0700" }}">{{ .DateAdded.Format "02 Jan" }}</time></td>
-			</tr>
-		{{ end }}
-	</tbody>
-</table>
-{{ end }}
-
-{{ define "news-post" }}<article id=news-{{ .Id }}>
-	<h2><a href="/news/{{ .Id }}">{{ .Title }}</a></h2>
-	<div class=news-meta>by <a href="/user/{{ .User.Id }}">{{ .User.Name }}</a> on <time datetime="{{ .DatePosted.Format "2006-01-02T15:04:05-0700" }}">{{ .DatePosted.Format "2006-01-02" }}</time> under <a href="/news/category/{{ .Category | urlquery }}">{{ .Category }}</a></div>
-	<div class=post-body>
-	{{ smarkdown .Body }}
-	</div>
-</article>
-{{ end }}
-
-{{ define "login-pane"}}{{ with . }}
-      <section id=logged-in class=auth>
-        <h1>You are logged in as:</h1>
-        <button id=logout-button>Log out</button>
-        <nav>
-          <ul>
-            <li id=profile-link>{{ if .Avatar }}<img href="/img/u/t/{{ .Id }}.jpg" width=32 height=32>{{ end }}<a href="/user/{{ .Id }}">{{ .Name }}</a></li>
-          </ul>
-        </nav>
-      </section>
-      {{ else }}
-      <section id=login class=auth>
-        <h1>Sign in</h1>
-        <form>
-        <input required id=user type=text placeholder="Username or email">
-        <input required id=pass type=password placeholder="Password">
-        <button id=login-button>Let me in!</button>
-        <button name=submit id=register-button>Register an account</button>
-        </form>
-      </section>
-      {{ end }}
-{{ end }}
-
-{{ define "search-browse" }}
-      <section id=search>
-        <ul class=filter-entry>
-          <li>
-            <label>
-              <select class=filter-type dir=rtl>
-                <option value=title>Title</option>
-                <option value=tags>Tags</option>
-                <option value=demographic>Demographic</option>
-                <option value=author>Author</option>
-                <option value=magazine>Magazine</option>
-                <option value=publisher>Publisher</option>
-              </select>
-            </label>
-            <input type=search class=filter-content placeholder="Keywords...">
-            <button class=remove-filter title="Remove this search filter">×</button>
-          </li>
+{{ define "header-bar" }}
+	<header>
+		<h1><a href="/">本物語。</a></h1>
+		<section id=search-bar>
+			<form id=search>
+				<ul>
+					<li>
+						<label>
+							<select class=filter-type dir=rtl>
+								<option value=title>Title</option>
+								<option value=tags>Tags</option>
+                <option value=group>Group</option>
+								<option value=author>Author</option>
+								<option value=magazine>Magazine</option>
+								<option value=publisher>Publisher</option>
+								<option value=demographic>Demographic</option>
+							</select>
+						</label>
+						<input tabindex=1 type=text class=filter-content placeholder="Keywords...">
+					</li>
+				</ul>
+				<button>Search</button>
+			</form>
+		</section>
+    <div id=browse>
+      <h2>Browse<em>→</em></h2>
+      <nav>
+        <ul>
+          <li><a href="/series">Series</a></li>
+          <li><a href="/tags">Tags</a></li>
+          <li><a href="/demographics">Demographics</a></li>
+          <li><a href="/authors">Authors</a></li>
+          <li><a href="/magazines">Magazines</a></li>
+          <li><a href="/publishers">Publishers</a></li>
+          <li><a href="/groups">Groups</a></li>
         </ul>
-        <button id=search-button title="Execute search">Search <em>→</em></button>
-        <button id=add-filter title="Add search filter">+</button>
-        <hr class=clear>
-      </section>
-      <section id=browse-links>
-        <nav id=browse>
-          <h1>Browse</h1>
-          <ul>
-            <li><a href=/series>Series</a></li>
-            <li><a href=/authors>Authors</a></li>
-            <li><a href=/magazines>Magazines</a></li>
-            <li><a href=/publishers>Publishers</a></li>
-            <li><a href=/translators>Translators</a></li>
-            <li><a href=/releases>Releases</a></li>
-          </ul>
-        </nav>
-        <nav id=filters>
-          <h1>Filter by...</h1>
-          <ul>
-            <li><a href=/demographics>Demographics</a></li>
-            <li><a href=/tags>Tags</a></li>
-            <li><a href=/vintages>Vintage</a></li>
-          </ul>
-        </nav>
-        <hr class=clear>
-      </section>
+      </nav>
+    </div>
+		<section id=header-user-info>
+		{{ if . }}
+			<div id=name><a href=/user/{{ .Id }}>{{ .Name }}</a></div>
+			{{ if .Avatar }}
+			<img src=/img/u/t/{{ .Id }}.jpg>
+			{{ else }}
+			<img src=/img/u/t/0.jpg>
+			{{ end }}
+		{{ else }}
+			<input tabindex=2 name=user type=text placeholder="Username or email">
+			<input tabindex=3 name=pass type=password placeholder=Password>
+			<button onclick=login()>Log in</button>
+		{{ end }}
+		</section>
+	</header>
+{{ end }}
+
+{{ define "footer" }}
+	<footer>
+		<div id=footer-logo><a href="http://displaynone.us"></a></div>
+		<div id=footer-text>
+			<h1>Copyright © 2013 <code><a href="http://displaynone.us">display: <b>none</b>;</a></code>.</h1>
+			<ul>
+				<li><a href="/about">About</a></li>
+				<li><a href="/legal">Legal</a></li>
+				<li><a href="https://github.com/moshee/books">Hacking</a></li>
+				<li><a href=#>IRC</a></li>
+				<li><a href="/help">Help</a></li>
+			</ul>
+		</div>
+	</footer>
 {{ end }}

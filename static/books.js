@@ -254,11 +254,13 @@
 			logoutButton.addEventListener('click', logout, false);
 		}
 
+	}
+
+	window.addEventListener('load', main, true);
+	window.addEventListener('load', function() {
 		var lr = document.createElement('script');
 		lr.async = true;
 		lr.src = 'http://' + document.domain + ':8080/livereload.js';
 		$('head').appendChild(lr);
-	}
-
-	window.addEventListener('load', main, true);
+	}, true);
 })();
