@@ -76,3 +76,11 @@
   {{ if ne $i $l }}+{{ end }}
   {{ end }}
 {{ end }}
+
+{{ define "series-character" }}
+<li>
+  {{ if .Picture }}<img href=/img/c/t/{{ .Id }}.jpg>{{ else }}<img href=/img/c/t/0.jpg>{{ end }}
+  <h4><a href=/character/{{ .Id }}>{{ .Name }}</a></h4>
+  <p>{{ .CharacterType }}{{ if ne .CharacterRole 0 }} — {{ .CharacterRole }}{{ end }}</p>
+</li>
+{{ end }}

@@ -141,8 +141,8 @@ func (s ReadStatus) String() string {
 func (t CharacterType) String() string {
 	return []string{
 		"(Unknown role)",
-		"Main character",
-		"Secondary character",
+		"Main",
+		"Supporting",
 		"Appears",
 		"Cameo",
 	}[t]
@@ -254,7 +254,7 @@ func (self *BookSeries) Related() (r []RelatedSeries) {
 	return
 }
 
-func (self *BookSeries) Characters() (cs []Character) {
+func (self *BookSeries) Characters() (cs Characters) {
 	err := gas.Query(&cs, "SELECT * FROM books.series_characters WHERE series_id = $1", self.Id)
 	if err != nil {
 		gas.Log(gas.Warning, "BookSeries.Characters: %v", err)
@@ -516,16 +516,38 @@ type Character struct {
 	CharacterRole `sql:"role"`
 }
 
-func (self *Character) Age() int {
-	return 0
-}
-
 func (self *Character) IsMain() bool {
 	return self.CharacterType == 1
 }
 
 func (self *Character) CastIn() []CharacterAppearance {
 	panic("unimplemented")
+}
+
+type Characters []Character
+
+func (self Characters) Mains() (cs Characters) {
+	cs = make(Characters, 0)
+
+	for _, c := range self {
+		if c.IsMain() {
+			cs = append(cs, c)
+		}
+	}
+
+	return
+}
+
+func (self Characters) Others() (cs Characters) {
+	cs = make(Characters, 0)
+
+	for _, c := range self {
+		if !c.IsMain() {
+			cs = append(cs, c)
+		}
+	}
+
+	return
 }
 
 type CharacterAppearance struct {

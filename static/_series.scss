@@ -2,6 +2,7 @@
 	#main {
 		.title-block {
 			text-align: center;
+			margin-bottom: 32px;
 		}
 		h1 {
 			font-size: 32px;
@@ -11,8 +12,6 @@
 			font-family: ryo gothic plusn m, kozuka gothic pr6n m, meiryo, sans-serif;
 		}
 		ul.authors {
-			margin-bottom: 64px;
-
 			li {
 				@include emphasis;
 				font-size: 14px;
@@ -36,7 +35,7 @@
 		}
 
 		section {
-			margin-bottom: 32px;
+			margin-top: 32px;
 
 			h3 {
 				font-size: 24px;
@@ -97,6 +96,10 @@
 		}
 	}
 
+	#details {
+		padding-left: 32px;
+	}
+
 	#info, #details {
 		float: left;
 		width: 50%;
@@ -104,34 +107,46 @@
 
 	#series-releases table {
 		width: 100%;
+		font-size: 14px;
 
 		td {
-			padding: 2px 8px;
+			padding: 2px 4px;
 
-			&.tv {
-				background: url('/static/volume.svg') no-repeat top left;
-				@include chap-spec;
-				background-position: 0 5px;
+			&.tv, &.tc {
+				position: relative;
+				padding-left: 16px;
 			}
-
-			&.tc {
+			&.tv:before {
+				background: url('/static/volume.svg') no-repeat top left;
+			}
+			&.tc:before {
 				background: url('/static/chapter.svg') no-repeat top left;
-				@include chap-spec;
-				background-position: 0 5px;
+			}
+			&.tv:before, &.tc:before {
+				content: "";
+				background-size: 16px 16px;
+				height: 16px;
+				width: 16px;
+				position: absolute;
+				top: 50%;
+				left: 0;
+				margin-top: -8px;
 			}
 
 			&.tg {
-				font-size: 14px;
+				max-width: 200px;
 			}
 
 			&.tt {
 				text-align: right;
-				font-size: 14px;
 				color: #888;
+				width: 100px;
 			}
 		}
 	}
 
+	#reviews {
+	}
 	article.review {
 		margin-bottom: 32px;
 
@@ -153,6 +168,51 @@
 		.review-body {
 			p {
 				font-size: 14px;
+			}
+		}
+	}
+
+	#series-characters ul {
+		clear: both;
+
+		li {
+			display: inline-block;
+			width: 50%;
+			margin-bottom: 16px;
+
+			img {
+				width: 48px;
+				height: 48px;
+				float: left;
+				margin-right: 16px;
+			}
+
+			h4 {
+				font-size: 20px;
+				line-height: 28px;
+			}
+			p {
+				font-size: 14px;
+				line-height: 20px;
+			}
+		}
+
+		&.main-characters li {
+			width: 100%;
+
+			img {
+				width: 64px;
+				height: 64px;
+			}
+
+			h4 {
+				font-size: 24px;
+				line-height: 40px;
+			}
+
+			p {
+				font-size: 18px;
+				line-height: 24px;
 			}
 		}
 	}
