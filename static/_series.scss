@@ -1,14 +1,47 @@
 #series {
 	#main {
+		.title-block {
+			text-align: center;
+		}
 		h1 {
 			font-size: 32px;
-			text-align: center;
 		}
 		h2 {
 			font-size: 18px;
-			text-align: center;
 			font-family: ryo gothic plusn m, kozuka gothic pr6n m, meiryo, sans-serif;
+		}
+		ul.authors {
 			margin-bottom: 64px;
+
+			li {
+				@include emphasis;
+				font-size: 14px;
+				line-height: 20px;
+				color: #888;
+				
+				a {
+					font-size: 16px;
+					text-transform: capitalize;
+				}
+			}
+			li:first-child:before {
+				content: "by ";
+			}
+			li:after {
+				content: ",";
+			}
+			li:last-child:after {
+				content: "";
+			}
+		}
+
+		section {
+			margin-bottom: 32px;
+
+			h3 {
+				font-size: 24px;
+				margin-bottom: 8px;
+			}
 		}
 	}
 
@@ -24,7 +57,7 @@
 
 		.cover.missing {
 			@include emphasis;
-			color: #ddd;
+			color: #aaa;
 			line-height: 240px;
 			text-align: center;
 			background: $grey0;
@@ -52,13 +85,75 @@
 				font-size: 13px;
 			}
 		}
-		#summary {
-			margin-top: 1px;
+
+		#tags {
+			ul {
+
+				li {
+					float: left;
+					margin-right: 16px;
+				}
+			}
 		}
 	}
 
 	#info, #details {
 		float: left;
 		width: 50%;
+	}
+
+	#series-releases table {
+		width: 100%;
+
+		td {
+			padding: 2px 8px;
+
+			&.tv {
+				background: url('/static/volume.svg') no-repeat top left;
+				@include chap-spec;
+				background-position: 0 5px;
+			}
+
+			&.tc {
+				background: url('/static/chapter.svg') no-repeat top left;
+				@include chap-spec;
+				background-position: 0 5px;
+			}
+
+			&.tg {
+				font-size: 14px;
+			}
+
+			&.tt {
+				text-align: right;
+				font-size: 14px;
+				color: #888;
+			}
+		}
+	}
+
+	article.review {
+		margin-bottom: 32px;
+
+		.byline {
+			margin-bottom: 8px;
+		}
+
+		em {
+			font: normal 700 18px/0 normal;
+			font-family: $body-font;
+			//font-family: $heading-font;
+			letter-spacing: 2px;
+			
+			sub {
+				letter-spacing: 0;
+			}
+		}
+
+		.review-body {
+			p {
+				font-size: 14px;
+			}
+		}
 	}
 }

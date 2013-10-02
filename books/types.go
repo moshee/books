@@ -217,15 +217,6 @@ func (self *Tags) WeightClass(i int) int {
 	return int(255 * (1.0 - (3.0 / (w + 3.0))))
 }
 
-func (self *Tags) HasSpoilers() bool {
-	for _, s := range self.Spoilers {
-		if s {
-			return true
-		}
-	}
-	return false
-}
-
 type License struct {
 	Id           int    `sql:"licensor_id"`
 	Name         string `sql:"licensor_name"`
@@ -251,7 +242,6 @@ type BookSeries struct {
 	*Magazine
 	HasCover bool
 
-	*Tags
 	*License
 }
 
@@ -264,20 +254,61 @@ func (self *BookSeries) Related() (r []RelatedSeries) {
 	return
 }
 
-func (self *BookSeries) Characters() []Character {
-	cs := make([]Character, 0)
+func (self *BookSeries) Characters() (cs []Character) {
 	err := gas.Query(&cs, "SELECT * FROM books.series_characters WHERE series_id = $1", self.Id)
 	if err != nil {
 		gas.Log(gas.Warning, "BookSeries.Characters: %v", err)
 		return nil
 	}
-	return cs
+	return
 }
 
-func (self *BookSeries) Credits() []ProductionCredit {
-	panic("unimplemented")
+func (self *BookSeries) Reviews() (ratings []BookRating) {
+	err := gas.Query(&ratings, `
+		SELECT *
+		FROM   books.series_book_ratings
+		WHERE  series_id = $1
+		LIMIT  5`, self.Id)
+	if err != nil {
+		gas.Log(gas.Warning, "BookSeries.Reviews: %v", err)
+		return nil
+	}
+	return
 }
 
+func (self *BookSeries) Releases() (releases []Release) {
+	/*
+		err := gas.Query(&releases, `
+			SELECT *
+			FROM   books.series_releases
+			WHERE  series_id = $1
+			LIMIT  10`, self.Id)
+	*/
+	err := gas.Query(&releases, "SELECT * FROM books.recent_releases WHERE series_id = $1", self.Id)
+	if err != nil {
+		gas.Log(gas.Warning, "BookSeries.Releases: %v", err)
+	}
+	return
+}
+
+func (self *BookSeries) Credits() (credits []ProductionCredit) {
+	err := gas.Query(&credits, "SELECT * FROM books.series_credits WHERE series_id = $1", self.Id)
+	if err != nil {
+		gas.Log(gas.Warning, "BookSeries.Credits: %v", err)
+	}
+	return
+}
+
+func (self *BookSeries) Tags() (tags BookTags) {
+	err := gas.Query(&tags, "SELECT * FROM books.series_tags WHERE series_id = $1", self.Id)
+	if err != nil {
+		gas.Log(gas.Warning, "BookSeries.Tags: %v", err)
+	}
+
+	return
+}
+
+/*
 func (self *BookSeries) LimitedTags(n int) *Tags {
 	if self.Tags == nil || n > len(self.Tags.Ids) {
 		return self.Tags
@@ -290,6 +321,7 @@ func (self *BookSeries) LimitedTags(n int) *Tags {
 		}
 	}
 }
+*/
 
 func (self *BookSeries) RatingStars() []string {
 	if !self.AvgRating.Valid {
@@ -329,8 +361,10 @@ type Author struct {
 }
 
 type ProductionCredit struct {
-	*BookSeries
-	*Author
+	SeriesId  int
+	AuthorId  int
+	GivenName string
+	Surname   string
 	Credit
 }
 
@@ -519,11 +553,51 @@ type Link struct {
 }
 
 type BookTag struct {
-	Id int
-	*BookSeries
-	Name    string
-	Spoiler bool
-	Weight  int
+	Id       int
+	SeriesId int
+	Name     string
+	Spoiler  bool
+	Weight   int
+}
+
+func (self BookTag) Opacity() float32 {
+	w := float32(self.Weight)
+	if w > 0.0 {
+		// pretty close to 1.0 pretty fast (starts at y ~ 0.75 for
+		// x = 0)
+		return 1.0 - (2.0 / (w + 8.0))
+	} else {
+		// Almost linear down to around 0.3 for x = -5 (ends at
+		// y ~ 0.6 for x = 0)
+		return 1.0 - (5.0 / (w + 12.0))
+	}
+}
+
+func (self BookTag) Color() int {
+	w := float32(self.Weight)
+	if w < 0.0 {
+		return 0x444444
+	}
+
+	rg := 0x44
+	b := 0xff
+	f := 1.0 - (3.0 / (w + 3.0))
+
+	rg = int(float32(rg) * (1 - f))
+	b = int(float32(b) * f)
+
+	return rg<<16 | rg<<8 | b
+}
+
+type BookTags []BookTag
+
+func (self BookTags) HasSpoiler() bool {
+	for _, s := range self {
+		if s.Spoiler {
+			return true
+		}
+	}
+	return false
 }
 
 type BookTagConsensus struct {

@@ -68,3 +68,11 @@
 		</div>
 	</footer>
 {{ end }}
+
+{{ define "group-list" }}
+  {{ $l := len .Ids | add -1 }}
+  {{ range $i, $id := .Ids }}
+  <a href=/group/{{ $id }}>{{ index $.Names $i }}</a>
+  {{ if ne $i $l }}+{{ end }}
+  {{ end }}
+{{ end }}

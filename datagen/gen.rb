@@ -131,8 +131,8 @@ def tstz
 def string
   text $files[:lipsum].sample end
 
-def longstring(max=5)
-  text rand(1..max).times.map { $files[:lipsum].sample }.join(' ') end
+def longstring(range=1..5)
+  text rand(range).times.map { $files[:lipsum].sample }.join(' ') end
 
 def lang(bias='en', amt=nil)
   if !amt.nil? and rand < amt
