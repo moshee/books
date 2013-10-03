@@ -76,6 +76,16 @@ a {
 			font-size: 20px;
 		}
 	}
+
+	&.tag {
+		display: block;
+		float: left;
+		padding: 0 2px;
+		margin: 0 4px 4px 0;
+		border: 1px solid #ddd;
+		border-radius: 3px;
+		font-size: 12px;
+	}
 }
 
 p {
@@ -330,8 +340,9 @@ header {
 	}
 
 	.feed {
-		padding-top: 16px;
-		width: 512px;
+		padding: 16px;
+		width: 50%;
+		float: left;
 
 		.feed-title-block {
 			padding: 16px 0;
@@ -355,7 +366,7 @@ header {
 			}
 		}
 
-		.release-item {
+		.feed-item {
 			display: flex;
 			line-height: 16px;
 			font-size: 14px;
@@ -367,6 +378,14 @@ header {
 				&:last-child {
 					padding-right: 0;
 				}
+			}
+
+			.demographic {
+				@include emphasis;
+			}
+
+			.tags {
+				flex-basis: 60%;
 			}
 
 			.volume {
@@ -384,6 +403,27 @@ header {
 				font-size: 13px;
 			}
 		}
+	}
+}
+
+.feed-news {
+	padding-bottom: 16px !important;
+	margin-bottom: 8px;
+
+	h3 em {
+		font-style: normal;
+		font-size: 14px;
+		text-transform: uppercase;
+	}
+
+	.post-meta {
+		font-size: 13px;
+		color: #888;
+		margin-bottom: 8px;
+	}
+
+	p {
+		font-size: 14px;
 	}
 }
 

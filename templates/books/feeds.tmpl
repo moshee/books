@@ -5,7 +5,7 @@
   </div>
   <ul>
   {{ range $i, $item := .Items }}
-    <li>{{ $.Render $i }}</li>
+    <li class={{ $item.Template }}>{{ $.Render $i }}</li>
   {{ end }}
   </ul>
 </div>
@@ -13,10 +13,27 @@
 
 {{ define "feed-release" }}
 <h3><a href=/series/{{ .BookSeries.Id }}>{{ .Title }}</a>{{ if .Permalink }}<a class=feed-permalink href="{{ .Permalink }}"></a>{{ end }}</h3>
-<div class=release-item>
+<div class=feed-item>
   {{ if index .Chapters.Volumes 0 }}<div class="volume flex-shrink"><span class=hidden>v. </span>{{ collapse_range .Chapters.Volumes }}</div>{{ end }}
   <div class="chapter flex-shrink"><span class=hidden>c. </span>{{ collapse_range .Chapters.Nums }}</div>
   <div class="group-names flex-grow">by {{ template "group-list" .TranslationGroups }}</div>
-  <time class=flex-shrink>{{ ago .ReleaseDate }}</time>
+  <time class=flex-shrink datetime="{{ .ReleaseDate | datetime }}">{{ ago .ReleaseDate }}</time>
+</div>
+{{ end }}
+
+{{ define "feed-news" }}
+<h3><em>{{ .Category }}: </em><a href=/news/{{ .Id }}>{{ .Title }}</a></h3>
+<div class=post-meta><a href=/user/{{ .User.Id }}>{{ .User.Name }}</a> on <time datetime="{{ .DatePosted | datetime }}">{{ .DatePosted.Format "2 Jan 2006" }}</time></div>
+<div class=post-content>
+  {{ smarkdown .Body }}
+</div>
+{{ end }}
+
+{{ define "feed-series" }}
+<h3><a href=/series/{{ .Id }}>{{ .Title }}</a></h3>
+<div class=feed-item>
+  <div class="demographic flex-shrink"><a href=/demographic/{{ .Demographic.URLString }}>{{ .Demographic }}</a></div>
+  <div class="tags flex-grow">{{ template "tag-list" .TagArr }}</div>
+  <time class=flex-shrink datetime="{{ .DateAdded | datetime }}">{{ .DateAdded.Format "2 Jan" }}</time>
 </div>
 {{ end }}

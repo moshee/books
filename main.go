@@ -18,11 +18,14 @@ func main() {
 	gas.TemplateFunc("books", "ago", ago)
 	gas.TemplateFunc("books", "collapse_range", collapse_range)
 	gas.TemplateFunc("books", "add", add)
+	gas.TemplateFunc("books", "datetime", func(t time.Time) string {
+		return t.Format("2006-02-01T15:04:05Z0700")
+	})
 
 	gas.New().
 		Get("/static/{path}", StaticHandler).
-		Get("/img/u/t/{img}", placeholdit(48, 48)).
-		Get("/img/c/{img}", placeholdit(320, 481)).
+		Get("/img/u/t/{img}", placeholdit(32, 32)).
+		Get("/img/c/{img}", placeholdit(160, 240)).
 		Get("/img/char/t/{img}", placeholdit(64, 64)).
 		Get("/series/{id}", books.SeriesPage).
 		Post("/login", books.Login).

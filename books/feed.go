@@ -33,4 +33,6 @@ type FeedItem interface {
 	Template() string
 }
 
-func (Release) Template() string { return "feed-release" }
+func (Release) Template() string    { return "feed-release" }
+func (NewsPost) Template() string   { return "feed-news" }
+func (BookSeries) Template() string { return "feed-series" }

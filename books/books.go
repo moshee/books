@@ -1,28 +1,22 @@
 package books
 
 import (
-	//"database/sql"
 	"github.com/moshee/gas"
 	//"github.com/argusdusty/Ferret"
-	//	"path"
-	"sort"
 	"strconv"
 )
 
 func Index(g *gas.Gas) {
-	releases := make([]Release, 20)
-	if err := gas.Query(&releases, "SELECT * FROM books.recent_releases LIMIT 20"); err != nil {
+	releases := make([]Release, 0, 15)
+	if err := gas.Query(&releases, "SELECT * FROM books.recent_releases LIMIT 15"); err != nil {
 		g.Error(500, err)
 		return
-	}
-	for _, r := range releases {
-		sort.Sort(r.TranslationGroups)
 	}
 
 	releaseFeed := &Feed{
 		"Latest Releases",
 		"",
-		g.User().(*User),
+		nil,
 		make([]FeedItem, len(releases)),
 	}
 
@@ -30,25 +24,45 @@ func Index(g *gas.Gas) {
 		releaseFeed.Items[i] = release
 	}
 
-	/*
-		series := make([]BookSeries, 10)
-		if err := gas.Query(&series, "SELECT * FROM books.latest_series LIMIT 10"); err != nil {
-			g.Error(500, err)
-			return
-		}
+	series := make([]BookSeries, 0, 15)
+	if err := gas.Query(&series, "SELECT * FROM books.latest_series LIMIT 15"); err != nil {
+		g.Error(500, err)
+		return
+	}
 
-		news := new(NewsPost)
-		if err := gas.QueryRow(news, "SELECT * FROM books.latest_news LIMIT 1"); err != nil {
-			g.Error(500, err)
-			return
-		}
-	*/
+	seriesFeed := &Feed{
+		"New Titles",
+		"",
+		nil,
+		make([]FeedItem, len(series)),
+	}
+
+	for i, s := range series {
+		seriesFeed.Items[i] = s
+	}
+
+	news := make([]NewsPost, 0, 3)
+	if err := gas.Query(&news, "SELECT * FROM books.latest_news LIMIT 3"); err != nil {
+		g.Error(500, err)
+		return
+	}
+
+	newsFeed := &Feed{
+		"Site News",
+		"",
+		nil,
+		make([]FeedItem, len(news)),
+	}
+
+	for i, s := range news {
+		newsFeed.Items[i] = s
+	}
 
 	g.Render("books", "index", &struct {
 		Feeds []*Feed
 		User  *User
 	}{
-		[]*Feed{releaseFeed},
+		[]*Feed{releaseFeed, seriesFeed, newsFeed},
 		g.User().(*User),
 	})
 

@@ -3,8 +3,6 @@
 		<h1><a href="/">本物語。</a></h1>
 		<section id=search-bar>
 			<form id=search>
-				<ul>
-					<li>
           <!--
 						<label>
 							<select class=filter-type dir=rtl>
@@ -17,9 +15,7 @@
 								<option value=demographic>Demographic</option>
 							</select>
             </label>-->
-						<input tabindex=1 type=text class=filter-content placeholder="Keywords...">
-					</li>
-				</ul>
+        <input tabindex=1 type=text class=filter-content placeholder="Keywords...">
 				<button type=button id=search-button>Search</button>
         <button type=button id=advanced-search-button>More options...</button>
 			</form>
@@ -84,6 +80,10 @@
   <a href=/group/{{ $id }}>{{ index $.Names $i }}</a>
   {{ if ne $i $l }}+{{ end }}
   {{ end }}
+{{ end }}
+
+{{ define "tag-list" }}
+{{ range .Names }}<a class=tag href="/tag/{{ . | urlquery }}">{{ . }}</a>{{ end }}
 {{ end }}
 
 {{ define "series-character" }}

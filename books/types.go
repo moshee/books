@@ -42,6 +42,17 @@ func (d Demographic) String() string {
 	}[d]
 }
 
+func (d Demographic) URLString() string {
+	return []string{
+		"shonen",
+		"shojo",
+		"seinen",
+		"josei",
+		"kodomo",
+		"seijin",
+	}[d]
+}
+
 func (s Sex) String() string {
 	return []string{
 		"Male",
@@ -242,7 +253,7 @@ type BookSeries struct {
 	*Magazine
 	HasCover bool
 
-	*License
+	TagArr *Tags
 }
 
 func (self *BookSeries) Related() (r []RelatedSeries) {

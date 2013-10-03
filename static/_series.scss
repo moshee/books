@@ -72,10 +72,10 @@
 				color: #666;
 				font-size: 14px;
 				text-align: right;
-				padding: 2px 8px 2px 0;
+				padding-right: 8px;
 			}
 			td {
-				padding: 2px 0 2px 8px;
+				padding-left: 8px;
 			}
 
 			td small {
@@ -211,6 +211,7 @@
 			img {
 				width: 64px;
 				height: 64px;
+				margin-right: 16px;
 			}
 
 			h4 {
