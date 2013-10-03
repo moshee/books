@@ -90,6 +90,21 @@ CREATE TABLE production_credits (
     credit    integer NOT NULL
 );
 
+CREATE VIEW series_credits AS
+    SELECT
+        s.id series_id,
+        a.id author_id,
+        a.given_name,
+        a.surname,
+        pc.credit
+    FROM
+        book_series        s,
+        authors            a,
+        production_credits pc
+    WHERE s.id = pc.series_id
+      AND a.id = pc.author_id
+    ORDER BY pc.credit, a.surname;
+
 CREATE TABLE related_series (
     id                serial  PRIMARY KEY,
     series_id         integer NOT NULL REFERENCES book_series,
@@ -155,6 +170,26 @@ CREATE TABLE releases_chapters (
     release_id integer NOT NULL REFERENCES releases,
     chapter_id integer NOT NULL REFERENCES chapters
 );
+
+--CREATE VIEW series_releases AS
+--    SELECT
+--        r.*,
+--        array_agg(ch.volume ORDER BY ch.num) chapter_volumes,
+--        array_agg(ch.num    ORDER BY ch.num) chapter_nums,
+--        array_agg(t.id      ORDER BY t.id)   translator_ids,
+--        array_agg(t.name    ORDER BY t.id)   translator_names
+--    FROM
+--        releases             r,
+--        releases_translators rt,
+--        translation_groups   t,
+--        releases_chapters    rc,
+--        chapters             ch
+--    WHERE r.id  = rt.release_id
+--      AND t.id  = rt.translator_id
+--      AND r.id  = rc.release_id
+--      AND ch.id = rc.chapter_id
+--    GROUP BY r.*
+--    ORDER BY r.release_date DESC;
 
 CREATE VIEW recent_releases AS
     SELECT
@@ -385,10 +420,7 @@ CREATE VIEW series_page AS
         COALESCE(m.magazine_title, '(none)') magazine_title,
         COALESCE(m.publisher_id, 0)          publisher_id,
         COALESCE(m.publisher_name, '(none)') publisher_name,
-        s.has_cover,
-        array_agg(btn.name   ORDER BY bt.weight DESC) tag_names,
-        array_agg(bt.weight  ORDER BY bt.weight DESC) tag_weights,
-        array_agg(bt.spoiler ORDER BY bt.weight DESC) tag_spoilers
+        s.has_cover
     FROM
         book_series s
         LEFT JOIN (
@@ -401,31 +433,21 @@ CREATE VIEW series_page AS
                 magazines  ms,
                 publishers p
             WHERE p.id = ms.publisher_id
-        ) m USING ( magazine_id ),
-        book_tags       bt,
-        book_tag_names  btn
-    WHERE bt.tag_id = btn.id
-      AND s.id      = bt.series_id
-    GROUP BY
-        s.id,
-        s.title,
-        s.native_title,
-        s.other_titles,
-        s.kind,
-        s.summary,
-        s.vintage,
-        s.date_added,
-        s.last_updated,
-        s.finished,
-        s.nsfw,
-        s.avg_rating,
-        s.rating_count,
-        s.demographic,
-        m.magazine_id,
-        m.magazine_title,
-        m.publisher_id,
-        m.publisher_name,
-        s.has_cover;
+        ) m USING ( magazine_id );
+
+CREATE VIEW series_tags AS
+    SELECT
+        s.id series_id,
+        btn.name,
+        bt.spoiler,
+        bt.weight
+    FROM
+        book_series s,
+        book_tags bt,
+        book_tag_names btn
+    WHERE s.id   = bt.series_id
+      AND btn.id = bt.tag_id
+    ORDER BY bt.weight DESC, btn.name;
 
 
 CREATE TABLE character_tag_names (
@@ -529,6 +551,24 @@ CREATE TABLE book_ratings (
     review    text,
     rate_date timestamptz NOT NULL
 );
+
+CREATE VIEW series_book_ratings AS
+    SELECT
+        r.id,
+        u.id user_id,
+        u.name,
+        s.id series_id,
+        r.rating,
+        r.review,
+        r.rate_date
+    FROM
+        books.book_ratings r,
+        books.users        u,
+        books.book_series  s
+    WHERE r.series_id = s.id
+      AND r.user_id   = u.id
+      AND r.review    IS NOT NULL
+    ORDER BY r.rate_date DESC;
 
 CREATE TABLE translator_ratings (
     id            serial      PRIMARY KEY,

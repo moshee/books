@@ -6,7 +6,7 @@ INSERT INTO users VALUES
 	( DEFAULT, 'moshee@displaynone.us', 'moshee', '\x8c83c69a7cdc85a1ed602e443621aec8badb18c7ba03df09a0e20859acda4afb', '\x9cd6009f8b52575f07a12944dcec3e49', 30, 10, 'ザー・会長', <%= tstz %>, 'now'::timestamptz, true, true),
 	( DEFAULT, 'deu@pomf.eu', 'deu', <%= bytea %>, <%= bytea %>, 30, 10, 'hi my name is deu and I have bad taste', <%= tstz %>, 'now'::timestamptz, true, true),
 	( DEFAULT, 'franz@gj-bu.com', 'franz', <%= bytea %>, <%= bytea %>, 30, 10, 'constantly eating foods', <%= tstz %>, 'now'::timestamptz, true, true),
-	<%= rec(100) { ['DEFAULT', email, text(/[:first_name:]\d{0,4}/.gen), bytea, bytea, (if rand > 0.05 then 1 else 0 end), rand(0..10), (null or longstring), tstz, tstz, bool, bool(0.9)] } %>
+	<%= rec(100) { ['DEFAULT', email, text(/[:first_name:]\d{0,4}/.gen), bytea, bytea, (if rand > 0.05 then 1 else 0 end), rand(0..10), (null or longstring(1..7)), tstz, tstz, bool, bool(0.9)] } %>
 
 INSERT INTO publishers VALUES
 	( DEFAULT, 'Kodansha', <%= tstz %>, NULL ),
@@ -34,7 +34,7 @@ INSERT INTO book_series VALUES
 	( DEFAULT, 'Girl Meets Bear', 'くまみこ', NULL, 0, 'I''m not really sure myself', 2013, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 2, 5 , true ),
 	( DEFAULT, 'Sunshine Sketch', 'ひだまりスケッチ', NULL, 0, 'X''___________''X)', 2004, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 2, 4 , true ),
 	( DEFAULT, 'Let''s have a meal together!', 'ごはん しよ！', NULL, 0, 'food', 2012, <%= tstz %>, <%= tstz %>, false, false, NULL, 0, 2, 5 , true ),
-	<%= rec(150) { ['DEFAULT', sample(:products), text(/[:ja:]{3,12}/.gen), nil, rand(2), longstring(4), rand(1950..2013), tstz, tstz, bool(0.3), bool(0.1), nil, 0, rand(5), (null(0.1) or rand(1..55)), bool] } %>
+	<%= rec(150) { ['DEFAULT', sample(:products), text(/[:ja:]{3,12}/.gen), nil, rand(2), longstring(2..8), rand(1950..2013), tstz, tstz, bool(0.3), bool(0.1), nil, 0, rand(5), (null(0.1) or rand(1..55)), bool] } %>
 
 INSERT INTO series_licenses VALUES
 <%= rec(30) { ['DEFAULT', rand(1..159), rand(1..55), country, tstz] } %>
@@ -205,10 +205,10 @@ INSERT INTO filtered_character_tags (user_id, tag_id) VALUES
 <%= rec(50) { [rand(1..103), rand(1..sizes[:character_tags])] } %>
 
 INSERT INTO book_ratings VALUES
-<%= rec(1000) { ['DEFAULT', rand(1..103), rand(1..159), rand(1..5), (null(0.99) or longstring), tstz] } %>
+<%= rec(3000) { ['DEFAULT', rand(1..103), rand(1..159), rand(1..5), (null(0.8) or longstring(1..8)), tstz] } %>
 
 INSERT INTO translator_ratings VALUES
-<%= rec(200) { ['DEFAULT', rand(1..103), rand(1..54), rand(1..5), (null(0.99) or longstring), tstz] } %>
+<%= rec(200) { ['DEFAULT', rand(1..103), rand(1..54), rand(1..5), (null(0.99) or longstring(1..8)), tstz] } %>
 
 INSERT INTO link_kinds (name) VALUES
     ( 'Twitter' ),
@@ -240,6 +240,6 @@ INSERT INTO news_categories (name) VALUES
     ( 'Poll' );
 
 INSERT INTO news_posts VALUES
-<%= rec(20) { ['DEFAULT', rand(1..3), rand(1..4), tstz, string, longstring] } %>
+<%= rec(20) { ['DEFAULT', rand(1..3), rand(1..4), tstz, string, longstring(1..9)] } %>
 
 END;

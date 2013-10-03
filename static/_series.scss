@@ -1,0 +1,227 @@
+#series {
+	#main {
+		.title-block {
+			text-align: center;
+			margin-bottom: 32px;
+		}
+		h1 {
+			font-size: 32px;
+		}
+		h2 {
+			font-size: 18px;
+			font-family: ryo gothic plusn m, kozuka gothic pr6n m, meiryo, sans-serif;
+		}
+		ul.authors {
+			li {
+				@include emphasis;
+				font-size: 14px;
+				line-height: 20px;
+				color: #888;
+				
+				a {
+					font-size: 16px;
+					text-transform: capitalize;
+				}
+			}
+			li:first-child:before {
+				content: "by ";
+			}
+			li:after {
+				content: ",";
+			}
+			li:last-child:after {
+				content: "";
+			}
+		}
+
+		section {
+			margin-top: 32px;
+
+			h3 {
+				font-size: 24px;
+				margin-bottom: 16px;
+			}
+		}
+	}
+
+	#info {
+		padding-right: 32px;
+
+		.cover {
+			width: 160px;
+			height: 240px;
+			display: inline-block;
+			margin-right: 32px;
+		}
+
+		.cover.missing {
+			@include emphasis;
+			color: #aaa;
+			line-height: 240px;
+			text-align: center;
+			background: $grey0;
+		}
+
+		table {
+			display: inline-block;
+			width: calc(100% - 195px);
+			vertical-align: top;
+
+			th {
+				@include emphasis;
+				color: #666;
+				font-size: 14px;
+				text-align: right;
+				padding: 2px 8px 2px 0;
+			}
+			td {
+				padding: 2px 0 2px 8px;
+			}
+
+			td small {
+				display: block;
+				color: #888;
+				font-size: 13px;
+			}
+		}
+
+		#tags {
+			ul {
+
+				li {
+					float: left;
+					margin-right: 16px;
+				}
+
+				.spoiler {
+					display: none;
+				}
+
+				&.show-spoiler .spoiler {
+					display: block;
+				}
+			}
+		}
+	}
+
+	#details {
+		padding-left: 32px;
+	}
+
+	#info, #details {
+		float: left;
+		width: 50%;
+	}
+
+	#series-releases table {
+		width: 100%;
+		font-size: 14px;
+
+		td {
+			padding: 2px 4px;
+
+			&.tv, &.tc {
+				position: relative;
+				padding-left: 16px;
+			}
+			&.tv:before {
+				background: url('/static/volume.svg') no-repeat top left;
+			}
+			&.tc:before {
+				background: url('/static/chapter.svg') no-repeat top left;
+			}
+			&.tv:before, &.tc:before {
+				content: "";
+				background-size: 16px 16px;
+				height: 16px;
+				width: 16px;
+				position: absolute;
+				top: 50%;
+				left: 0;
+				margin-top: -8px;
+			}
+
+			&.tg {
+				max-width: 200px;
+			}
+
+			&.tt {
+				text-align: right;
+				color: #888;
+				width: 100px;
+			}
+		}
+	}
+
+	#reviews {
+	}
+	article.review {
+		margin-bottom: 32px;
+
+		.byline {
+			margin-bottom: 8px;
+		}
+
+		em {
+			font: normal 700 18px/0 normal;
+			font-family: $body-font;
+			//font-family: $heading-font;
+			letter-spacing: 2px;
+			
+			sub {
+				letter-spacing: 0;
+			}
+		}
+
+		.review-body {
+			p {
+				font-size: 14px;
+			}
+		}
+	}
+
+	#series-characters ul {
+		clear: both;
+
+		li {
+			display: inline-block;
+			width: 50%;
+			margin-bottom: 16px;
+
+			img {
+				width: 32px;
+				height: 32px;
+				float: left;
+				margin-right: 8px;
+			}
+
+			h4 {
+				font-size: 20px;
+				line-height: 32px
+			}
+			p {
+				font-size: 14px;
+				line-height: 24px;
+			}
+		}
+
+		&.main-characters li {
+			width: 100%;
+
+			img {
+				width: 64px;
+				height: 64px;
+			}
+
+			h4 {
+				font-size: 24px;
+				line-height: 40px;
+			}
+
+			p {
+				font-size: 18px;
+				line-height: 24px;
+			}
+		}
+	}
+}

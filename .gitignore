@@ -5,3 +5,5 @@ datagen/*.txt
 datagen/namedb
 datagen/scratch*
 datagen/test*
+.sass-cache
+static/*.css
