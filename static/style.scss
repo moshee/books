@@ -1,0 +1,440 @@
+* { margin: 0; padding: 0; box-sizing: border-box }
+*:focus {
+	outline: none;
+}
+
+$body-font: source sans pro, meiryo, sans-serif;
+$heading-font: magra, sans-serif;
+$green: #5a1;
+$grey0: #f5f5f5;
+$grey1: #f0f0f0;
+$grey2: #eaeaea;
+$grey3: #e5e5e5;
+
+@mixin emphasis {
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+@mixin vertical-center {
+	display: inline-block;
+	vertical-align: middle;
+}
+	
+
+@mixin form-elem {
+	-webkit-appearance: none;
+	height: 32px;
+	padding: 6px 8px;
+	line-height: 20px;
+	border: none;
+	color: #444;
+	font-family: $body-font;
+	font-size: 14px;
+}
+
+@mixin chap-spec {
+	@include emphasis;
+	background-size: 16px 16px;
+	padding: {
+		left: 16px;
+		right: 8px;
+	}
+}
+
+html {
+	background: #fafafa;
+}
+
+body {
+	color: #444;
+	font-family: $body-font;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: $heading-font;
+	font-weight: 400;
+}
+
+a {
+	text-decoration: none;
+	color: darken($green, 10%);
+
+	&:hover, &:focus {
+		color: lighten($green, 10%);
+	}
+
+	&.more {
+		@include emphasis;
+		font-size: 14px;
+		display: block;
+		text-align: center;
+		margin: 8px 0;
+
+		&:after {
+			content: " →";
+			font-size: 20px;
+		}
+	}
+}
+
+p {
+	line-height: 1.5em;
+	
+	&:not(:last-of-type) {
+		margin-bottom: 1em;
+	}
+}
+
+ul {
+	list-style-type: none;
+}
+
+hr.clear {
+	clear: both;
+	border-width: 0;
+	margin-bottom: 32px;
+}
+
+.indicator {
+	@include emphasis;
+	text-align: center;
+	margin: 32px 0;
+
+	&:before, &:after {
+		content: "";
+		display: inline-block;
+		width: 64px;
+		height: 2px;
+		background: #444;
+		margin: 0 8px;
+		position: relative;
+		top: -2px;
+		vertical-align: middle;
+	}
+}
+
+input[type=text], input[type=password] {
+	@include form-elem;
+	background: $grey1;
+
+	&:focus {
+		background: $grey2;
+	}
+
+	&.invalid {
+		border: 1px solid rgba(200, 0, 0, 0.4);
+		background: #fee;
+		margin: -1px -3px;
+		height: 32px + 2px;
+
+	}
+}
+
+button {
+	@include form-elem;
+	@include emphasis;
+	background: $grey3;
+	text-align: center;
+
+	&:hover {
+		background: $green;
+		color: #fff;
+	}
+	&:active {
+		background: darken($green, 5%);
+	}
+}
+
+*:disabled {
+	opacity: 0.5;
+}
+
+header {
+	height: 88px;
+	padding: 16px 0;
+
+	h1 {
+		width: 64px;
+		position: fixed;
+		left: 32px;
+		top: 0;
+
+		a {
+			font-family: ryo gothic plusn h, kozuka gothic pr6n h, meiryo, sans-serif;
+			-webkit-writing-mode: vertical-rl;
+			-moz-writing-mode: vertical-rl;
+			writing-mode: vertical-rl;
+			font-size: 42px;
+			line-height: 64px;
+			padding: 32px 0 0;
+			display: block;
+			color: #222;
+			transition: all .05s ease-out;
+
+			&:hover, &:focus {
+				background: $green;
+				color: #fff;
+			}
+		}
+	}
+
+	#search-bar {
+		$width: 512px;
+
+		width: $width;
+		margin-left: 128px;
+		position: relative;
+
+		ul {
+			flex: 1 1 auto;
+
+			li {
+				display: flex;
+			}
+		}
+
+		form {
+			display: flex;
+			position: relative;
+
+			label {
+				height: 32px;
+				position: relative;
+				display: flex;
+				flex: 0 1 auto;
+			}
+
+			label:after {
+				content: "↓";
+				position: absolute;
+				right: 6px;
+				top: 8px;
+				width: 16px;
+				height: 16px;
+				text-align: center;
+				line-height: 12px;
+				font-weight: 700;
+				font-size: 20px;
+				pointer-events: none;
+			}
+
+			select {
+				@include form-elem;
+				@include emphasis;
+				background: $grey3;
+				padding-right: 20px;
+			}
+
+			input {
+				display: flex;
+				flex: 1 1 auto;
+			}
+
+			button {
+				display: flex;
+				flex: 0 1 auto;
+				margin-left: 8px;
+			}
+		}
+	}
+
+	#browse {
+		margin: 8px 0 0 128px;
+
+		* {
+			display: inline;
+		}
+
+		h2 {
+			font-family: $body-font;
+			font-size: 14px;
+			@include emphasis;
+			margin-right: 8px;
+
+			em {
+				font-size: 20px;
+				line-height: 0;
+				color: $green;
+			}
+		}
+		nav ul {
+			li {
+				margin-right: 8px;
+			}
+		}
+	}
+
+	#header-user-info {
+		position: absolute;
+		top: 16px;
+		right: 8px;
+		font-size: 0;
+
+		#name {
+			@include vertical-center;
+			font-size: 20px;
+			line-height: 32px;
+		}
+
+		img {
+			@include vertical-center;
+			margin: 0 16px;
+			height: 32px;
+			width: 32px;
+		}
+
+		input {
+			@include vertical-center;
+			margin-right: 8px;
+		}
+
+		button {
+			@include vertical-center;
+			margin-right: 8px;
+		}
+
+		#other-links {
+			display: inline-block;
+			margin: 0;
+			padding: 0;
+			vertical-align: top;
+
+			a {
+				display: block;
+				font-size: 13px;
+				line-height: 16px;
+				height: 16px;
+			}
+		}
+	}
+}
+
+.flex-shrink {
+	flex: 0 1 auto;
+}
+
+.flex-grow {
+	flex: 1 1 auto;
+}
+
+.hidden {
+	font-size: 0;
+}
+
+#main {
+	margin: 0 128px 64px;
+
+	h1 {
+		font-size: 30px;
+	}
+
+	.feed {
+		padding-top: 16px;
+		width: 512px;
+
+		.feed-title-block {
+			padding: 16px 0;
+			text-align: center;
+		}
+
+		h2 {
+			@include emphasis;
+			font-size: 20px;
+		}
+
+		h3 {
+			font-size: 16px;
+			margin-bottom: 8px;
+		}
+
+		ul {
+			li {
+				padding: 8px;
+				border-bottom: 1px dotted #ccc;
+			}
+		}
+
+		.release-item {
+			display: flex;
+			line-height: 16px;
+			font-size: 14px;
+
+			> * {
+				padding-right: 16px;
+				display: inline-block;
+
+				&:last-child {
+					padding-right: 0;
+				}
+			}
+
+			.volume {
+				background: url('/static/volume.svg') no-repeat top left;
+				@include chap-spec;
+			}
+			.chapter {
+				background: url('/static/chapter.svg') no-repeat top left;
+				@include chap-spec;
+			}
+
+			time {
+				text-align: right;
+				color: #888;
+				font-size: 13px;
+			}
+		}
+	}
+}
+
+footer {
+	color: #888;
+	padding: 32px 0;
+	text-align: center;
+	font-size: 0;
+
+	#footer-text {
+		text-align: left;
+		margin-left: 16px;
+
+		h1 {
+			font-size: 14px;
+			margin-bottom: 4px;
+
+			code {
+				font-size: 12px;
+			}
+		}
+
+		ul {
+			font-size: 12px;
+
+			li {
+				display: inline-block;
+				margin-right: 16px;
+			}
+		}
+	}
+
+	#footer-logo a {
+		display: block;
+		width: 42px;
+		height: 40px;
+		background: {
+			position: 0 0;
+			size: 84px 40px;
+			image: url('/static/displaynone-logomark.svg');
+		}
+
+		&:hover {
+			background-position: -42px 0;
+		}
+	}
+
+	#footer-text, #footer-logo {
+		display: inline-block;
+		vertical-align: middle;
+	}
+}
+
+@import 'series';

@@ -3,51 +3,28 @@
 	<meta charset=utf-8>
 	<meta name=viewport content="initial-scale=1.0">
 	<meta name=description content="A place to discover and opinionate on Japanese print-based entertainment.">
-  <link rel=stylesheet href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Magra&subset=latin,latin-ext">
+	<link rel=stylesheet href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Magra&subset=latin,latin-ext">
 	<title>True story</title>
-	<link rel=stylesheet href=/static/style.css><!-- TODO: CDN -->
-	<link rel=stylesheet href=/static/mobile.css media="only screen and (max-width: 1024px)">
-  <script src="/static/books.js"></script>
+	<link rel=stylesheet href=/static/style.css>
+	<script src="/static/books.js"></script>
 </head>
-<body class=front>
+<body class="front{{ if .User }} logged-in{{ end }}">
+	{{ template "header-bar" .User }}
 	<section id=main>
-		<header>
-      <h1><a href="/">本物語。</a></h1>
-		</header>
-		<aside class=sidebar id=sidebar-top>
-      {{ template "search-browse" }}
-      {{ template "login-pane" .User }}
-    </aside>
-		<section id=latest>
-			<section id=latest-releases>
-				<h1>Recently Submitted Releases</h1>
-				{{ template "release-list-by-added" .Releases }}
-        <a class=look-more href=/releases/sort/release+date>Browse all releases</a>
-			</section>
-			<section id=latest-books>
-				<h1>Recently Added Titles</h1>
-				{{ template "series-list-by-added" .Series }}
-        <a class=look-more href=/series/sort/date+added>Browse all titles</a>
-			</section>
-		</section>
-    <aside class=sidebar id=news>
-      <h1>Site news</h1>
-      {{ with .News }}
-      {{ template "news-post" . }}
-      {{ else }}
-      <p>No news at this time.</p>
-      {{ end }}
-      <a class=look-more href=/news>View past news posts</a>
-		</aside>
-		<hr class=clear>
+	{{ if .User }}
+		{{ with $feeds := .User.Feeds }}
+		<h1>{{ .Name }}'s Feeds</h1>
+			{{ range .Feeds }}
+				{{ template "feed" . }}
+			{{ end }}
+		{{ end }}
+	{{ end }}
+		<div class=indicator>Public Feeds</div>
+	{{ range .Feeds }}
+		{{ template "feed" . }}
+	{{ end }}
 	</section>
-	<footer>
-		<section id=copyright>
-			<h1>Copyright © 2013 <code><a href="http://displaynone.us">display: <b>none</b>;</a></code>.&nbsp;&nbsp;&nbsp;All rights reserved.</h1>
-      <p id=footer-links><a href="/about">About</a> — <a href="/legal">Legal</a> — <a href="https://github.com/moshee/books">Hacking</a> — <a href=#>IRC</a> — <a href="/help">Help</a></p>
-		</section>
-		<section id=footer-logo><a href="http://displaynone.us"></a></section>
-	</footer>
+  {{ template "footer" }}
 </body>
 {{ end }}
 

@@ -7,7 +7,6 @@ import (
 	//	"path"
 	"sort"
 	"strconv"
-	"time"
 )
 
 func Index(g *gas.Gas) {
@@ -20,31 +19,54 @@ func Index(g *gas.Gas) {
 		sort.Sort(r.TranslationGroups)
 	}
 
-	series := make([]BookSeries, 10)
-	if err := gas.Query(&series, "SELECT * FROM books.latest_series LIMIT 10"); err != nil {
-		g.Error(500, err)
-		return
+	releaseFeed := &Feed{
+		"Latest Releases",
+		"",
+		g.User().(*User),
+		make([]FeedItem, len(releases)),
 	}
 
-	news := new(NewsPost)
-	if err := gas.QueryRow(news, "SELECT * FROM books.latest_news LIMIT 1"); err != nil {
-		g.Error(500, err)
-		return
+	for i, release := range releases {
+		releaseFeed.Items[i] = release
 	}
+
+	/*
+		series := make([]BookSeries, 10)
+		if err := gas.Query(&series, "SELECT * FROM books.latest_series LIMIT 10"); err != nil {
+			g.Error(500, err)
+			return
+		}
+
+		news := new(NewsPost)
+		if err := gas.QueryRow(news, "SELECT * FROM books.latest_news LIMIT 1"); err != nil {
+			g.Error(500, err)
+			return
+		}
+	*/
 
 	g.Render("books", "index", &struct {
-		Releases []Release
-		Series   []BookSeries
-		News     *NewsPost
-		Now      time.Time
-		User     *User
+		Feeds []*Feed
+		User  *User
 	}{
-		releases,
-		series,
-		news,
-		time.Now(),
+		[]*Feed{releaseFeed},
 		g.User().(*User),
 	})
+
+	/*
+		g.Render("books", "index", &struct {
+			Releases []Release
+			Series   []BookSeries
+			News     *NewsPost
+			Now      time.Time
+			User     *User
+		}{
+			releases,
+			series,
+			news,
+			time.Now(),
+			g.User().(*User),
+		})
+	*/
 }
 
 func SeriesIndex(g *gas.Gas) {

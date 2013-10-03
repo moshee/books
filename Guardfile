@@ -2,10 +2,9 @@ guard :shell do
   watch %r'templates/.*\.tmpl' do
     `killall -HUP main`
   end
-  watch 'main' do
-    system 'killall -INT main'
-  end
 end
+
+guard :sass, input: 'static'
 
 guard :livereload, port: '8080' do
   watch %r'static/.*\.(css|js|svg|png)$'

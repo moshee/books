@@ -112,11 +112,10 @@
 	function login(e) {
 		var loginButton = e.target;
 
-		var section = $('section.auth');
-		var form = $('form', section);
+		var form = loginButton.parentElement;
 
-		var user = $('#user', form);
-		var password = $('#pass', form);
+		var user = $('input[name=user]', form);
+		var password = $('input[name=pass]', form);
 		var bad = false;
 
 		if (user.value.length == 0) {
@@ -139,13 +138,10 @@
 
 		user.classList.remove('invalid');
 		password.classList.remove('invalid');	
-		form.classList.remove('invalid');
 
 		loginButton.setAttribute('disabled');
 		var old = loginButton.innerHTML;
 		loginButton.innerText = 'Logging in...';
-		var registerButton = $('#register-button', form);
-		registerButton.setAttribute('disabled');
 
 		ajax_post('/login', {
 			'user': user.value,
@@ -161,34 +157,25 @@
 			switch (x.status) {
 			case 200:
 				// okay, replace contents
-				section.outerHTML = x.response;
-				$('#logout-button')
-					.addEventListener('click', logout, false);
+				$('header').outerHTML = x.response;
+				$('#logout-button').addEventListener('click', logout, false);
 				break;
+
 			case 400:
 				// bad password probably
 				var resp = JSON.parse(x.response);
-				var p = make('p', {'class': 'error'}, 'Error: ' + resp.msg);
-
-				form.insertBefore(p, user);
+				alert(resp.msg);
 				break;
+
 			case 500:
 				// something wrong with the server
 				var resp = JSON.parse(x.response);
-				var p = make('p', {'class': 'error'},
-							 'Server error: ' + resp.msg);
-				form.insertBefore(p, user);
-
-				var m = make('p', {'class': 'error'},
-							 'This should not happen. ' +
-							 'You should probably report this error.');
-				form.insertBefore(m, p.nextSibling);
+				alert(resp.msg);
 				break;
 			}
 
 			loginButton.innerHTML = old;
 			loginButton.removeAttribute('disabled');
-			registerButton.removeAttribute('disabled');
 		});
 	}
 
@@ -197,7 +184,6 @@
 		button.setAttribute('disabled');
 		var old = button.innerText;
 		button.innerText = 'Logging out...';
-		var form = $('section.auth');
 
 		ajax_post('/logout', null, true, function(e) {
 			var x = e.srcElement;
@@ -205,28 +191,21 @@
 			switch (x.status) {
 			case 200:
 				// okay, replace contents
-				form.outerHTML = x.response;
+				$('header').outerHTML = x.response;
 				$('#login-button')
 					.addEventListener('click', login, false);
 				break;
+
 			case 400:
 				// bad password probably
 				var resp = JSON.parse(x.response);
-				var p = make('p', {'class': 'error'}, 'Error: ' + resp.msg);
-				form.appendChild(p);
-
+				alert(resp.msg);
 				break;
+
 			case 500:
 				// something wrong with the server
 				var resp = JSON.parse(x.response);
-				var p = make('p', {'class': 'error'},
-							 'Server error: ' + resp.msg);
-				var m = make('p', {'class': 'error'},
-							 'This should not happen. ' +
-							 'You should probably report this error.');
-
-				form.appendChild(p);
-				form.appendChild(m);
+				alert(resp.msg);
 				break;
 			}
 
@@ -235,30 +214,29 @@
 		});
 	}
 
+	function register() {
+	}
+
 	function main() {
-		searchFilter = $('#search ul');
-		searchFilterItem = $('li', searchFilter); 
+		[
+			['#search button', doSearch],
+			['#login-button', login],
+			['#logout-button', logout]
+		].forEach(function(pair) {
+			try {
+				$(pair[0]).addEventListener('click', pair[1], false);
+			} catch (e) {
+				console.log(e.stack);
+				return;
+			}
+		});
+	}
 
-		$('#add-filter').addEventListener('click', addSearchFilterItem, false);
-		$('button.remove-filter', searchFilterItem)
-			.addEventListener('click', delSearchFilterItem, false);
-		$('#search-button').addEventListener('click', doSearch, false);
-
-		var loginButton = $('#login-button');
-		if (loginButton != null) {
-			loginButton.addEventListener('click', login, false);
-		}
-
-		var logoutButton = $('#logout-button');
-		if (logoutButton != null) {
-			logoutButton.addEventListener('click', logout, false);
-		}
-
+	window.addEventListener('load', main, true);
+	window.addEventListener('load', function() {
 		var lr = document.createElement('script');
 		lr.async = true;
 		lr.src = 'http://' + document.domain + ':8080/livereload.js';
 		$('head').appendChild(lr);
-	}
-
-	window.addEventListener('load', main, true);
+	}, true);
 })();
