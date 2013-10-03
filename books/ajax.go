@@ -18,7 +18,7 @@ func Login(g *gas.Gas) {
 		return
 	}
 
-	g.Render("books", "login-pane", g.User().(*User))
+	g.Render("books", "header-bar", g.User().(*User))
 }
 
 func Logout(g *gas.Gas) {
@@ -28,5 +28,5 @@ func Logout(g *gas.Gas) {
 		return
 	}
 
-	g.Render("books", "login-pane", nil)
+	g.Render("books", "header-bar", nil)
 }

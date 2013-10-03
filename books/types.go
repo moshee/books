@@ -474,6 +474,10 @@ func (self *User) Online() bool {
 	panic("unimplemented")
 }
 
+func (self *User) Feeds() []Feed {
+	return nil
+}
+
 // interface gas.User
 func (self *User) Allowed(privileges interface{}) bool {
 	return self.Privileges.Is(privileges.(Privileges))

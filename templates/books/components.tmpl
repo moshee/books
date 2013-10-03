@@ -5,6 +5,7 @@
 			<form id=search>
 				<ul>
 					<li>
+          <!--
 						<label>
 							<select class=filter-type dir=rtl>
 								<option value=title>Title</option>
@@ -15,11 +16,12 @@
 								<option value=publisher>Publisher</option>
 								<option value=demographic>Demographic</option>
 							</select>
-						</label>
+            </label>-->
 						<input tabindex=1 type=text class=filter-content placeholder="Keywords...">
 					</li>
 				</ul>
-				<button>Search</button>
+				<button type=button id=search-button>Search</button>
+        <button type=button id=advanced-search-button>More options...</button>
 			</form>
 		</section>
     <div id=browse>
@@ -44,10 +46,17 @@
 			{{ else }}
 			<img src=/img/u/t/0.jpg>
 			{{ end }}
+      <button type=button id=logout-button>Log out</button>
 		{{ else }}
-			<input tabindex=2 name=user type=text placeholder="Username or email">
-			<input tabindex=3 name=pass type=password placeholder=Password>
-			<button onclick=login()>Log in</button>
+      <form>
+        <input tabindex=2 name=user type=text placeholder="Username or email">
+        <input tabindex=3 name=pass type=password placeholder=Password>
+        <button id=login-button>Log in</button>
+        <div id=other-links>
+          <a href=/register>Sign up →</a>
+          <a href=/forgot>Forgetful?</a>
+        </div>
+      </form>
 		{{ end }}
 		</section>
 	</header>

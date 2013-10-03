@@ -9,7 +9,7 @@
 	<script src="/static/books.js"></script>
 </head>
 <body id=series {{ if .User }}class=logged-in {{ end }}>
-	{{ template "header-bar" }}
+	{{ template "header-bar" $.User }}
 	<section id=main>
     {{ with .Series }}
     <section class=title-block>
@@ -54,7 +54,7 @@
       <section id=tags>
         <h3>Tags</h3>
         {{ with .Tags }}
-        {{ if .HasSpoiler }}<a href="javascript:toggleTags()">Show spoiler tag(s)</a>
+        {{ if .HasSpoiler }}<input name=show-spoilers type=checkbox> Show spoiler tag(s)
         {{ end }}
         <ul class=tags>
           {{ range $i, $tag := . }}

@@ -39,7 +39,7 @@
 
 			h3 {
 				font-size: 24px;
-				margin-bottom: 8px;
+				margin-bottom: 16px;
 			}
 		}
 	}
@@ -91,6 +91,14 @@
 				li {
 					float: left;
 					margin-right: 16px;
+				}
+
+				.spoiler {
+					display: none;
+				}
+
+				&.show-spoiler .spoiler {
+					display: block;
 				}
 			}
 		}
@@ -181,19 +189,19 @@
 			margin-bottom: 16px;
 
 			img {
-				width: 48px;
-				height: 48px;
+				width: 32px;
+				height: 32px;
 				float: left;
-				margin-right: 16px;
+				margin-right: 8px;
 			}
 
 			h4 {
 				font-size: 20px;
-				line-height: 28px;
+				line-height: 32px
 			}
 			p {
 				font-size: 14px;
-				line-height: 20px;
+				line-height: 24px;
 			}
 		}
 

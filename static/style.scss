@@ -16,6 +16,12 @@ $grey3: #e5e5e5;
 	text-transform: uppercase;
 }
 
+@mixin vertical-center {
+	display: inline-block;
+	vertical-align: middle;
+}
+	
+
 @mixin form-elem {
 	-webkit-appearance: none;
 	height: 32px;
@@ -108,12 +114,20 @@ hr.clear {
 	}
 }
 
-input {
+input[type=text], input[type=password] {
 	@include form-elem;
 	background: $grey1;
 
 	&:focus {
 		background: $grey2;
+	}
+
+	&.invalid {
+		border: 1px solid rgba(200, 0, 0, 0.4);
+		background: #fee;
+		margin: -1px -3px;
+		height: 32px + 2px;
+
 	}
 }
 
@@ -130,6 +144,10 @@ button {
 	&:active {
 		background: darken($green, 5%);
 	}
+}
+
+*:disabled {
+	opacity: 0.5;
 }
 
 header {
@@ -163,21 +181,21 @@ header {
 
 	#search-bar {
 		$width: 512px;
-		$button-width: 72px;
 
 		width: $width;
 		margin-left: 128px;
 		position: relative;
 
 		ul {
+			flex: 1 1 auto;
 
 			li {
-				width: $width - $button-width;
 				display: flex;
 			}
 		}
 
 		form {
+			display: flex;
 			position: relative;
 
 			label {
@@ -211,15 +229,12 @@ header {
 			input {
 				display: flex;
 				flex: 1 1 auto;
-				margin: 0 8px;
 			}
 
 			button {
-				position: absolute;
-				bottom: 0;
-				right: 0;
-				width: $button-width;
-				padding: 0;
+				display: flex;
+				flex: 0 1 auto;
+				margin-left: 8px;
 			}
 		}
 	}
@@ -253,16 +268,44 @@ header {
 	#header-user-info {
 		position: absolute;
 		top: 16px;
-		right: 16px;
+		right: 8px;
 		font-size: 0;
 
-		input {
-			margin-right: 8px;
+		#name {
+			@include vertical-center;
+			font-size: 20px;
+			line-height: 32px;
 		}
 
 		img {
-			width: 48px;
-			height: 48px;
+			@include vertical-center;
+			margin: 0 16px;
+			height: 32px;
+			width: 32px;
+		}
+
+		input {
+			@include vertical-center;
+			margin-right: 8px;
+		}
+
+		button {
+			@include vertical-center;
+			margin-right: 8px;
+		}
+
+		#other-links {
+			display: inline-block;
+			margin: 0;
+			padding: 0;
+			vertical-align: top;
+
+			a {
+				display: block;
+				font-size: 13px;
+				line-height: 16px;
+				height: 16px;
+			}
 		}
 	}
 }
@@ -291,10 +334,6 @@ header {
 		width: 512px;
 
 		.feed-title-block {
-			border: {
-				top: 1px solid #ccc;
-				bottom: 1px solid #ccc;
-			}
 			padding: 16px 0;
 			text-align: center;
 		}

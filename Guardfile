@@ -2,9 +2,6 @@ guard :shell do
   watch %r'templates/.*\.tmpl' do
     `killall -HUP main`
   end
-  watch 'main' do
-    system 'killall -INT main'
-  end
 end
 
 guard :sass, input: 'static'
