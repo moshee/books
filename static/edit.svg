@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" [
+	<!ENTITY st0 "fill-rule:evenodd;clip-rule:evenodd;">
+]>
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="1024px" height="1024px" viewBox="0 0 1024 1024" style="enable-background:new 0 0 1024 1024;" xml:space="preserve">
+<g>
+	<rect x="0.5" y="127.5" style="&st0;" width="128" height="128"/>
+	<rect x="0.5" y="383.5" style="&st0;" width="128" height="128"/>
+	<polygon style="&st0;" points="1024.5,221.5 640.5,575.5 574.5,735.5 320.5,813.5 210.5,703.5 286.5,447.5 448.5,383.5 832.5,-0.5 
+		640.5,-0.5 512.5,127.5 256.5,127.5 256.5,255.5 384.5,255.5 192.5,447.5 128.5,703.5 128.5,639.5 0.5,639.5 0.5,767.5 
+		112.5,767.5 80.5,895.5 0.5,895.5 0.5,1023.5 128.5,1023.5 128.5,943.5 256.5,911.5 256.5,1023.5 896.5,1023.5 896.5,895.5 
+		320.5,895.5 576.5,831.5 640.5,767.5 896.5,767.5 896.5,639.5 768.5,639.5 1024.5,383.5 	"/>
+	<polygon style="&st0;" points="448.5,575.5 576.5,511.5 960.5,127.5 896.5,63.5 512.5,447.5 	"/>
+</g>
+</svg>
