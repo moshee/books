@@ -154,7 +154,8 @@ CREATE TABLE releases (
     release_date    timestamptz NOT NULL DEFAULT 'now'::timestamptz,
     notes           text,
     is_last_release boolean     NOT NULL DEFAULT false,
-    extra           text
+    extra           text,
+    permalink       text
 );
 
 CREATE TABLE releases_translators (
@@ -655,22 +656,31 @@ CREATE VIEW latest_news AS
 -- Feeds
 --
 
-CREATE TABLE books.feeds (
+CREATE TABLE feeds (
     id           serial      PRIMARY KEY,
-    kind         integer     NOT NULL DEFAULT 0, -- Predefined, user, ...
-    feed_id      bytea       NOT NULL UNIQUE, -- A random string of bytes that identifies this feed (don't use the id)
-    feedspec     text        NOT NULL, -- Could be in any format. Dunno yet. Description of feed contents.
-    creator      integer     NOT NULL REFERENCES books.users,
-    date_created timestamptz NOT NULL DEFAULT 'now'::timestamptz,
-    name         text,
-    description  text
+    kind         text        NOT NULL,        -- Release, series, article, etc. Display format.
+    hash         bytea       NOT NULL UNIQUE, -- A random string of bytes that identifies this feed (don't use the id)
+    feedspec     text        NOT NULL,        -- Description of feed contents.
+    creator      integer     REFERENCES users,
+    name         text        NOT NULL,
+    description  text        NOT NULL DEFAULT '',
+    date_created timestamptz NOT NULL DEFAULT 'now'::timestamptz
 );
 
-CREATE TABLE books.feed_permissions (
-    id      serial  PRIMARY KEY,
-    feed_id integer NOT NULL REFERENCES books.feeds,
-    user_id integer NOT NULL REFERENCES books.users,
-    action  integer NOT NULL -- allow, disallow, ...
+CREATE TABLE feed_permissions (
+    id         serial      PRIMARY KEY,
+    feed_id    integer     NOT NULL REFERENCES feeds,
+    user_id    integer     NOT NULL REFERENCES users,
+    action     integer     NOT NULL, -- allow, disallow, ...
+    date_given timestamptz NOT NULL DEFAULT 'now'::timestamptz
+);
+
+CREATE TABLE feed_subscriptions (
+    id          serial      PRIMARY KEY,
+    feed_id     integer     NOT NULL REFERENCES feeds,
+    user_id     integer     NOT NULL REFERENCES users,
+    private     boolean     NOT NULL DEFAULT false,
+    date_subbed timestamptz NOT NULL DEFAULT 'now'::timestamptz
 );
 
 --

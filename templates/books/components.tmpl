@@ -34,29 +34,32 @@
         </ul>
       </nav>
     </div>
-		<section id=header-user-info>
-		{{ if . }}
-			<div id=name><a href=/user/{{ .Id }}>{{ .Name }}</a></div>
-			{{ if .Avatar }}
-			<img src=/img/u/t/{{ .Id }}.jpg>
-			{{ else }}
-			<img src=/img/u/t/0.jpg>
-			{{ end }}
-      <button type=button id=logout-button>Log out</button>
-		{{ else }}
-      <form>
-        <input tabindex=2 name=user type=text placeholder="Username or email">
-        <input tabindex=3 name=pass type=password placeholder=Password>
-        <button id=login-button>Log in</button>
-        <div id=other-links>
-          <a href=/register>Sign up →</a>
-          <a href=/forgot>Forgetful?</a>
-        </div>
-      </form>
-		{{ end }}
-		</section>
 	</header>
 {{ end }}
+
+{{ define "user-cp" }}
+{{ if . }}
+  <a class=profile-link href=/user/{{ .Id }} data-tooltip="Visit your profile">
+    {{ if .Avatar }}
+    <img src=/img/u/t/{{ .Id }}.jpg>
+    {{ else }}
+    <img src=/img/u/t/0.jpg>
+    {{ end }}
+  </a>
+  <hr>
+{{ else }}
+  <form>
+    <input tabindex=2 name=user type=text placeholder="Username or email">
+    <input tabindex=3 name=pass type=password placeholder=Password>
+    <button id=login-button>Log in</button>
+    <div id=other-links>
+      <a href=/register>Sign up →</a>
+      <a href=/forgot>Forgetful?</a>
+    </div>
+  </form>
+{{ end }}
+{{ end }}
+		
 
 {{ define "footer" }}
 	<footer>

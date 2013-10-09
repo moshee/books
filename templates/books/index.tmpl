@@ -10,6 +10,9 @@
 </head>
 <body class="front{{ if .User }} logged-in{{ end }}">
 	{{ template "header-bar" .User }}
+  <aside id=cp>
+    {{ template "user-cp" .User }}
+  </aside>
 	<section id=main>
 	{{ if .User }}
 		{{ with $feeds := .User.Feeds }}

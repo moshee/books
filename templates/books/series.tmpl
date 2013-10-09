@@ -9,170 +9,201 @@
 	<script src="/static/books.js"></script>
 </head>
 <body id=series {{ if .User }}class=logged-in {{ end }}>
-	{{ template "header-bar" $.User }}
-	<section id=main>
-    {{ with .Series }}
-    <section class=title-block>
-      <div class=indicator>Series Info</div>
-      <h1>{{ .Title }}</h1>
-      <h2>{{ .NativeTitle }}</h2>
-      {{ with .Credits }}
-      <ul class=authors>
-        {{ range . }}
-        <li><strong><a href=/author/{{ .AuthorId }}>{{ .Surname }}, {{ .GivenName }}</a></strong> ({{ .Credit }})</li>
-        {{ end }}
+	{{ template "header-bar" }}
+  <aside id=cp>
+    {{ template "user-cp" .User }}
+    <nav>
+      <ul>
+        <li><a href=javascript:editPage() data-tooltip="Edit series info"><img src=/static/edit.svg></a></li>
       </ul>
-      {{ end }}
-    </section>
-    <hr class=clear>
-    <section id=info>
-      <section id=series-meta>
-        {{ if .HasCover }}
-        <img class=cover src=/img/c/{{ .Id }}.jpg>
-        {{ else }}
-        <div class="cover missing">No cover.{{ if $.User }}<a class=more href=/series/{{ .Id }}/cover>Add one.</a>{{ end }}</div>
-        {{ end }}
-        <table>
-          <tr><th>Kind</th><td>{{ .SeriesKind }}</td></tr>
-          <tr><th>Vintage</th><td>{{ .Vintage }}</td></tr>
-          <tr><th>Demographic</th><td>{{ .Demographic }}</td></tr>
-          <tr><th>Mean rating</th><td>{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }} / 5 ({{ .RatingCount }} votes){{ else }}n/a{{ end }}</td></tr>
-          <tr><th>Complete?</th><td>{{ if .Finished }}Yes{{ else }}No{{ end }}</td></tr>
-          <tr><th>NSFW?</th><td>{{ if .NSFW }}Yes{{ else }}No{{ end }}</td></tr>
-          <tr><th>Serialized in</th><td>
-        {{ if ne .Magazine.Id 0 }}
-          <a href=/magazine/{{ .Magazine.Id }}>{{ .Magazine.Title }}</a>
-          <small>(by <a href=/publisher/{{ .Magazine.Publisher.Id }}>{{ .Magazine.Publisher.Name }}</a>)</small>
-        {{ else }}
-          <span class=none>(none)</span>
-        {{ end }}
-          </td></tr>
-          <tr><th>Added</th><td class=ld>{{ .DateAdded.Format "02 Jan 2006" }}</td></tr>
-          <tr><th>Updated</th><td class=ld>{{ .LastUpdated.Format "02 Jan 2006 15:04" }}</td></tr>
-        </table>
-      </section>
-      <section id=tags>
-        <h3>Tags</h3>
-        {{ with .Tags }}
-        {{ if .HasSpoiler }}<input name=show-spoilers type=checkbox> Show spoiler tag(s)
-        {{ end }}
-        <ul class=tags>
-          {{ range $i, $tag := . }}
-          <li{{ if .Spoiler }} class=spoiler {{ end }}>
-          {{ if $.User }}
-          <button class=upboat href="javascript:voteTag({{ $i }}, {{ $.User.VoteWeight }})">+</button>
-          <button class=downboat href="javascript:voteTag({{ $i }}, -{{ $.User.VoteWeight }})">–</button>
-          {{ end }}
-          <a style="opacity:{{ .Opacity | printf "%.2g" }};color:{{ .Color | printf "#%.6x" }}"
-            href="/tag/{{ urlquery .Name }}"{{ if le .Weight 0 }}
-            title="People disagree about this one."{{ end }}>{{ .Name }}</a>
-          ({{ .Weight | printf "%+d" }})
-        </li>
-        {{ end }}
-        </ul>
-      {{ else }}
-        <p>No tags have been added.</p>
-        {{ if $.User }}
-        <p><a href="/series/{{ .Id }}/tags">Add some?</a></p>
-        {{ else }}
-        <p>Log in to add some.</p>
-        {{ end }}
-      {{ end }}
-      </section>
-      <hr class=clear>
-      <section id=summary>
-        <h3>Summary</h3>
-        {{ with .Summary }}
-        {{ smarkdown .}}
-        {{ else }}
-        <p>No summary available.</p>
-        {{ if $.User }}<p><button onclick=writeSummary()>Write one</button></p>{{ end }}
-        {{ end }}
-      </section>
-      <section id=related-series>
-        <h3>Related series</h3>
-        {{ with .Related }}
-        <ul>
-          {{ range . }}
-          <li><a href=/series/{{ .Id }}>{{ .Title }}</a> ({{ .Relation }})</li>
-          {{ end }}
-        </ul>
-        {{ else }}
-        <p>No related series.</p>
-          {{ if $.User }}
-        <p><a href=/series/{{ $.Series.Id }}>Know of one?</a></p>
-          {{ else }}
-        <p><a href=javascript:hiLogin()>Log in</a> to add one.</p>
-          {{ end }}
-        {{ end }}
-      </section>
-    </section>
-    <section id=details>
-      <section id=series-releases>
-        <h3>Releases</h3>
-        {{ with .Releases }}
-        <table>
-          {{ range . }}
-          <tr>
-            {{ if index .Chapters.Volumes 0 }}<td class=tv>{{ collapse_range .Chapters.Volumes }}</td>
-            {{ else }}<td></td>{{ end }}
+    </nav>
+  </aside>
+	<section id=main>
+		{{ with .Series }}
+		<aside id=series-meta>
+			{{ if .HasCover }}
+			<img class=cover src=/img/c/{{ .Id }}.jpg>
+			{{ else }}
+			<div class="cover missing">No cover.</div>
+			{{ end }}
+      <table>
+        <tr>
+          <td>
+            <h4>Kind</h4>
+            <p>{{ .SeriesKind }}</p>
+          </td>
+          <td>
+            <h4>Demographic</h4>
+            <p>{{ .Demographic }}</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <h4>Vintage</h4>
+            <p>{{ .Vintage }}</p>
+          </td>
+          <td>
+            <h4>Mean rating</h4>
+            <p>{{ if .AvgRating.Valid }}{{ .AvgRating.Float64 | printf "%.2g" }} / 5 ({{ .RatingCount }} votes){{ else }}n/a{{ end }}</p>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <h4>Complete?</h4>
+            <p>{{ if .Finished }}Yes{{ else }}No{{ end }}</p>
+          </td>
+          <td>
+            <h4>NSFW?</h4>
+            <p>{{ if .NSFW }}Yes{{ else }}No{{ end }}</p>
+          </td>
+        </tr>
+        <tr>
+          <td colspan=2>
+            <h4>Serialized in</h4>
+            {{ if ne .Magazine.Id 0 }}
+            <p><a href=/magazine/{{ .Magazine.Id }}>{{ .Magazine.Title }}</a></p>
+            <small>(by <a href=/publisher/{{ .Magazine.Publisher.Id }}>{{ .Magazine.Publisher.Name }}</a>)</small>
+            {{ else }}
+            <p class=none>(none)</p>
+            {{ end }}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <h4>Added</h4>
+            <p><time datetime="{{ .DateAdded | datetime }}">{{ .DateAdded.Format "02 Jan 2006" }}</time></p>
+          </td>
+          <td>
+            <h4>Updated</h4>
+            <p><time datetime="{{ .LastUpdated | datetime }}">{{ .LastUpdated.Format "02 Jan 2006 15:04" }}</time></p>
+          </td>
+        </tr>
+      </table>
+			<section id=tags>
+				<h3>Tags</h3>
+				{{ with .Tags }}
+					{{ if .HasSpoiler }}
+					<input name=show-spoilers type=checkbox><label for=show-spoilers>Show spoiler tag(s)</label>
+					{{ end }}
+				<ul class=tags>
+					{{ range $i, $tag := . }}
+					<li{{ if .Spoiler }} class=spoiler {{ end }}>
+					{{ if $.User }}
+					<button class=upboat href="javascript:voteTag({{ $i }}, {{ $.User.VoteWeight }})">+</button>
+					<button class=downboat href="javascript:voteTag({{ $i }}, -{{ $.User.VoteWeight }})">–</button>
+					{{ end }}
+					<a style="opacity:{{ .Opacity | printf "%.2g" }};color:{{ .Color | printf "#%.6x" }}"
+						href="/tag/{{ urlquery .Name }}"{{ if le .Weight 0 }}
+						title="People disagree about this one."{{ end }}>{{ .Name }}</a>
+					({{ .Weight | printf "%+d" }})
+				</li>
+					{{ end }}
+				</ul>
+				{{ else }}
+				<p>No tags have been added.</p>
+				{{ end }}
+			</section>
+			<section id=summary>
+				<h3>Summary</h3>
+				{{ with .Summary }}
+				{{ smarkdown .}}
+				{{ else }}
+				<p>No summary available.</p>
+				{{ end }}
+			</section>
+		</aside>
+		<section id=info>
+			<section class=title-block>
+				<h1>{{ .Title }}</h1>
+				<h2>{{ .NativeTitle }}</h2>
+				{{ with .Credits }}
+				<ul class=authors>
+					{{ range . }}
+					<li><strong><a href=/author/{{ .AuthorId }}>{{ .Surname }}, {{ .GivenName }}</a></strong> ({{ .Credit }})</li>
+					{{ end }}
+				</ul>
+				{{ end }}
+			</section>
+			<hr class=clear>
+			<section id=series-releases>
+        <h3>Releases{{ if $.User }} <button id=add-release>Add release</button>{{ end }}</h3>
+				{{ with .Releases }}
+				<table>
+          <thead><tr><th class=tv></th><th class=tc></th></tr></thead>
+					{{ range . }}
+					<tr>
+						{{ if index .Chapters.Volumes 0 }}<td class=tv>{{ collapse_range .Chapters.Volumes }}</td>
+						{{ else }}<td></td>{{ end }}
             <td class=tc>{{ collapse_range .Chapters.Nums }}</td>
-            <td class=tg>{{ template "group-list" .TranslationGroups }}</td>
-            <td class=tt><time datetime="{{ .ReleaseDate.Format "2006-01-02T15:04:05Z0700" }}">{{ .ReleaseDate | ago }}</time></td>
-          </tr>
+						<td class=tg>{{ template "group-list" .TranslationGroups }}</td>
+						<td class=tt><time datetime="{{ .ReleaseDate.Format "2006-01-02T15:04:05Z0700" }}">{{ .ReleaseDate | ago }}</time></td>
+					</tr>
+					{{ end }}
+				</table>
+				<p><a class=more href=/releases/series/{{ $.Series.Id }}>See all releases of this series</a></p>
+				{{ else }}
+				<p>No releases found for this series.</p>
+				{{ end }}
+			</section>
+			<section id=related-series>
+				<h3>Related series</h3>
+				{{ with .Related }}
+				<ul>
+					{{ range . }}
+					<li><a href=/series/{{ .Id }}>{{ .Title }}</a> ({{ .Relation }})</li>
+					{{ end }}
+				</ul>
+				{{ else }}
+				<p>No related series.</p>
+					{{ if $.User }}
+				<p><a href=/series/{{ $.Series.Id }}>Know of one?</a></p>
+					{{ else }}
+				<p><a href=javascript:hiLogin()>Log in</a> to add one.</p>
+					{{ end }}
+				{{ end }}
+			</section>
+			<section id=series-characters>
+				<h3>Characters</h3>
+			{{ with .Characters }}
+				{{ with .Mains }}
+				<ul class=main-characters>
+				{{ range .}}{{ template "series-character" . }}{{ end }}
+				</ul>
+				{{ end }}
+				{{ with .Others }}
+				<ul>
+				{{ range .}}{{ template "series-character" . }}{{ end }}
+				</ul>
+				{{ end }}
+			{{ else }}
+				<p>No characters have been added for this series.</p>
+			{{ end }}
+			</section>
+      <section id=reviews>
+        <h3>Reviews{{ if $.User }} <button id=write-review>Opinionate</button>{{ end }}</h3>
+        {{ with .Reviews }}
+          {{ range . }}
+        <article class=review>
+          <div class=rating><sup>{{ .Rating }}</sup>╱<sub>5</sub></div>
+          <div class=byline>
+            <div class=by-name><a href=/user/{{ .User.Id }}>{{ .User.Name }}</a></div>
+            <div class=by-time><time datetime="{{ .RateDate.Format "2006-01-02T15:04:05Z0700" }}">{{ .RateDate.Format "2 Jan 2006" }}</time></div>
+          </div>
+          <div class=review-body>
+            {{ smarkdown .Review.String }}
+          </div>
+        </article>
           {{ end }}
-        </table>
-        <p><a class=more href=/releases/series/{{ $.Series.Id }}>See all releases of this series</a></p>
+          <p><a class=more href=/series/{{ $.Series.Id }}/reviews>View all reviews</a></p>
         {{ else }}
-        <p>No releases found for this series.</p>
-          {{ if $.User }}
-        <p><a href=#>Want to add one?</a></p>
-          {{ end }}
+          <p>Nobody has expressed their opinion on this series yet.</p> 
         {{ end }}
       </section>
-      <section id=series-characters>
-        <h3>Characters</h3>
-      {{ with .Characters }}
-        {{ with .Mains }}
-        <ul class=main-characters>
-        {{ range .}}{{ template "series-character" . }}{{ end }}
-        </ul>
-        {{ end }}
-        {{ with .Others }}
-        <ul>
-        {{ range .}}{{ template "series-character" . }}{{ end }}
-        </ul>
-        {{ end }}
-      {{ else }}
-        <p>No characters have been added for this series.</p>
-        {{ if $.User }}
-        <p><a class=more href=/series/70/characters>Add some</a></p>
-        {{ else }}
-        <p><a href=javascript:hiLogin()>Log in</a> to add some.</p>
-        {{ end }}
-      {{ end }}
-      </section>
-    </section>
-    <hr class=clear>
-    <section id=reviews>
-      <h3>Reviews</h3>
-      {{ with .Reviews }}
-        {{ range . }}
-      <article class=review>
-        <div class=byline><em><sup>{{ .Rating }}</sup>&frasl;<sub>5</sub></em> by <a href=/user/{{ .User.Id }}>{{ .User.Name }}</a> on <time datetime="{{ .RateDate.Format "2006-01-02T15:04:05Z0700" }}">{{ .RateDate.Format "2 Jan 2006" }}</time> ({{ .RateDate | ago }})</div>
-        <div class=review-body>
-          {{ smarkdown .Review.String }}
-        </div>
-      </article>
-        {{ end }}
-        <p><a class=more>View all reviews</a></p>
-      {{ else }}
-        <p>No reviews have been written yet.</p> 
-      {{ end }}
-    </section>
-    {{ end }}{{/* with .Series */}}
+		</section>
+		<hr class=clear>
+		{{ end }}{{/* with .Series */}}
 	</section>
-  {{ template "footer" }}
+	{{ template "footer" }}
 </body>
 {{ end }}
 

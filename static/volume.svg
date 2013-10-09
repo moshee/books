@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" [
+	<!ENTITY st0 "fill-rule:evenodd;clip-rule:evenodd;">
+]>
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 width="48px" height="48px" viewBox="0 0 48 48" style="enable-background:new 0 0 48 48;" xml:space="preserve">
-<polygon points="14.458,10.208 11.264,7.214 34.914,1.964 32.607,0.325 8.174,5.628 8.174,43.246 13.147,47.676 38.911,42.063 
-	38.911,4.902 "/>
+	 width="1024px" height="1024px" viewBox="0 0 1024 1024" style="enable-background:new 0 0 1024 1024;" xml:space="preserve">
+<path style="&st0;" d="M832.535-0.5c-159.563,0-489.129,0-640.035,0c-63.125,0-64,64-64,64v768v128c0,0-0.188,64,64,64
+	c170.656,0,640.035,0,640.035,0s64-2.5,64-64c0-117.625,0-117.625,0-896C896.535,63.5,896.535-0.5,832.535-0.5z M832.535,959.5
+	H192.5v-128h640.035V959.5z M832.535,767.5H320.5v-704h512.035V767.5z"/>
+<rect x="704.5" y="127.5" style="&st0;" width="64" height="448"/>
+<rect x="576.5" y="127.5" style="&st0;" width="64" height="192"/>
+<rect x="576.5" y="383.5" style="&st0;" width="64" height="256"/>
+<polyline style="&st0;" points="192.5,63.5 192.5,767.5 320.5,767.5 320.5,63.5 "/>
 </svg>

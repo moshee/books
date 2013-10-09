@@ -14,10 +14,10 @@
 {{ define "feed-release" }}
 <h3><a href=/series/{{ .BookSeries.Id }}>{{ .Title }}</a>{{ if .Permalink }}<a class=feed-permalink href="{{ .Permalink }}"></a>{{ end }}</h3>
 <div class=feed-item>
-  {{ if index .Chapters.Volumes 0 }}<div class="volume flex-shrink"><span class=hidden>v. </span>{{ collapse_range .Chapters.Volumes }}</div>{{ end }}
-  <div class="chapter flex-shrink"><span class=hidden>c. </span>{{ collapse_range .Chapters.Nums }}</div>
-  <div class="group-names flex-grow">by {{ template "group-list" .TranslationGroups }}</div>
-  <time class=flex-shrink datetime="{{ .ReleaseDate | datetime }}">{{ ago .ReleaseDate }}</time>
+  {{ if index .Chapters.Volumes 0 }}<div class="volume"><span class=hidden>v. </span>{{ collapse_range .Chapters.Volumes }}</div>{{ end }}
+  <div class="chapter"><span class=hidden>c. </span>{{ collapse_range .Chapters.Nums }}</div>
+  <div class="group-names">by {{ template "group-list" .TranslationGroups }}</div>
+  <time datetime="{{ .ReleaseDate | datetime }}">{{ ago .ReleaseDate }}</time>
 </div>
 {{ end }}
 
@@ -32,8 +32,8 @@
 {{ define "feed-series" }}
 <h3><a href=/series/{{ .Id }}>{{ .Title }}</a></h3>
 <div class=feed-item>
-  <div class="demographic flex-shrink"><a href=/demographic/{{ .Demographic.URLString }}>{{ .Demographic }}</a></div>
-  <div class="tags flex-grow">{{ template "tag-list" .TagArr }}</div>
-  <time class=flex-shrink datetime="{{ .DateAdded | datetime }}">{{ .DateAdded.Format "2 Jan" }}</time>
+  <div class="demographic"><a href=/demographic/{{ .Demographic.URLString }}>{{ .Demographic }}</a></div>
+  <div class="tags">{{ template "tag-list" .TagArr }}</div>
+  <time datetime="{{ .DateAdded | datetime }}">{{ .DateAdded.Format "2 Jan" }}</time>
 </div>
 {{ end }}

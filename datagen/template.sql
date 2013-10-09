@@ -114,7 +114,7 @@ INSERT INTO chapters VALUES
 <% end %>
 
 INSERT INTO releases VALUES
-<%= rec(300) { ['DEFAULT', rand(1..159), lang, tstz, (null(0.95) or string), bool(0.05), (null(0.9) or text(%w(Extra Omake).sample))] } %>
+<%= rec(300) { ['DEFAULT', rand(1..159), lang, tstz, (null(0.95) or string), bool(0.05), (null(0.9) or text(%w(Extra Omake).sample)), (null(0.5) or url)] } %>
 
 <% 300.times do |release| %>
     <% s = chapters.sample %>

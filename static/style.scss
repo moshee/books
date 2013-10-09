@@ -20,9 +20,34 @@ $grey3: #e5e5e5;
 	display: inline-block;
 	vertical-align: middle;
 }
-	
 
-@mixin form-elem {
+.chap-spec {
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	background: {
+		size: 16px 16px;
+		repeat: no-repeat;
+		attachment: top left;
+	}
+}
+
+th.tv:before {
+	content: " ";
+	@extend .chap-spec;
+	background-image: url('/static/volume.svg');
+}
+th.tc:before {
+	content: " ";
+	@extend .chap-spec;
+	background-image: url('/static/chapter.svg');
+}
+
+.tv, .tc {
+	text-align: center;
+}
+
+.form-elem {
 	-webkit-appearance: none;
 	height: 32px;
 	padding: 6px 8px;
@@ -33,13 +58,25 @@ $grey3: #e5e5e5;
 	font-size: 14px;
 }
 
-@mixin chap-spec {
-	@include emphasis;
-	background-size: 16px 16px;
-	padding: {
-		left: 16px;
-		right: 8px;
-	}
+[data-tooltip] {
+	position: relative;
+}
+
+[data-tooltip]:hover::after {
+	content: attr(data-tooltip);
+	position: absolute;
+	padding: 0 8px;
+	margin: -12px 0 0 8px;
+	background: rgba(0,0,0,.7);
+	color: #fff;
+	display: block;
+	top: 50%;
+	left: 100%;
+	font-size: 12px;
+	white-space: nowrap;
+	height: 24px;
+	line-height: 24px;
+	z-index: 1;
 }
 
 html {
@@ -49,6 +86,7 @@ html {
 body {
 	color: #444;
 	font-family: $body-font;
+	background: #fff;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -78,8 +116,7 @@ a {
 	}
 
 	&.tag {
-		display: block;
-		float: left;
+		display: inline-block;
 		padding: 0 2px;
 		margin: 0 4px 4px 0;
 		border: 1px solid #ddd;
@@ -125,7 +162,7 @@ hr.clear {
 }
 
 input[type=text], input[type=password] {
-	@include form-elem;
+	@extend .form-elem;
 	background: $grey1;
 
 	&:focus {
@@ -142,7 +179,7 @@ input[type=text], input[type=password] {
 }
 
 button {
-	@include form-elem;
+	@extend .form-elem;
 	@include emphasis;
 	background: $grey3;
 	text-align: center;
@@ -163,6 +200,8 @@ button {
 header {
 	height: 88px;
 	padding: 16px 0;
+	text-align: center;
+	margin-bottom: 64px;
 
 	h1 {
 		width: 64px;
@@ -171,7 +210,8 @@ header {
 		top: 0;
 
 		a {
-			font-family: ryo gothic plusn h, kozuka gothic pr6n h, meiryo, sans-serif;
+			font-family: ryo gothic plusn h, hiragino kaku gothic std w8, kozuka gothic pr6n h, meiryo, sans-serif;
+			font-weight: 900;
 			-webkit-writing-mode: vertical-rl;
 			-moz-writing-mode: vertical-rl;
 			writing-mode: vertical-rl;
@@ -193,8 +233,8 @@ header {
 		$width: 512px;
 
 		width: $width;
-		margin-left: 128px;
 		position: relative;
+		margin: 0 auto;
 
 		ul {
 			flex: 1 1 auto;
@@ -230,7 +270,7 @@ header {
 			}
 
 			select {
-				@include form-elem;
+				@extend .form-elem;
 				@include emphasis;
 				background: $grey3;
 				padding-right: 20px;
@@ -250,7 +290,7 @@ header {
 	}
 
 	#browse {
-		margin: 8px 0 0 128px;
+		margin-top: 8px;
 
 		* {
 			display: inline;
@@ -274,48 +314,63 @@ header {
 			}
 		}
 	}
+}
 
-	#header-user-info {
-		position: absolute;
-		top: 16px;
-		right: 8px;
-		font-size: 0;
+#cp {
+	position: fixed;
+	left: 32px;
+	top: 232px;
+	width: 64px;
+	padding: 0 8px;
 
-		#name {
-			@include vertical-center;
-			font-size: 20px;
-			line-height: 32px;
-		}
+	a.profile-link {
+		display: block;
+		position: relative;
+		overflow: visible;
 
 		img {
-			@include vertical-center;
-			margin: 0 16px;
-			height: 32px;
+			height: 48px;
+			width: 48px;
+		}
+	}
+
+	hr {
+		border: none;
+		border-top: 3px solid #ccc;
+		margin: 16px 0 8px;
+	}
+
+	nav ul li a {
+		display: block;
+		padding: 8px;
+
+		img {
 			width: 32px;
+			height: 32px;
+			opacity: 0.75;
 		}
 
-		input {
-			@include vertical-center;
-			margin-right: 8px;
+		&:hover {
+			background: $green;
 		}
+	}
 
-		button {
-			@include vertical-center;
-			margin-right: 8px;
-		}
+	input {
+		@include vertical-center;
+		margin-right: 8px;
+	}
 
-		#other-links {
-			display: inline-block;
-			margin: 0;
-			padding: 0;
-			vertical-align: top;
+	#other-links {
+		display: inline-block;
+		margin: 0;
+		padding: 0;
+		vertical-align: top;
 
-			a {
-				display: block;
-				font-size: 13px;
-				line-height: 16px;
-				height: 16px;
-			}
+		a {
+			display: block;
+			font-size: 13px;
+			line-height: 16px;
+			height: 16px;
 		}
 	}
 }
@@ -338,70 +393,66 @@ header {
 	h1 {
 		font-size: 30px;
 	}
+}
 
-	.feed {
-		padding: 16px;
-		width: 50%;
-		float: left;
+.feed {
+	padding: 16px;
+	width: 50%;
+	float: left;
 
-		.feed-title-block {
-			padding: 16px 0;
-			text-align: center;
+	.feed-title-block {
+		padding: 16px 0;
+		text-align: center;
+	}
+
+	h2 {
+		@include emphasis;
+		font-size: 20px;
+	}
+
+	h3 {
+		font-size: 16px;
+		margin-bottom: 8px;
+	}
+
+	ul {
+		li {
+			padding: 8px;
+			border-bottom: 1px dotted #ccc;
+			position: relative;
+		}
+	}
+
+	.feed-item {
+		//display: flex;
+		line-height: 16px;
+		font-size: 14px;
+
+		> * {
+			padding-right: 16px;
+			//display: inline-block;
+			display: inline;
+
+			&:last-child {
+				padding-right: 0;
+			}
 		}
 
-		h2 {
+		.demographic {
 			@include emphasis;
-			font-size: 20px;
 		}
 
-		h3 {
-			font-size: 16px;
-			margin-bottom: 8px;
+		.tags {
+			//display: inline-block;
 		}
 
-		ul {
-			li {
-				padding: 8px;
-				border-bottom: 1px dotted #ccc;
-			}
-		}
-
-		.feed-item {
-			display: flex;
-			line-height: 16px;
-			font-size: 14px;
-
-			> * {
-				padding-right: 16px;
-				display: inline-block;
-
-				&:last-child {
-					padding-right: 0;
-				}
-			}
-
-			.demographic {
-				@include emphasis;
-			}
-
-			.tags {
-				flex-basis: 60%;
-			}
-
-			.volume {
-				background: url('/static/volume.svg') no-repeat top left;
-				@include chap-spec;
-			}
-			.chapter {
-				background: url('/static/chapter.svg') no-repeat top left;
-				@include chap-spec;
-			}
-
-			time {
-				text-align: right;
-				color: #888;
-				font-size: 13px;
-			}
+		time {
+			text-align: right;
+			color: #888;
+			font-size: 13px;
+			position: absolute;
+			top: 8px;
+			right: 8px;
 		}
 	}
 }
@@ -478,3 +529,4 @@ footer {
 }
 
 @import 'series';
+@import '1280';

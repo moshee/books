@@ -1,228 +1,141 @@
 #series {
 	#main {
+		display: flex;
+
 		.title-block {
-			text-align: center;
 			margin-bottom: 32px;
 		}
 		h1 {
-			font-size: 32px;
+			font-size: 38px;
 		}
 		h2 {
 			font-size: 18px;
 			font-family: ryo gothic plusn m, kozuka gothic pr6n m, meiryo, sans-serif;
 		}
-		ul.authors {
-			li {
-				@include emphasis;
-				font-size: 14px;
-				line-height: 20px;
-				color: #888;
-				
-				a {
-					font-size: 16px;
-					text-transform: capitalize;
-				}
-			}
-			li:first-child:before {
-				content: "by ";
-			}
-			li:after {
-				content: ",";
-			}
-			li:last-child:after {
-				content: "";
+		h3 {
+			font-size: 22px;
+			margin-bottom: 16px;
+
+			button {
+				float: right;
 			}
 		}
 
-		section {
-			margin-top: 32px;
+		h4 {
+			@include emphasis;
+			font-family: $body-font;
+			font-size: 14px;
+			color: #666;
+		}
+		#series-meta {
+			width: 256px;
+			flex: 0 1 auto;
 
-			h3 {
-				font-size: 24px;
-				margin-bottom: 16px;
+			.cover {
+				width: 256px;
+				height: auto;
+				margin-bottom: 32px;
 			}
+			.cover.missing {
+				@include emphasis;
+				background: $grey0;
+				height: 384px;
+				color: #888;
+				line-height: 384px;
+				text-align: center;
+			}
+
+			p {
+				margin-bottom: 0;
+			}
+
+			table {
+				width: 100%;
+				border-collapse: collapse;
+
+				td {
+					padding-bottom: 8px;
+				}
+				td:nth-of-type(2) {
+					padding-left: 8px;
+				}
+			}
+		}
+		#summary p {
+			font-size: 14px;
 		}
 	}
 
 	#info {
-		padding-right: 32px;
+		//width: calc(100% - 288px);
+		margin-left: 64px;
+		flex: 1 1 0;
 
-		.cover {
-			width: 160px;
-			height: 240px;
-			display: inline-block;
-			margin-right: 32px;
+		&>section {
+			margin-bottom: 64px;
 		}
+	}
 
-		.cover.missing {
-			@include emphasis;
-			color: #aaa;
-			line-height: 240px;
-			text-align: center;
-			background: $grey0;
-		}
-
+	#series-releases {
 		table {
-			display: inline-block;
-			width: calc(100% - 195px);
-			vertical-align: top;
+			border-collapse: collapse;
+			width: 100%;
 
-			th {
-				@include emphasis;
-				color: #666;
-				font-size: 14px;
-				text-align: right;
-				padding-right: 8px;
-			}
-			td {
-				padding-left: 8px;
-			}
-
-			td small {
-				display: block;
-				color: #888;
-				font-size: 13px;
-			}
-		}
-
-		#tags {
-			ul {
-
-				li {
-					float: left;
-					margin-right: 16px;
+			tr {
+				td, th {
+					padding: 2px 8px;
+					font-size: 14px;
 				}
 
-				.spoiler {
-					display: none;
+				&:nth-of-type(2n+1) td {
+					background: $grey0;
 				}
 
-				&.show-spoiler .spoiler {
-					display: block;
+				td.tt {
+					text-align: right;
+					font-size: 13px;
+					color: #888;
 				}
-			}
-		}
-	}
-
-	#details {
-		padding-left: 32px;
-	}
-
-	#info, #details {
-		float: left;
-		width: 50%;
-	}
-
-	#series-releases table {
-		width: 100%;
-		font-size: 14px;
-
-		td {
-			padding: 2px 4px;
-
-			&.tv, &.tc {
-				position: relative;
-				padding-left: 16px;
-			}
-			&.tv:before {
-				background: url('/static/volume.svg') no-repeat top left;
-			}
-			&.tc:before {
-				background: url('/static/chapter.svg') no-repeat top left;
-			}
-			&.tv:before, &.tc:before {
-				content: "";
-				background-size: 16px 16px;
-				height: 16px;
-				width: 16px;
-				position: absolute;
-				top: 50%;
-				left: 0;
-				margin-top: -8px;
-			}
-
-			&.tg {
-				max-width: 200px;
-			}
-
-			&.tt {
-				text-align: right;
-				color: #888;
-				width: 100px;
 			}
 		}
 	}
 
 	#reviews {
-	}
-	article.review {
-		margin-bottom: 32px;
+		.rating {
+			font-size: 24px;
+			display: inline-block;
+			vertical-align: middle;
+			letter-spacing: -10px;
+			font-weight: 700;
+			margin: 0 8px 8px 0;
 
-		.byline {
-			margin-bottom: 8px;
-		}
-
-		em {
-			font: normal 700 18px/0 normal;
-			font-family: $body-font;
-			//font-family: $heading-font;
-			letter-spacing: 2px;
-			
+			sup {
+				letter-spacing: -8px;
+			}
 			sub {
 				letter-spacing: 0;
 			}
 		}
 
-		.review-body {
-			p {
-				font-size: 14px;
-			}
-		}
-	}
-
-	#series-characters ul {
-		clear: both;
-
-		li {
+		.byline {
 			display: inline-block;
-			width: 50%;
-			margin-bottom: 16px;
+			vertical-align: top;
 
-			img {
-				width: 32px;
-				height: 32px;
-				float: left;
-				margin-right: 8px;
+			.by-name {
+				font-size: 18px;
 			}
-
-			h4 {
-				font-size: 20px;
-				line-height: 32px
-			}
-			p {
-				font-size: 14px;
-				line-height: 24px;
+			.by-time {
+				font-size: 13px;
+				color: #888;
 			}
 		}
 
-		&.main-characters li {
-			width: 100%;
+		article.review {
+			margin-bottom: 32px;
 
-			img {
-				width: 64px;
-				height: 64px;
-				margin-right: 16px;
-			}
-
-			h4 {
-				font-size: 24px;
-				line-height: 40px;
-			}
-
-			p {
-				font-size: 18px;
-				line-height: 24px;
-			}
+		}
+		.review-body {
+			margin-left: 40px;
 		}
 	}
 }
