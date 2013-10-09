@@ -22,6 +22,7 @@ $grey3: #e5e5e5;
 }
 
 .chap-spec {
+	content: " ";
 	width: 16px;
 	height: 16px;
 	display: inline-block;
@@ -30,15 +31,14 @@ $grey3: #e5e5e5;
 		repeat: no-repeat;
 		attachment: top left;
 	}
+	opacity: 0.75;
 }
 
 th.tv:before {
-	content: " ";
 	@extend .chap-spec;
 	background-image: url('/static/volume.svg');
 }
 th.tc:before {
-	content: " ";
 	@extend .chap-spec;
 	background-image: url('/static/chapter.svg');
 }
@@ -337,12 +337,12 @@ header {
 	hr {
 		border: none;
 		border-top: 3px solid #ccc;
-		margin: 16px 0 8px;
+		margin: 16px 0;
 	}
 
 	nav ul li a {
 		display: block;
-		padding: 8px;
+		margin: 8px;
 
 		img {
 			width: 32px;
@@ -350,8 +350,8 @@ header {
 			opacity: 0.75;
 		}
 
-		&:hover {
-			background: $green;
+		&:hover img {
+			opacity: 1;
 		}
 	}
 

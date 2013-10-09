@@ -1,39 +1,51 @@
 {{ define "feed" }}
 <div class=feed>
-  <div class=feed-title-block>
-    <h2>{{ .Title }}</h2>
-  </div>
-  <ul>
-  {{ range $i, $item := .Items }}
-    <li class={{ $item.Template }}>{{ $.Render $i }}</li>
-  {{ end }}
-  </ul>
+	<div class=feed-title-block>
+		<h2>{{ .Title }}</h2>
+	</div>
+	{{ .Render }}
 </div>
 {{ end }}
 
 {{ define "feed-release" }}
-<h3><a href=/series/{{ .BookSeries.Id }}>{{ .Title }}</a>{{ if .Permalink }}<a class=feed-permalink href="{{ .Permalink }}"></a>{{ end }}</h3>
-<div class=feed-item>
-  {{ if index .Chapters.Volumes 0 }}<div class="volume"><span class=hidden>v. </span>{{ collapse_range .Chapters.Volumes }}</div>{{ end }}
-  <div class="chapter"><span class=hidden>c. </span>{{ collapse_range .Chapters.Nums }}</div>
-  <div class="group-names">by {{ template "group-list" .TranslationGroups }}</div>
-  <time datetime="{{ .ReleaseDate | datetime }}">{{ ago .ReleaseDate }}</time>
-</div>
+<ul>
+	{{ range . }}
+	<li>
+		<h3><a href=/series/{{ .BookSeries.Id }}>{{ .Title }}</a>{{ if .Permalink }}<a class=feed-permalink href="{{ .Permalink }}"></a>{{ end }}</h3>
+		<div class=feed-item>
+			{{ if index .Chapters.Volumes 0 }}<div class="volume"><span class=hidden>v. </span>{{ collapse_range .Chapters.Volumes }}</div>{{ end }}
+			<div class="chapter"><span class=hidden>c. </span>{{ collapse_range .Chapters.Nums }}</div>
+			<div class="group-names">by {{ template "group-list" .TranslationGroups }}</div>
+			<time datetime="{{ .ReleaseDate | datetime }}">{{ ago .ReleaseDate }}</time>
+		</div>
+	</li>
+	{{ end }}
+</ul>
 {{ end }}
 
 {{ define "feed-news" }}
-<h3><em>{{ .Category }}: </em><a href=/news/{{ .Id }}>{{ .Title }}</a></h3>
-<div class=post-meta><a href=/user/{{ .User.Id }}>{{ .User.Name }}</a> on <time datetime="{{ .DatePosted | datetime }}">{{ .DatePosted.Format "2 Jan 2006" }}</time></div>
-<div class=post-content>
-  {{ smarkdown .Body }}
-</div>
+{{ range . }}
+<article class=news-post>
+	<h3><em>{{ .Category }}: </em><a href=/news/{{ .Id }}>{{ .Title }}</a></h3>
+	<div class=post-meta><a href=/user/{{ .User.Id }}>{{ .User.Name }}</a> on <time datetime="{{ .DatePosted | datetime }}">{{ .DatePosted.Format "2 Jan 2006" }}</time></div>
+	<div class=post-content>
+		{{ smarkdown .Body }}
+	</div>
+</article>
+{{ end }}
 {{ end }}
 
 {{ define "feed-series" }}
-<h3><a href=/series/{{ .Id }}>{{ .Title }}</a></h3>
-<div class=feed-item>
-  <div class="demographic"><a href=/demographic/{{ .Demographic.URLString }}>{{ .Demographic }}</a></div>
-  <div class="tags">{{ template "tag-list" .TagArr }}</div>
-  <time datetime="{{ .DateAdded | datetime }}">{{ .DateAdded.Format "2 Jan" }}</time>
-</div>
+<ul>
+	{{ range . }}
+	<li>
+		<h3><a href=/series/{{ .Id }}>{{ .Title }}</a></h3>
+		<div class=feed-item>
+			<div class="demographic"><a href=/demographic/{{ .Demographic.URLString }}>{{ .Demographic }}</a></div>
+			<div class="tags">{{ template "tag-list" .TagArr }}</div>
+			<time datetime="{{ .DateAdded | datetime }}">{{ .DateAdded.Format "2 Jan" }}</time>
+		</div>
+	</li>
+	{{ end }}
+</ul>
 {{ end }}

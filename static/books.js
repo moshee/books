@@ -145,7 +145,8 @@
 
 		ajax_post('/login', {
 			'user': user.value,
-			'pass': password.value
+			'pass': password.value,
+			'page': $('body').getAttribute('id')
 		}, true, function(e) {
 			// get rid of any errors that might be there from the last attempt
 			var errors = $$('.error', form);
@@ -157,8 +158,7 @@
 			switch (x.status) {
 			case 200:
 				// okay, replace contents
-				$('header').outerHTML = x.response;
-				$('#logout-button').addEventListener('click', logout, false);
+				$('#cp').innerHTML = x.response;
 				break;
 
 			case 400:
@@ -191,7 +191,7 @@
 			switch (x.status) {
 			case 200:
 				// okay, replace contents
-				$('header').outerHTML = x.response;
+				$('#cp').innerHTML = x.response;
 				$('#login-button')
 					.addEventListener('click', login, false);
 				break;
@@ -226,6 +226,7 @@
 			try {
 				$(pair[0]).addEventListener('click', pair[1], false);
 			} catch (e) {
+				console.log("Element: " + pair[0]);
 				console.log(e.stack);
 				return;
 			}

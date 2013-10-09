@@ -9,7 +9,7 @@
 	<script src="/static/books.js"></script>
 </head>
 <body class="front{{ if .User }} logged-in{{ end }}">
-	{{ template "header-bar" .User }}
+	{{ template "header-bar" }}
   <aside id=cp>
     {{ template "user-cp" .User }}
   </aside>

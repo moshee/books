@@ -24,8 +24,8 @@ func main() {
 
 	gas.New().
 		Get("/static/{path}", StaticHandler).
-		Get("/img/u/t/{img}", placeholdit(32, 32)).
-		Get("/img/c/{img}", placeholdit(160, 240)).
+		Get("/img/u/t/{img}", placeholdit(48, 48)).
+		Get("/img/c/{img}", placeholdit(256, 384)).
 		Get("/img/char/t/{img}", placeholdit(64, 64)).
 		Get("/series/{id}", books.SeriesPage).
 		Post("/login", books.Login).

@@ -4,35 +4,41 @@ import (
 	"bytes"
 	"github.com/moshee/gas"
 	"html/template"
+	"time"
 )
 
 type Feed struct {
-	Title string
-	Id    string
-	Owner *User
-	Items []FeedItem
+	Id          int
+	Kind        string
+	Hash        []byte
+	Spec        string
+	Creator     *User
+	Title       string
+	Description string
+	DateCreated time.Time
+
+	Items interface{}
 }
 
-func (self *Feed) Render(i int) template.HTML {
-	name := self.Items[i].Template()
-	t := gas.Templates["books"].Lookup(name)
+// Execute the feed's associated template and return the output as safe HTML
+func (self *Feed) Render() template.HTML {
+	t := gas.Templates["books"].Lookup("feed-" + self.Kind)
 	if t == nil {
-		return template.HTML("Error rendering template: no template found for '" + name + "' in feed '" + self.Title + "'")
+		return template.HTML("Error rendering feed '" + self.Title + "': no template found for '" + self.Kind + "'")
 	}
 
 	buf := new(bytes.Buffer)
-	err := t.Execute(buf, self.Items[i])
+	err := t.Execute(buf, self.Items)
 	if err != nil {
-		return template.HTML("Error rendering template for feed '" + self.Title + "': " + err.Error())
+		return template.HTML("Error rendering for feed '" + self.Title + "': " + err.Error())
 	}
 
 	return template.HTML(buf.Bytes())
 }
 
-type FeedItem interface {
-	Template() string
-}
+// Query data using the feedspec and populate the Items field so that Render
+// can be used
+func (self *Feed) Populate() error {
 
-func (Release) Template() string    { return "feed-release" }
-func (NewsPost) Template() string   { return "feed-news" }
-func (BookSeries) Template() string { return "feed-series" }
+	return nil
+}

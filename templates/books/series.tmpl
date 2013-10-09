@@ -12,11 +12,9 @@
 	{{ template "header-bar" }}
   <aside id=cp>
     {{ template "user-cp" .User }}
-    <nav>
-      <ul>
-        <li><a href=javascript:editPage() data-tooltip="Edit series info"><img src=/static/edit.svg></a></li>
-      </ul>
-    </nav>
+    {{ if .User }}
+    {{ template "cp-series" }}
+    {{ end }}
   </aside>
 	<section id=main>
 		{{ with .Series }}
@@ -83,7 +81,7 @@
 				<h3>Tags</h3>
 				{{ with .Tags }}
 					{{ if .HasSpoiler }}
-					<input name=show-spoilers type=checkbox><label for=show-spoilers>Show spoiler tag(s)</label>
+					<input name=show-spoilers id=show-spoilers type=checkbox><label for=show-spoilers>Show spoiler tag(s)</label>
 					{{ end }}
 				<ul class=tags>
 					{{ range $i, $tag := . }}
@@ -103,6 +101,7 @@
 				<p>No tags have been added.</p>
 				{{ end }}
 			</section>
+      <hr class=clear>
 			<section id=summary>
 				<h3>Summary</h3>
 				{{ with .Summary }}
@@ -129,7 +128,7 @@
         <h3>Releases{{ if $.User }} <button id=add-release>Add release</button>{{ end }}</h3>
 				{{ with .Releases }}
 				<table>
-          <thead><tr><th class=tv></th><th class=tc></th></tr></thead>
+          <thead><tr><th class=tv title="Volume(s)"></th><th class=tc title="Chapter(s)"></th></tr></thead>
 					{{ range . }}
 					<tr>
 						{{ if index .Chapters.Volumes 0 }}<td class=tv>{{ collapse_range .Chapters.Volumes }}</td>
@@ -155,11 +154,6 @@
 				</ul>
 				{{ else }}
 				<p>No related series.</p>
-					{{ if $.User }}
-				<p><a href=/series/{{ $.Series.Id }}>Know of one?</a></p>
-					{{ else }}
-				<p><a href=javascript:hiLogin()>Log in</a> to add one.</p>
-					{{ end }}
 				{{ end }}
 			</section>
 			<section id=series-characters>
@@ -180,7 +174,21 @@
 			{{ end }}
 			</section>
       <section id=reviews>
-        <h3>Reviews{{ if $.User }} <button id=write-review>Opinionate</button>{{ end }}</h3>
+        <h3>Reviews</h3>
+        {{ if $.User }}
+        <div id=review-editor>
+          <strong>Rating: </strong>
+          <ul>
+            <li><label for=rating>1</label><input name=rating type=radio value=1></li>
+            <li><label for=rating>2</label><input name=rating type=radio value=2></li>
+            <li><label for=rating>3</label><input name=rating type=radio value=3></li>
+            <li><label for=rating>4</label><input name=rating type=radio value=4></li>
+            <li><label for=rating>5</label><input name=rating type=radio value=5></li>
+          </ul>
+          <textarea placeholder="Express your opinions..."></textarea>
+          <button id=submit-review>Show those nerds who’s right</button>
+        </div>
+        {{ end }}
         {{ with .Reviews }}
           {{ range . }}
         <article class=review>
@@ -194,7 +202,16 @@
           </div>
         </article>
           {{ end }}
+          {{ $l := len . }}
+          {{ if lt $l 5 }}
+            {{ if eq $l 1 }}
+          <p>Showing the only review written for this series.</p>
+            {{ else }}
+          <p>Showing all {{ $l }} reviews.</p>
+            {{ end }}
+          {{ else }}
           <p><a class=more href=/series/{{ $.Series.Id }}/reviews>View all reviews</a></p>
+          {{ end }}
         {{ else }}
           <p>Nobody has expressed their opinion on this series yet.</p> 
         {{ end }}

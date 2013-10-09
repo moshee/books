@@ -288,14 +288,7 @@ func (self *BookSeries) Reviews() (ratings []BookRating) {
 }
 
 func (self *BookSeries) Releases() (releases []Release) {
-	/*
-		err := gas.Query(&releases, `
-			SELECT *
-			FROM   books.series_releases
-			WHERE  series_id = $1
-			LIMIT  10`, self.Id)
-	*/
-	err := gas.Query(&releases, "SELECT * FROM books.recent_releases WHERE series_id = $1", self.Id)
+	err := gas.Query(&releases, "SELECT * FROM books.recent_releases WHERE series_id = $1 LIMIT 10", self.Id)
 	if err != nil {
 		gas.Log(gas.Warning, "BookSeries.Releases: %v", err)
 	}
@@ -436,7 +429,7 @@ type Release struct {
 	Notes         sql.NullString `sql:"release_notes"`
 	IsLastRelease bool
 	Extra         sql.NullString
-	Permalink     string
+	Permalink     sql.NullString
 
 	*Chapters
 	Padding int

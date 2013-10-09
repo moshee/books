@@ -18,7 +18,12 @@ func Login(g *gas.Gas) {
 		return
 	}
 
-	g.Render("books", "header-bar", g.User().(*User))
+	user := g.User().(*User)
+
+	g.Render("books", "user-cp", user)
+	if page := g.FormValue("page"); len(page) > 0 {
+		g.Render("books", "cp-"+page, user)
+	}
 }
 
 func Logout(g *gas.Gas) {
@@ -28,5 +33,5 @@ func Logout(g *gas.Gas) {
 		return
 	}
 
-	g.Render("books", "header-bar", nil)
+	g.Render("books", "user-cp", nil)
 }

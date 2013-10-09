@@ -114,9 +114,9 @@ INSERT INTO chapters VALUES
 <% end %>
 
 INSERT INTO releases VALUES
-<%= rec(300) { ['DEFAULT', rand(1..159), lang, tstz, (null(0.95) or string), bool(0.05), (null(0.9) or text(%w(Extra Omake).sample)), (null(0.5) or url)] } %>
+<%= rec(1000) { ['DEFAULT', rand(1..159), lang, tstz, (null(0.95) or string), bool(0.05), (null(0.9) or text(%w(Extra Omake).sample)), (null(0.5) or url)] } %>
 
-<% 300.times do |release| %>
+<% 1000.times do |release| %>
     <% s = chapters.sample %>
     <% next if s.nil? %>
     <% max = s.max %>
@@ -128,7 +128,7 @@ INSERT INTO releases_chapters VALUES
 <% end %>
 
 INSERT INTO releases_translators VALUES
-<%= rec(300, 0.1, 1..2, true) { |n| ['DEFAULT', n, rand(1..54)] } %>
+<%= rec(1000, 0.05, 1..2, true) { |n| ['DEFAULT', n, rand(1..54)] } %>
 
 INSERT INTO user_chapters VALUES
 <%= rec(100) { ['DEFAULT', rand(1..103), rand(1..chap_count), rand(2), tstz] } %>
@@ -166,10 +166,10 @@ INSERT INTO related_characters VALUES
 <%= rec(100) { ['DEFAULT', rand(1..100), rand(101..200), rand(1..8)] } %>
 
 INSERT INTO book_tag_names VALUES
-<%= rec($files[:colors].size) { |n| ['DEFAULT', text($files[:colors][n-1])] } %>
+<%= rec($files[:colors].size) { |n| ['DEFAULT', text($files[:colors][n-1]), (null(0.4) or longstring(1..3))] } %>
 
 INSERT INTO book_tags VALUES
-<%= rec(500) { ['DEFAULT', rand(1..159), rand(1..($files[:colors].size)), bool(0.05), rand] } %>
+<%= rec(1000) { ['DEFAULT', rand(1..159), rand(1..($files[:colors].size)), bool(0.05), rand] } %>
 
 INSERT INTO book_tag_consensus VALUES
 <%= rec(500) { ['DEFAULT', rand(1..103), rand(1..500), rand(-5..10), tstz] } %>

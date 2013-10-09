@@ -201,6 +201,7 @@ CREATE VIEW recent_releases AS
         r.release_date,
         r.is_last_release,
         r.extra,
+        r.permalink,
         array_agg(ch.volume)       AS chapter_volumes,
         array_agg(ch.num)          AS chapter_nums,
         array_agg(DISTINCT t.id)   AS translator_ids,
@@ -224,7 +225,8 @@ CREATE VIEW recent_releases AS
         r.language,
         r.release_date,
         r.is_last_release,
-        r.extra
+        r.extra,
+        r.permalink
     ORDER BY r.release_date DESC;
 --
 -- Users
@@ -352,8 +354,9 @@ CREATE TABLE related_characters (
 --   for a given Series/Character.
 
 CREATE TABLE book_tag_names (
-    id   serial PRIMARY KEY,
-    name text   NOT NULL
+    id          serial PRIMARY KEY,
+    name        text   NOT NULL,
+    description text
 );
 
 CREATE TABLE book_tags (
@@ -662,7 +665,7 @@ CREATE TABLE feeds (
     hash         bytea       NOT NULL UNIQUE, -- A random string of bytes that identifies this feed (don't use the id)
     feedspec     text        NOT NULL,        -- Description of feed contents.
     creator      integer     REFERENCES users,
-    name         text        NOT NULL,
+    title        text        NOT NULL,
     description  text        NOT NULL DEFAULT '',
     date_created timestamptz NOT NULL DEFAULT 'now'::timestamptz
 );

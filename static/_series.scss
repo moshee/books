@@ -15,6 +15,7 @@
 		h3 {
 			font-size: 22px;
 			margin-bottom: 16px;
+			clear: both;
 
 			button {
 				float: right;
@@ -52,6 +53,7 @@
 			table {
 				width: 100%;
 				border-collapse: collapse;
+				margin-bottom: 24px;
 
 				td {
 					padding-bottom: 8px;
@@ -59,6 +61,30 @@
 				td:nth-of-type(2) {
 					padding-left: 8px;
 				}
+			}
+
+			ul.tags {
+				margin-bottom: 32px;
+
+				li {
+					float: left;
+					margin-right: 8px;
+					font-size: 14px;
+					margin: 4px 8px 4px 0;
+				}
+				li.spoiler {
+					display: none;
+					background: $grey0;
+					padding: 2px 4px;
+					margin: 2px 8px 2px 0;
+				}
+			}
+
+			#show-spoilers {
+				margin: 0 8px 8px 0;
+			}
+			#tags input#show-spoilers:checked ~ ul li.spoiler {
+				display: inline-block;
 			}
 		}
 		#summary p {

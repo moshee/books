@@ -38,6 +38,7 @@
 {{ end }}
 
 {{ define "user-cp" }}
+<div id=cp-user-info>
 {{ if . }}
   <a class=profile-link href=/user/{{ .Id }} data-tooltip="Visit your profile">
     {{ if .Avatar }}
@@ -46,6 +47,7 @@
     <img src=/img/u/t/0.jpg>
     {{ end }}
   </a>
+  <button id=logout-button>Log out</button>
   <hr>
 {{ else }}
   <form>
@@ -58,6 +60,15 @@
     </div>
   </form>
 {{ end }}
+</div>
+{{ end }}
+
+{{ define "cp-series" }}
+    <nav>
+      <ul>
+        <li><a href=javascript:editPage() data-tooltip="Edit series info"><img src=/static/edit.svg></a></li>
+      </ul>
+    </nav>
 {{ end }}
 		
 

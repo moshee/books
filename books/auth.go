@@ -52,7 +52,7 @@ func (DBStore) UpdateSession(id []byte) error {
 	if err != nil {
 		return err
 	}
-	return exec("UPDATE books.sessions SET expires = $1 WHERE id = $2",
+	return exec("UPDATE books.sessions SET expire_date = $1 WHERE id = $2",
 		time.Now().Add(gas.MaxCookieAge), sess.Sessid)
 }
 
