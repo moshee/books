@@ -1,5 +1,7 @@
 guard :sass, input: 'static'
 
+guard :coffeescript, input: 'static'
+
 guard :shell do
   watch %r'templates/.*\.tmpl' do
     system 'killall -HUP main'

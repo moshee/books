@@ -7,3 +7,4 @@ datagen/scratch*
 datagen/test*
 .sass-cache
 static/*.css
+static/*.js
