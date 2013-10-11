@@ -26,7 +26,7 @@ INSERT INTO schema_version VALUES (0);
 CREATE TABLE publishers (
     id         serial      PRIMARY KEY,
     name       text        NOT NULL,
-    date_added timestamptz NOT NULL DEFAULT 'now'::timestamptz,
+    date_added timestamptz NOT NULL DEFAULT now(),
     summary    text
 );
 
@@ -35,7 +35,7 @@ CREATE TABLE magazines (
     title        text        NOT NULL,
     publisher_id integer     NOT NULL REFERENCES publishers,
     language     text        NOT NULL,
-    date_added   timestamptz NOT NULL DEFAULT 'now'::timestamptz,
+    date_added   timestamptz NOT NULL DEFAULT now(),
     demographic  integer,
     summary      text
 );
@@ -151,7 +151,7 @@ CREATE TABLE releases (
     id              serial      PRIMARY KEY,
     series_id       integer     NOT NULL REFERENCES book_series,
     language        text        NOT NULL DEFAULT 'en',
-    release_date    timestamptz NOT NULL DEFAULT 'now'::timestamptz,
+    release_date    timestamptz NOT NULL DEFAULT now(),
     notes           text,
     is_last_release boolean     NOT NULL DEFAULT false,
     extra           text,
@@ -241,7 +241,7 @@ CREATE TABLE users (
     rights        integer     NOT NULL DEFAULT 0,
     vote_weight   integer     NOT NULL DEFAULT 1,
     summary       text,
-    register_date timestamptz NOT NULL DEFAULT 'now'::timestamptz,
+    register_date timestamptz NOT NULL DEFAULT now(),
     last_active   timestamptz NOT NULL DEFAULT 'epoch'::timestamptz,
     avatar        boolean     NOT NULL DEFAULT false,
     active        boolean     NOT NULL DEFAULT false
@@ -269,7 +269,7 @@ CREATE TABLE user_chapters (
     user_id    integer     NOT NULL REFERENCES users,
     chapter_id integer     NOT NULL REFERENCES chapters,
     status     integer     NOT NULL,
-    date_read  timestamptz NOT NULL DEFAULT 'now'::timestamptz
+    date_read  timestamptz NOT NULL DEFAULT now()
 );
 
 -- keeps track of which releases a user owns
@@ -278,7 +278,7 @@ CREATE TABLE user_releases (
     user_id    integer     NOT NULL REFERENCES users,
     release_id integer     NOT NULL REFERENCES releases,
     status     integer     NOT NULL,
-    date_owned timestamptz NOT NULL DEFAULT 'now'::timestamptz
+    date_owned timestamptz NOT NULL DEFAULT now()
 );
 
 -- keeps track of users belonging to translator groups
@@ -372,7 +372,7 @@ CREATE TABLE book_tag_consensus (
     user_id     integer     NOT NULL REFERENCES users,
     book_tag_id integer     NOT NULL REFERENCES book_tags,
     vote        integer     NOT NULL,
-    vote_date   timestamptz NOT NULL
+    vote_date   timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE VIEW latest_series AS
@@ -633,7 +633,7 @@ CREATE TABLE news_posts (
     id          serial      PRIMARY KEY,
     user_id     integer     NOT NULL REFERENCES users,
     category_id integer     NOT NULL REFERENCES news_categories,
-    date_posted timestamptz NOT NULL DEFAULT 'now'::timestamptz,
+    date_posted timestamptz NOT NULL DEFAULT now(),
     title       text        NOT NULL,
     body        text        NOT NULL
 );
@@ -667,7 +667,7 @@ CREATE TABLE feeds (
     creator      integer     REFERENCES users,
     title        text        NOT NULL,
     description  text        NOT NULL DEFAULT '',
-    date_created timestamptz NOT NULL DEFAULT 'now'::timestamptz
+    date_created timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE feed_permissions (
@@ -675,7 +675,7 @@ CREATE TABLE feed_permissions (
     feed_id    integer     NOT NULL REFERENCES feeds,
     user_id    integer     NOT NULL REFERENCES users,
     action     integer     NOT NULL, -- allow, disallow, ...
-    date_given timestamptz NOT NULL DEFAULT 'now'::timestamptz
+    date_given timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE feed_subscriptions (
@@ -683,7 +683,7 @@ CREATE TABLE feed_subscriptions (
     feed_id     integer     NOT NULL REFERENCES feeds,
     user_id     integer     NOT NULL REFERENCES users,
     private     boolean     NOT NULL DEFAULT false,
-    date_subbed timestamptz NOT NULL DEFAULT 'now'::timestamptz
+    date_subbed timestamptz NOT NULL DEFAULT now()
 );
 
 --
