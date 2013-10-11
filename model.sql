@@ -919,3 +919,5 @@ CREATE RULE series_relations_ignore_duplicates_on_insert AS
 CREATE TRIGGER update_series_relations
     AFTER INSERT OR UPDATE OR DELETE ON books.related_series FOR EACH ROW
     EXECUTE PROCEDURE do_update_series_relations();
+
+END;
