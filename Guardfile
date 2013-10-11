@@ -1,6 +1,4 @@
-guard :sass, input: 'static'
-
-guard :coffeescript, input: 'static'
+guard :sass, input: 'scss', output: 'static'
 
 guard :shell do
   watch %r'templates/.*\.tmpl' do
@@ -8,6 +6,9 @@ guard :shell do
   end
   watch 'static/style.css' do
     system "csso static/style.css static/style-min.css && echo '[csso] style.css -> style-min.css'"
+  end
+  watch %r'coffee/.+\.coffee$' do
+    system "coffee -cj static/books.js coffee/*.coffee && echo '[coffee] JS compiled'"
   end
 end
 

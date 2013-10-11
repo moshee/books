@@ -209,3 +209,9 @@
 	span#tag-downvote.selected { color: #f66; }
 	span#tag-upvote.selected { color: #6f6; }
 }
+
+#review-editor {
+	ul li {
+		display: inline-block;
+	}
+}
