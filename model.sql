@@ -767,7 +767,7 @@ CREATE TRIGGER update_translator_average_rating
 CREATE FUNCTION do_update_book_tags() RETURNS trigger AS $$
     DECLARE
         rec        RECORD;
-        new_weight integer;
+        new_weight real;
     BEGIN
         IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
             rec := NEW;
