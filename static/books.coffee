@@ -8,49 +8,72 @@ $$ = (sel, base) ->
   base = document if not base?
   base.querySelectorAll sel
 
-HTMLElement::on = (evt, func, bubble) ->
+HTMLElement::on = XMLHttpRequest::on = Window::on = (evt, func, capture) ->
   if evt.constructor.name is 'Array'
-    this.addEventListener e, func, bubble for e in evt
+    this.addEventListener e, func, capture for e in evt
   else
     # add a touchend event automatically for click events
     if evt is 'click'
-      this.addEventListener 'touchend', func, bubble
-    this.addEventListener evt, func, bubble
-  
-ajaxPost = (path, data, async, callbacks) ->
-  x = new XMLHttpRequest()
+      this.addEventListener 'touchend', func, capture
+    this.addEventListener evt, func, capture
 
-  if callbacks?
-    switch typeof(callbacks)
+HTMLElement::css = (obj) ->
+  @style[key] = val for key, val of obj
+
+HTMLElement::attr = (obj) ->
+  switch typeof obj
+    when 'string'
+      @getAttribute obj
+    when 'object'
+      for key, val of obj
+        if val is null
+          @removeAttribute key
+        else
+          @setAttribute key, val
+
+ajax = (opts) ->
+  x = new XMLHttpRequest()
+  opts.method ||= 'post'
+  unless opts.async?
+    opts.async = false
+
+  if opts.attrs?
+    x[name] = attr for name, attr of opts.attrs
+
+  if opts.headers?
+    x.setRequestHeader header, val for header, val of opts.headers
+
+  if opts.callback?
+    switch typeof opts.callback
       when 'object'
-        x.addEventListener(evt, callback, false) for evt, callback of callbacks
+        x.on(evt, func, false) for evt, func of opts.callback
 
       when 'function'
-        x.addEventListener 'load', callbacks, true
+        x.on 'load', opts.callback, false
 
-  x.open 'post', path, async
+  x.open opts.method, opts.path, opts.async
 
-  if typeof data is 'object'
+  if typeof opts.data is 'object'
     fd = new FormData
-    fd.append key, val for key, val of data
+    fd.append key, val for key, val of opts.data
     x.send fd
   else
-    x.send data
+    x.send opts.data
 
-make = (tag, attrs, text) ->
-  elem = document.createElement(tag)
+make = (opts) ->
+  if not opts.tag?
+    elem = document.createTextNode opts.text
+    if opts.base? then opts.base.appendChild elem
+    return elem
 
-  if attrs?
-    for name, attr of attrs
-      if attr?
-        elem.setAttribute name, attr
-      else
-        elem.setAttribute name
+  elem = document.createElement opts.tag
 
-  if text?
-    elem.innerText = text
+  if opts.base?     then opts.base.appendChild elem
+  if opts.attrs?    then elem.attr opts.attrs
+  if opts.text?     then elem.attr innerText: opts.text
+  if opts.children? then elem.appendChild opts.children elem
 
-  return elem
+  elem
 
 # handlers
 
@@ -79,15 +102,19 @@ login = (e) ->
   user.classList.remove 'invalid'
   password.classList.remove 'invalid'
 
-  loginButton.setAttribute 'disabled'
+  loginButton.attr disabled: yes
   old = loginButton.innerHTML
   loginButton.innerText = 'Logging in...' # TODO: change to a spinner
 
-  ajaxPost '/login',
-    'user': user.value
-    'pass': password.value
-    'page': $('body').getAttribute('id'),
-    true, (e) ->
+  ajax
+    method: 'post'
+    path: '/login'
+    data:
+      'user': user.value
+      'pass': password.value
+      'page': $('body').attr 'id'
+    async: true
+    callback: (e) ->
       # get rid of errors that might be left over
       # TODO: inline errors instead of lazy alert()
       # form.removeChild error for error in $$ '.error', form
@@ -97,102 +124,154 @@ login = (e) ->
         when 200
           $('#cp').innerHTML = x.response
         else
-          resp = JSON.parse x.response
-          alert resp.msg
+          throw toString: -> x.response
 
       loginButton.innerHTML = old
-      loginButton.removeAttribute 'disabled'
+      loginButton.attr disabled: null
 
 logout = (e) ->
   button = e.target
-  button.setAttribute 'disabled'
+  button.attr disabled: yes
   old = button.innerText
   button.innerText = 'Logging out...'
 
-  ajaxPost '/logout', null, true, (e) ->
-    x = e.srcElement
-    console.log e
-    switch x.status
-      when 200
-        $('#cp').innerHTML = x.response
-        $('#login-button').addEventListener 'click', login, false
-      else
-        resp = JSON.parse x.response
-        alert resp.msg
+  ajax
+    method: 'post'
+    path: '/logout'
+    async: yes
+    callback: (e) ->
+      x = e.srcElement
+      console.log e
+      switch x.status
+        when 200
+          $('#cp').innerHTML = x.response
+          $('#login-button').on 'click', login, false
+        else
+          resp = JSON.parse x.response
+          alert resp.msg
+          false
+
 
 class Series
-  constructor: () ->
-    @tags = $ '#tags li a'
-    tag.addEventListener 'click', showTagInfo, false for tag in @tags
+  constructor: ->
+    @tags = $$ '.tags li a'
+    tag.on 'click', @showTagInfo, false for tag in @tags
+
+    @editLink = $ '#edit-page'
 
     @tagShown = null
     @tagInfo = null
 
-showTagInfo = (e) ->
-  a = e.targetElement
+  # Display the tag info popup, getting the tag's description from the server
+  # TODO: cache descriptions
+  showTagInfo: (e) =>
+    a = e.target
+    e.preventDefault()
 
-  if THIS.tagShown? and THIS.tagShown is a.innerText
-    return
-
-  info = THIS.tagInfo
-  info.style.display = 'none'
-
-  if not info?
-    ajaxPost '/ajax/tag-info', 'tagName': a.innerText, false, (e) ->
-      resp = JSON.parse e.response
-      if resp.err isnt null
-        alert resp.msg
-        return
-
-      info = make 'div', 'id': 'tag-info'
-      info.innerHTML = resp.msg
-
-      $('#tag-upvote', info).addEventListener 'click', (e) ->
-        # ajax post...
-        false
-      , false
-
-      $('#tag-downvote', info).addEventListener 'click', (e) ->
-        # ajax post...
-        false
-      , false
-
-      THIS.tagInfo = info
-      document.body.appendChild info
-
-  if not info?
-    alert 'Something went wrong getting tag info'
-    return
-
-  desc = $ '#tag-desc', info
-  ajaxPost '/ajax/tag-desc', 'tagName': a.innerText, false, (e) ->
-    resp = JSON.parse e.response
-    if resp.err isnt null
-      alert resp.msg
+    # clicking on the link will have toggle behavior
+    if @tagShown? and @tagShown is a.innerText
+      @hideTagInfo()
       return
 
-    desc.innerText = resp.msg
+    @populateTagInfo a, =>
+      @tagInfo.css display: 'block'
+      @positionTagInfo a.parentElement
+      @tagShown = a.innerText
 
-  info.style.display = 'block'
+    # if user clicks outside the popup, close it
+    #document.body.on 'click', @hideTagInfo, false
+    return false
 
-  info.style.left = a.offsetWidth + a.offsetLeft + 8 + 'px'
-  info.style.top = a.offsetHeight/2 + a.offsetTop - info.offsetHeight
-  THIS.tagShown = a.innerText
+  hideTagInfo: (e) =>
+    if not @tagInfo? or @tagShown is ''
+      document.body.removeEventListener 'click', @hideTagInfo, false
+      return true
 
-  # if user clicks outside the popup, close it
-  document.body.addEventListener 'click', (e) ->
-    el = e.targetElement
-    if el isnt info and el.parentElement isnt info
-      hideTagInfo()
+    if not e?
+      @tagInfo.css display: 'none'
+      @tagShown = ''
+      return # not an event, don't care about return
+
+    console.log e
+
+    # only hide if clicked outside of popup
+    unless @tagInfo.contains e.target
+      @tagInfo.style.display = 'none'
+      @tagShown = ''
+      document.body.removeEventListener 'click', @hideTagInfo, false
+
     true # keep going down the click events.
-  , true
 
-hideTagInfo = ->
-  if not THIS.tagInfo?
-    return
+  voteTag: (a, action) ->
+    # click event handler
+    (e) =>
+      e.preventDefault()
+      ajax
+        method: 'post'
+        path: '/ajax/tag/vote'
+        data:
+          'tag':    a.innerText
+          'action': action
+          'series': document.body.dataset.id
+        async: true
+        callback: (e) =>
+          x = e.target
+          if x.status is 200
+            li = a.parentElement
+            li.innerHTML = x.response
+            @populateTagInfo a, =>
+              @tagInfo.css display: 'block'
+              @positionTagInfo a.parentElement
+          else
+            resp = JSON.parse x.response
+            alert resp.msg
+            false
 
-  tagInfo.style.display = 'none'
-  THIS.tagShown = ''
+  populateTagInfo: (a, callback) =>
+    ajax
+      method: 'post'
+      path: '/ajax/tag/info'
+      data:
+        'tag':    a.innerText
+        'series': document.body.dataset.id
+      async: true
+      callback: (e) =>
+        x = e.target
+
+        if x.status isnt 200
+          resp = JSON.parse x.response
+          alert resp.msg
+          return false
+
+        if @tagInfo?
+          @tagInfo.css display: 'none'
+        else
+          @tagInfo = make
+            tag: 'div'
+            attrs:
+              id: 'tag-info'
+          document.body.appendChild @tagInfo
+
+        @tagInfo.innerHTML = x.response
+
+        if (upvote = $ 'a#tag-upvote', @tagInfo)?
+          upvote.on 'click', @voteTag(a, 'up'), false
+
+        if (downvote = $ 'a#tag-downvote', @tagInfo)?
+          downvote.on 'click', @voteTag(a, 'down'), false
+
+        callback() if callback?
+
+
+  positionTagInfo: (li) =>
+    topEdge = li.offsetTop - window.scrollY
+
+    @tagInfo.css
+      left:    li.offsetLeft + 'px'
+      top:     if topEdge < @tagInfo.offsetHeight
+        li.offsetTop + li.offsetHeight + 8 + 'px'
+      else
+        li.offsetTop - @tagInfo.offsetHeight - 8 + 'px'
 
 pageObjects =
   'series': Series
@@ -200,23 +279,22 @@ pageObjects =
 THIS = null
 
 main = ->
-  pairs = [
-    #['#search button', doSearch]
-    ['#login-button', login]
-    ['#logout-button', logout]
-  ]
-  for pair in pairs
-    try
-      $(pair[0]).addEventListener 'click', pair[1], false
-    catch e
-      console.log "Element: #{pair[0]}"
-      console.log e.stack
+  pairs =
+    '#login-button': login
+    '#logout-button': logout
 
-  if (page = $('body').getAttribute 'id').length > 0
+  for name, func of pairs
+    el = $ name
+    if el?
+      el.on 'click', func, false
+
+  if (page = document.body.attr 'id').length > 0
     THIS = new pageObjects[page]()
 
-window.addEventListener 'load', main, true
-window.addEventListener 'load', ->
-  $('head').appendChild make 'script',
-    async: true
-    src: "http://#{document.domain}:8080/livereload.js"
+window.on 'load', main, true
+window.on 'load', ->
+  $('head').appendChild make
+    tag: 'script'
+    attrs:
+      async: true
+      src: "http://#{document.domain}:8080/livereload.js"

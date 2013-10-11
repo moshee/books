@@ -8,7 +8,7 @@
 	<link rel=stylesheet href=/static/style.css>
 	<script src="/static/books.js"></script>
 </head>
-<body id=series {{ if .User }}class=logged-in {{ end }}>
+<body id=series {{ if .User }}class=logged-in {{ end }} data-id={{ .Series.Id }}>
 	{{ template "header-bar" }}
   <aside id=cp>
     {{ template "user-cp" .User }}
@@ -84,17 +84,8 @@
 					<input name=show-spoilers id=show-spoilers type=checkbox><label for=show-spoilers>Show spoiler tag(s)</label>
 					{{ end }}
 				<ul class=tags>
-					{{ range $i, $tag := . }}
-					<li{{ if .Spoiler }} class=spoiler {{ end }}>
-					{{ if $.User }}
-					<button class=upboat href="javascript:voteTag({{ $i }}, {{ $.User.VoteWeight }})">+</button>
-					<button class=downboat href="javascript:voteTag({{ $i }}, -{{ $.User.VoteWeight }})">–</button>
-					{{ end }}
-					<a style="opacity:{{ .Opacity | printf "%.2g" }};color:{{ .Color | printf "#%.6x" }}"
-						href="/tag/{{ urlquery .Name }}"{{ if le .Weight 0 }}
-						title="People disagree about this one."{{ end }}>{{ .Name }}</a>
-					({{ .Weight | printf "%+d" }})
-				</li>
+					{{ range . }}
+          <li{{ if .Spoiler }} class=spoiler {{ end }}>{{ template "tag-link" . }}</li>
 					{{ end }}
 				</ul>
 				{{ else }}

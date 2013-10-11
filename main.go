@@ -32,6 +32,8 @@ func main() {
 		Get("/login", goHome).
 		Post("/logout", books.Logout).
 		Get("/logout", goHome).
+		Post("/ajax/tag/info", books.TagInfo).
+		Post("/ajax/tag/vote", books.TagVote).
 		Get("/", books.Index)
 
 	gas.InitDB("postgres", "user=postgres dbname=postgres sslmode=disable")
@@ -86,21 +88,30 @@ const (
 
 func ago(t time.Time) string {
 	dur := time.Since(t)
+	unit := ""
+	var amt time.Duration
 
 	switch {
 	case dur > time_Year:
-		return fmt.Sprintf("%dyrs, %dd ago",
-			dur/time_Year,
-			(dur%time_Year)/time_Day)
+		unit = "year"
+		amt = dur / time_Year
 	case dur > time_Day:
-		return fmt.Sprintf("%d days ago", (dur%time_Year)/time_Day)
+		unit = "day"
+		amt = (dur % time_Year) / time_Day
 	case dur > time.Hour:
-		return fmt.Sprintf("%d hours ago", (dur%time_Day)/time.Hour)
+		unit = "hour"
+		amt = (dur % time_Day) / time.Hour
 	case dur > time.Minute:
-		return fmt.Sprintf("%d mins ago", (dur%time.Hour)/time.Minute)
+		unit = "min"
+		amt = (dur % time.Hour) / time.Minute
 	default:
 		return "Just now"
 	}
+
+	if amt == 1 {
+		unit += "s"
+	}
+	return fmt.Sprintf("%d %s ago", amt, unit)
 }
 
 func collapse_range(a []int) string {

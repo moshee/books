@@ -583,11 +583,11 @@ type Link struct {
 }
 
 type BookTag struct {
-	Id       int
-	SeriesId int
-	Name     string
-	Spoiler  bool
-	Weight   int
+	Id       int    `json:"id"`
+	SeriesId int    `json:"series_id"`
+	Name     string `json:"name"`
+	Spoiler  bool   `json:"spoiler"`
+	Weight   int    `json:"weight"`
 }
 
 func (self BookTag) Opacity() float32 {
@@ -604,17 +604,17 @@ func (self BookTag) Opacity() float32 {
 }
 
 func (self BookTag) Color() int {
-	w := float32(self.Weight)
-	if w < 0.0 {
+	if self.Weight < 0.0 {
 		return 0x444444
 	}
 
-	rg := 0x44
-	b := 0xff
-	f := 1.0 - (3.0 / (w + 3.0))
+	f := 1.0 - (3.0 / (float32(self.Weight) + 3.0))
 
-	rg = int(float32(rg) * (1 - f))
-	b = int(float32(b) * f)
+	// range: 0x00 (high) .. 0x44 (low)
+	rg := int(float32(0x44) * (1 - f))
+
+	// range: 0xff (high) .. 0x44 (low)
+	b := int(float32(0xff-0x44)*f) + 0x44
 
 	return rg<<16 | rg<<8 | b
 }

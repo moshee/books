@@ -1,0 +1,25 @@
+{{ define "tag-info" }}
+<div id=tag-desc>
+  <h4><span>Tag:</span> {{ .Name }}</h4>
+  {{ smarkdown .Description }}
+</div>
+<div id=tag-buttons>
+  {{ if eq .Opinion 0 }}
+  <a href=# id=tag-upvote>Agree ✓</a>
+  <a href=# id=tag-downvote>Disagree ✗</a>
+  {{ else if lt .Opinion 0 }}
+  <a href=# id=tag-upvote>Agree ✓</a>
+  <span id=tag-downvote class=selected>You disagree ✗</span>
+  {{ else }}
+  <span id=tag-upvote class=selected>You agree ✓</span>
+  <a href=# id=tag-downvote>Disagree ✗</a>
+  {{ end }}
+  <a href=/tags/{{ .Name | urlquery }}>View tag page →</a>
+</div>
+{{ end }}
+
+{{ define "tag-link" }}
+<a href=# style="opacity:{{ .Opacity | printf "%.2g" }};color:{{ .Color | printf "#%.6x" }}"
+  {{ if le .Weight 0 }}title="People disagree about this one."{{ end }}>{{ .Name }}</a>
+({{ .Weight | printf "%+d" }})
+{{ end }}
