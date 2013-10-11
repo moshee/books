@@ -109,7 +109,7 @@
 				{{ with .Credits }}
 				<ul class=authors>
 					{{ range . }}
-					<li><strong><a href=/author/{{ .AuthorId }}>{{ .Surname }}, {{ .GivenName }}</a></strong> ({{ .Credit }})</li>
+          <li><strong><a href=/author/{{ .AuthorId }}>{{ if .Surname.Valid }}{{ .Surname.String }}, {{ end }}{{ .GivenName }}</a></strong> ({{ .Credit }})</li>
 					{{ end }}
 				</ul>
 				{{ end }}
