@@ -364,7 +364,8 @@ CREATE TABLE book_tags (
     series_id integer NOT NULL REFERENCES book_series,
     tag_id    integer NOT NULL REFERENCES book_tag_names,
     spoiler   boolean NOT NULL,
-    weight    integer NOT NULL
+    weight    integer NOT NULL,
+    visible   boolean NOT NULL DEFAULT true
 );
 
 CREATE TABLE book_tag_consensus (
@@ -393,6 +394,7 @@ CREATE VIEW latest_series AS
     WHERE t.series_id = s.id
       AND t.tag_id    = n.id
       AND t.spoiler   = false
+      AND t.visible
     GROUP BY
         s.id,
         s.title,
@@ -451,6 +453,7 @@ CREATE VIEW series_tags AS
         book_tag_names btn
     WHERE s.id   = bt.series_id
       AND btn.id = bt.tag_id
+      AND bt.visible
     ORDER BY bt.weight DESC, btn.name;
 
 
@@ -464,7 +467,8 @@ CREATE TABLE character_tags (
     character_id integer NOT NULL REFERENCES characters,
     tag_id       integer NOT NULL REFERENCES character_tag_names,
     spoiler      boolean NOT NULL,
-    weight       integer NOT NULL
+    weight       integer NOT NULL,
+    visible      boolean NOT NULL DEFAULT true
 );
 
 CREATE TABLE character_tag_consensus (
@@ -696,7 +700,7 @@ CREATE FUNCTION do_update_book_average_rating() RETURNS trigger AS $$
     BEGIN
         CASE TG_OP
         WHEN 'INSERT', 'UPDATE' THEN
-            UPDATE book_series
+            UPDATE books.book_series
                 SET avg_rating = (
                     -- NOTE: watch out for potential off-by-one error here
                     -- (the NEW record might not be included in this SELECT
@@ -709,7 +713,7 @@ CREATE FUNCTION do_update_book_average_rating() RETURNS trigger AS $$
                 WHERE id = NEW.series_id;
             RETURN NEW;
         WHEN 'DELETE' THEN
-            UPDATE book_series
+            UPDATE books.book_series
                 SET avg_rating = (
                     SELECT AVG(rating)
                         FROM book_ratings r
@@ -724,14 +728,14 @@ CREATE FUNCTION do_update_book_average_rating() RETURNS trigger AS $$
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_book_average_rating
-    AFTER INSERT OR UPDATE OR DELETE ON book_ratings FOR EACH ROW
+    AFTER INSERT OR UPDATE OR DELETE ON books.book_ratings FOR EACH ROW
     EXECUTE PROCEDURE do_update_book_average_rating();
 
 CREATE FUNCTION do_update_translator_average_rating() RETURNS trigger AS $$
     BEGIN
         CASE TG_OP
         WHEN 'INSERT', 'UPDATE' THEN
-            UPDATE translation_groups
+            UPDATE books.translation_groups
                 SET avg_rating = (
                     SELECT AVG(rating)
                         FROM translator_ratings r
@@ -741,7 +745,7 @@ CREATE FUNCTION do_update_translator_average_rating() RETURNS trigger AS $$
                 WHERE id = NEW.translator_id;
             RETURN NEW;
         WHEN 'DELETE' THEN
-            UPDATE translation_groups
+            UPDATE books.translation_groups
                 SET avg_rating = (
                     SELECT AVG(rating)
                         FROM translator_ratings r
@@ -756,7 +760,7 @@ CREATE FUNCTION do_update_translator_average_rating() RETURNS trigger AS $$
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_translator_average_rating
-    AFTER INSERT OR UPDATE OR DELETE ON translator_ratings FOR EACH ROW
+    AFTER INSERT OR UPDATE OR DELETE ON books.translator_ratings FOR EACH ROW
     EXECUTE PROCEDURE do_update_translator_average_rating();
 
 -- update the tags whenever a vote occurs
@@ -778,36 +782,29 @@ CREATE FUNCTION do_update_book_tags() RETURNS trigger AS $$
 
         -- On second thought, maybe we should keep the tags around and just not
         -- show them (but they can always be recovered if necessary)
-        UPDATE book_tags
-            SET weight = (
-                SELECT avg(vote)
-                    FROM book_tag_consensus c
-                    WHERE c.book_tag_id = rec.book_tag_id
-                )
-            WHERE id = rec.book_tag_id;
-/*
-        SELECT avg(vote) INTO new_weight
-            FROM book_tag_consensus c
+        SELECT INTO new_weight
+            AVG(vote)
+            FROM books.book_tag_consensus c
             WHERE c.book_tag_id = rec.book_tag_id;
 
         IF (new_weight < -5) THEN
-            DELETE FROM book_tag_consensus
-                WHERE book_tag_id = rec.book_tag_id;
-            DELETE FROM book_tag_names
-                WHERE id = rec.book_tag_id;
+            UPDATE books.book_tags
+            SET
+                weight = new_weight,
+                visible = false
+            WHERE id = rec.book_tag_id;
         ELSE
-            UPDATE book_tag_names
+            UPDATE books.book_tags
                 SET weight = new_weight
                 WHERE id = rec.book_tag_id;
         END IF;
-*/
 
         RETURN rec;
     END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_book_tags
-    AFTER INSERT OR UPDATE OR DELETE ON book_tag_consensus FOR EACH ROW
+    AFTER INSERT OR UPDATE OR DELETE ON books.book_tag_consensus FOR EACH ROW
     EXECUTE PROCEDURE do_update_book_tags();
 
 CREATE FUNCTION do_update_character_tags() RETURNS trigger AS $$
@@ -821,7 +818,7 @@ CREATE FUNCTION do_update_character_tags() RETURNS trigger AS $$
             rec := OLD;
         END IF;
 
-        UPDATE character_tags
+        UPDATE books.character_tags
             SET weight = (
                 SELECT avg(vote)
                     FROM character_tag_consensus c
@@ -829,35 +826,18 @@ CREATE FUNCTION do_update_character_tags() RETURNS trigger AS $$
                 )
             WHERE id = rec.character_tag_id;
 
-        /*
-        SELECT avg(vote) INTO new_weight
-            FROM character_tag_consensus c
-            WHERE c.character_tag_id = rec.character_tag_id;
-
-        IF (new_weight < -5) THEN
-            DELETE FROM character_tag_consensus
-                WHERE character_tag_id = rec.character_tag_id;
-            DELETE FROM character_tag_names
-                WHERE id = rec.character_tag_id;
-        ELSE
-            UPDATE character_tag_names
-                SET weight = new_weight
-                WHERE id = rec.character_tag_id;
-        END IF;
-*/
-
         RETURN rec;
     END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER update_character_tags
-    AFTER INSERT OR UPDATE OR DELETE ON character_tag_consensus FOR EACH ROW
+    AFTER INSERT OR UPDATE OR DELETE ON books.character_tag_consensus FOR EACH ROW
     EXECUTE PROCEDURE do_update_character_tags();
 
 -- update the chapters a user owns when he gets a release
 CREATE FUNCTION do_update_user_chapters() RETURNS trigger AS $$
     BEGIN
-        INSERT INTO user_chapters (user_id, chapter_id, status)
+        INSERT INTO books.user_chapters (user_id, chapter_id, status)
             SELECT NEW.user_id, c.id, NEW.status
                 FROM chapters c, releases_chapters r
                 WHERE r.chapter_id = c.id
@@ -867,16 +847,16 @@ CREATE FUNCTION do_update_user_chapters() RETURNS trigger AS $$
 $$ LANGUAGE plpgsql;
 
 CREATE RULE user_chapters_ignore_duplicates_on_insert AS
-    ON INSERT TO user_chapters
+    ON INSERT TO books.user_chapters
     WHERE (EXISTS (
         SELECT 1
-        FROM user_chapters
+        FROM books.user_chapters
         WHERE user_chapters.chapter_id = NEW.chapter_id
     ))
     DO INSTEAD NOTHING;
 
 CREATE TRIGGER update_user_chapters
-    AFTER INSERT ON user_releases FOR EACH ROW
+    AFTER INSERT ON books.user_releases FOR EACH ROW
     EXECUTE PROCEDURE do_update_user_chapters();
 
 -- update the object of a series relation
@@ -905,7 +885,7 @@ CREATE FUNCTION do_update_series_relations() RETURNS trigger AS $$
                     USING HINT = 'Function do_update_series_relations() may need to be updated';
             END CASE;
         ELSE
-            DELETE FROM related_series
+            DELETE FROM books.related_series
                 WHERE series_id = OLD.related_series_id
                 AND related_series_id = OLD.series_id;
                 RETURN OLD;
@@ -913,10 +893,10 @@ CREATE FUNCTION do_update_series_relations() RETURNS trigger AS $$
 
         CASE TG_OP
         WHEN 'INSERT' THEN
-            INSERT INTO related_series (series_id, related_series_id, relation)
+            INSERT INTO books.related_series (series_id, related_series_id, relation)
                 VALUES (NEW.related_series_id, NEW.series_id, related_relation);
         WHEN 'UPDATE' THEN
-            UPDATE related_series
+            UPDATE books.related_series
                 SET relation = related_relation
                 WHERE series_id = NEW.related_series_id
                 AND related_series_id = NEW.series_id;
@@ -927,70 +907,15 @@ CREATE FUNCTION do_update_series_relations() RETURNS trigger AS $$
 $$ LANGUAGE plpgsql;
 
 CREATE RULE series_relations_ignore_duplicates_on_insert AS
-    ON INSERT TO related_series
+    ON INSERT TO books.related_series
     WHERE (EXISTS (
         SELECT 1
-            FROM related_series
+            FROM books.related_series
             WHERE series_id = NEW.series_id
             AND related_series_id = NEW.related_series_id
     ))
     DO INSTEAD NOTHING;
 
 CREATE TRIGGER update_series_relations
-    AFTER INSERT OR UPDATE OR DELETE ON related_series FOR EACH ROW
+    AFTER INSERT OR UPDATE OR DELETE ON books.related_series FOR EACH ROW
     EXECUTE PROCEDURE do_update_series_relations();
-
--- update the object of a character relation
---CREATE FUNCTION do_update_character_relations() RETURNS trigger AS $$
---    BEGIN
---        CASE TG_OP
---            WHEN 'INSERT' THEN
---                INSERT INTO related_characters (character_id, related_character_id, relation, ends)
---                    VALUES (NEW.related_character_id, NEW.character_id, (
---                        SELECT opposes
---                            FROM characters_relation_kinds
---                            WHERE id = NEW.relation
---                        ),
---                        NEW.ends);
---            WHEN 'UPDATE' THEN
---                UPDATE related_characters
---                    SET relation = (
---                        SELECT opposes
---                            FROM characters_relation_kinds
---                            WHERE id = NEW.relation
---                        ),
---                        ends = NEW.ends
---                    WHERE relation = OLD.relation
---                        AND character_id = NEW.related_character_id
---                        AND related_character_id = NEW.character_id;
---            WHEN 'DELETE' THEN
---                DELETE FROM related_characters
---                    WHERE relation = OLD.relation
---                        AND character_id = OLD.related_character_id
---                        AND related_character_id = OLD.character_id;
---        END CASE;
---    END;
---$$ LANGUAGE plpgsql;
---
---CREATE RULE characters_relations_ignore_duplicates_on_insert AS
---    ON INSERT TO related_characters
---    WHERE (EXISTS (
---        SELECT 1
---        FROM related_characters
---            WHERE (
---                relation = NEW.relation
---                    OR relation = (SELECT opposes
---                        FROM characters_relation_kinds
---                        WHERE id = NEW.relation
---                    )
---            )
---                AND character_id = NEW.character_id
---                AND related_character_id = NEW.related_character_id
---    ))
---    DO INSTEAD NOTHING;
---
---CREATE TRIGGER update_character_relations
---    AFTER INSERT OR UPDATE OR DELETE ON related_characters
---    EXECUTE PROCEDURE do_update_character_relations();
-
-END;
