@@ -368,7 +368,7 @@ type ProductionCredit struct {
 	SeriesId  int
 	AuthorId  int
 	GivenName string
-	Surname   string
+	Surname   sql.NullString
 	Credit
 }
 
