@@ -767,7 +767,7 @@ CREATE TRIGGER update_translator_average_rating
 CREATE FUNCTION do_update_book_tags() RETURNS trigger AS $$
     DECLARE
         rec        RECORD;
-        new_weight real;
+        new_weight int;
     BEGIN
         IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
             rec := NEW;
@@ -783,7 +783,7 @@ CREATE FUNCTION do_update_book_tags() RETURNS trigger AS $$
         -- On second thought, maybe we should keep the tags around and just not
         -- show them (but they can always be recovered if necessary)
         SELECT INTO new_weight
-            AVG(vote)
+            SUM(vote)
             FROM books.book_tag_consensus c
             WHERE c.book_tag_id = rec.book_tag_id;
 
