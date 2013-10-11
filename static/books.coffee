@@ -143,7 +143,6 @@ logout = (e) ->
     async: yes
     callback: (e) ->
       x = e.srcElement
-      console.log e
       switch x.status
         when 200
           $('#cp').innerHTML = x.response
@@ -181,6 +180,7 @@ class Series
       @tagShown = a.innerText
       document.body.on 'click', @hideTagInfo, false
 
+  # hide the tag info popup
   hideTagInfo: (e) =>
     if not @tagInfo? or @tagShown is ''
       document.body.removeEventListener 'click', @hideTagInfo, false
@@ -191,8 +191,10 @@ class Series
       @tagShown = ''
       return # not an event, don't care about return
 
+    # we want the view tag page link to still work as expected
+    if e.target.attr('id') is 'tag-link'
+      return
     e.preventDefault()
-    console.log e
 
     # only hide if clicked outside of popup
     unless @tagInfo.contains e.target
@@ -202,6 +204,8 @@ class Series
 
     true # keep going down the click events.
 
+  # send the user's tag vote attempt to the server and replace data on page if
+  # it was successful
   voteTag: (a, action) ->
     # click event handler
     (e) =>
@@ -239,6 +243,7 @@ class Series
             resp = JSON.parse x.response
             alert resp.msg
 
+  # request the tag info popup contents from the server
   populateTagInfo: (a, callback) =>
     ajax
       method: 'post'
@@ -275,6 +280,7 @@ class Series
         callback() if callback?
 
 
+  # position the tag info popup above the li
   positionTagInfo: (li) =>
     topEdge = li.offsetTop - window.scrollY
 
@@ -285,11 +291,18 @@ class Series
       else
         li.offsetTop - @tagInfo.offsetHeight - 8 + 'px'
 
+  # sort tag list elements in descending order using value returned by sortBy
   sortTag: (li, sortBy) ->
     ul = li.parentElement
     lis = $$ 'li', ul
 
     thisVal = sortBy li
+
+    prev = li.previousElementSibling
+    next = li.nextElementSibling
+    if (not prev? or sortBy(prev) >= thisVal) and (not next? or sortBy(next) <= thisVal)
+      # already sorted
+      return
 
     for other in lis
       if sortBy(other) < thisVal

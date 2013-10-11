@@ -1,7 +1,11 @@
 {{ define "tag-info" }}
 <div id=tag-desc>
   <h4><span>Tag:</span> {{ .Name }}</h4>
+  {{ if .Description.Valid }}
   {{ smarkdown .Description }}
+  {{ else }}
+  <p class=none>No description available.</p>
+  {{ end }}
 </div>
 <div id=tag-buttons>
   {{ if eq .Opinion 0 }}
@@ -14,7 +18,7 @@
   <span id=tag-upvote class=selected>You agree ✓</span>
   <a href=# id=tag-downvote>Disagree ✗</a>
   {{ end }}
-  <a href=/tags/{{ .Name | urlquery }}>View tag page →</a>
+  <a href=/tags/{{ .Name | urlquery }} id=tag-link>View tag page →</a>
 </div>
 {{ end }}
 

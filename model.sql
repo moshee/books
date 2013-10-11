@@ -787,17 +787,11 @@ CREATE FUNCTION do_update_book_tags() RETURNS trigger AS $$
             FROM books.book_tag_consensus c
             WHERE c.book_tag_id = rec.book_tag_id;
 
-        IF (new_weight < -5) THEN
-            UPDATE books.book_tags
-            SET
-                weight = new_weight,
-                visible = false
-            WHERE id = rec.book_tag_id;
-        ELSE
-            UPDATE books.book_tags
-                SET weight = new_weight
-                WHERE id = rec.book_tag_id;
-        END IF;
+        -- TODO: set up hiding disagreed upon tags as a batch job instead of
+        -- hiding immediately
+        UPDATE books.book_tags
+        SET    weight = new_weight
+        WHERE  id = rec.book_tag_id;
 
         RETURN rec;
     END;

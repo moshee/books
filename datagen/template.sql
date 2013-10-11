@@ -169,7 +169,7 @@ INSERT INTO book_tag_names VALUES
 <%= rec($files[:colors].size) { |n| ['DEFAULT', text($files[:colors][n-1]), (null(0.4) or longstring(1..3))] } %>
 
 INSERT INTO book_tags VALUES
-<%= rec(1000) { ['DEFAULT', rand(1..159), rand(1..($files[:colors].size)), bool(0.05), rand] } %>
+<%= rec(1000) { ['DEFAULT', rand(1..159), rand(1..($files[:colors].size)), bool(0.05), 0, true] } %>
 
 INSERT INTO book_tag_consensus VALUES
 <%= rec(500) { ['DEFAULT', rand(1..103), rand(1..500), rand(-5..10), tstz] } %>

@@ -179,7 +179,7 @@ func TagVote(g *gas.Gas) {
 		return
 	}
 
-	if (existingVote < 0 && vote < 0) || (existingVote > 0 && vote > 0) {
+	if existingVote != 0 && (existingVote >= 0) != (vote <= 0) {
 		// oh no! user already did this vote. error.
 		// The javascript SHOULD in theory prevent this from happening, but
 		// it's better to be safe.
@@ -196,8 +196,7 @@ func TagVote(g *gas.Gas) {
 				t.id,
 				t.series_id,
 				btn.name,
-				t.spoiler,
-				t.weight
+				t.spoiler
 			FROM
 				books.book_tags t,
 				books.book_tag_names btn
@@ -218,6 +217,12 @@ func TagVote(g *gas.Gas) {
 			VALUES
 				( $1, $2, $3 )
 			`, user.Id, tag.Id, vote)
+
+		if err != nil {
+			g.WriteHeader(500)
+			g.JSON(&AJAXResponse{false, err.Error()})
+			return
+		}
 	} else {
 		// user made a vote but opposite. do the update.
 		err = gas.QueryRow(tag, `
@@ -226,8 +231,7 @@ func TagVote(g *gas.Gas) {
 					t.id,
 					t.series_id,
 					btn.name,
-					t.spoiler,
-					t.weight
+					t.spoiler
 				FROM
 					books.book_tags t,
 					books.book_tag_names btn
@@ -251,9 +255,17 @@ func TagVote(g *gas.Gas) {
 		return
 	}
 
-	// duplicating the logic that's supposedly already done on the database...
-	// don't wanna do another query...
-	tag.Weight += vote
+	err = gas.DB.QueryRow(`
+		SELECT weight
+		FROM   books.book_tags
+		WHERE  id = $1
+		`, tag.Id).Scan(&tag.Weight)
+
+	if err != nil {
+		g.WriteHeader(500)
+		g.JSON(&AJAXResponse{false, err.Error()})
+		return
+	}
 
 	g.Render("books", "tag-link", tag)
 }
