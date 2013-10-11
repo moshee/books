@@ -121,9 +121,29 @@ func TagVote(g *gas.Gas) {
 		vote = user.VoteWeight
 	case "down":
 		vote = -user.VoteWeight
+	case "remove":
+		_, err := gas.DB.Exec(`
+			DELETE FROM
+				books.book_tag_consensus btc
+			USING
+				books.book_tags bt
+				books.book_tag_names btn
+			WHERE btc.user_id  = $1
+			  AND bt.id        = btc.book_tag_id
+			  AND bt.tag_id    = btn.id
+			  AND btn.name     = $2
+			  AND bt.series_id = $3
+			  `, user.Id, name, seriesId)
+		if err != nil {
+			g.WriteHeader(500)
+			g.JSON(&AJAXResponse{false, "error removing vote: " + err.Error()})
+		} else {
+			g.JSON(&AJAXResponse{true, ""})
+		}
+		return
 	default:
 		g.WriteHeader(400)
-		g.JSON(&AJAXResponse{false, "invalid vote action"})
+		g.JSON(&AJAXResponse{false, "invalid vote action: " + action})
 		return
 	}
 
@@ -144,7 +164,7 @@ func TagVote(g *gas.Gas) {
 		FROM
 			books.book_tag_names btn,
 			books.book_tags bt
-			LEFT JOIN books.book_tag_consensus btc ON 
+			LEFT JOIN books.book_tag_consensus btc ON
 				btc.book_tag_id = bt.id
 				AND btc.user_id = $1
 		WHERE
@@ -220,7 +240,7 @@ func TagVote(g *gas.Gas) {
 				vote      = $3,
 				vote_date = now()
 			FROM bt
-			WHERE btc.id = bt.id
+			WHERE btc.book_tag_id = (SELECT id FROM bt)
 			  AND btc.user_id = $4
 			RETURNING bt.*
 			`, name, seriesId, vote, user.Id)

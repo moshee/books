@@ -108,7 +108,7 @@ func ago(t time.Time) string {
 		return "Just now"
 	}
 
-	if amt == 1 {
+	if amt != 1 {
 		unit += "s"
 	}
 	return fmt.Sprintf("%d %s ago", amt, unit)

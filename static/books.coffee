@@ -9,6 +9,8 @@ $$ = (sel, base) ->
   base.querySelectorAll sel
 
 HTMLElement::on = XMLHttpRequest::on = Window::on = (evt, func, capture) ->
+  capture ?= false
+
   if evt.constructor.name is 'Array'
     this.addEventListener e, func, capture for e in evt
   else
@@ -177,21 +179,19 @@ class Series
       @tagInfo.css display: 'block'
       @positionTagInfo a.parentElement
       @tagShown = a.innerText
-
-    # if user clicks outside the popup, close it
-    #document.body.on 'click', @hideTagInfo, false
-    return false
+      document.body.on 'click', @hideTagInfo, false
 
   hideTagInfo: (e) =>
     if not @tagInfo? or @tagShown is ''
       document.body.removeEventListener 'click', @hideTagInfo, false
-      return true
+      return
 
     if not e?
       @tagInfo.css display: 'none'
       @tagShown = ''
       return # not an event, don't care about return
 
+    e.preventDefault()
     console.log e
 
     # only hide if clicked outside of popup
@@ -205,6 +205,11 @@ class Series
   voteTag: (a, action) ->
     # click event handler
     (e) =>
+      # prevent trying to respond to hyper excessive clicking.
+      # the listeners will be added back in the call to @populateTagInfo.
+      a.removeEventListener 'click', @voteTag
+      a.removeEventListener 'touchend', @voteTag
+
       e.preventDefault()
       ajax
         method: 'post'
@@ -218,14 +223,21 @@ class Series
           x = e.target
           if x.status is 200
             li = a.parentElement
-            li.innerHTML = x.response
+            li.innerHTML = x.response # update with data from server
+
+            # attach the events etc to the NEW link. The contents of li (a)
+            # changed up there ↑↑
+            a = $ 'a', li
+            a.on 'click', @showTagInfo
+
             @populateTagInfo a, =>
+              @sortTag li, (li) ->
+                parseInt li.innerText.slice li.innerText.search /(\+|\-)?\d+\)$/
               @tagInfo.css display: 'block'
-              @positionTagInfo a.parentElement
+              @positionTagInfo li
           else
             resp = JSON.parse x.response
             alert resp.msg
-            false
 
   populateTagInfo: (a, callback) =>
     ajax
@@ -272,6 +284,20 @@ class Series
         li.offsetTop + li.offsetHeight + 8 + 'px'
       else
         li.offsetTop - @tagInfo.offsetHeight - 8 + 'px'
+
+  sortTag: (li, sortBy) ->
+    ul = li.parentElement
+    lis = $$ 'li', ul
+
+    thisVal = sortBy li
+
+    for other in lis
+      if sortBy(other) < thisVal
+        ul.insertBefore li, other
+        return
+
+    # stick it at the end if it's the lowest
+    ul.appendChild li
 
 pageObjects =
   'series': Series
