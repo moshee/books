@@ -232,90 +232,90 @@ header {
 			}
 		}
 	}
+}
 
-	#search-bar {
-		$width: 512px;
+#search-bar {
+	$width: 512px;
 
-		width: $width;
-		position: relative;
-		margin: 0 auto;
+	width: $width;
+	position: relative;
+	margin: 0 auto;
 
-		ul {
-			flex: 1 1 auto;
+	ul {
+		flex: 1 1 auto;
 
-			li {
-				display: flex;
-			}
-		}
-
-		form {
+		li {
 			display: flex;
-			position: relative;
-
-			label {
-				height: 32px;
-				position: relative;
-				display: flex;
-				flex: 0 1 auto;
-			}
-
-			label:after {
-				content: "↓";
-				position: absolute;
-				right: 6px;
-				top: 8px;
-				width: 16px;
-				height: 16px;
-				text-align: center;
-				line-height: 12px;
-				font-weight: 700;
-				font-size: 20px;
-				pointer-events: none;
-			}
-
-			select {
-				@extend .form-elem;
-				@include emphasis;
-				background: $grey3;
-				padding-right: 20px;
-			}
-
-			input {
-				display: flex;
-				flex: 1 1 auto;
-			}
-
-			button {
-				display: flex;
-				flex: 0 1 auto;
-				margin-left: 8px;
-			}
 		}
 	}
 
-	#browse {
-		margin-top: 8px;
+	form {
+		display: flex;
+		position: relative;
 
-		* {
-			display: inline;
+		label {
+			height: 32px;
+			position: relative;
+			display: flex;
+			flex: 0 1 auto;
 		}
 
-		h2 {
-			font-family: $body-font;
-			font-size: 14px;
+		label:after {
+			content: "↓";
+			position: absolute;
+			right: 6px;
+			top: 8px;
+			width: 16px;
+			height: 16px;
+			text-align: center;
+			line-height: 12px;
+			font-weight: 700;
+			font-size: 20px;
+			pointer-events: none;
+		}
+
+		select {
+			@extend .form-elem;
 			@include emphasis;
-			margin-right: 8px;
-
-			em {
-				font-size: 20px;
-				line-height: 0;
-				color: $green;
-			}
+			background: $grey3;
+			padding-right: 20px;
 		}
-		nav ul {
-			li {
-				margin-right: 8px;
-			}
+
+		input {
+			display: flex;
+			flex: 1 1 auto;
+		}
+
+		button {
+			display: flex;
+			flex: 0 1 auto;
+			margin-left: 8px;
+		}
+	}
+}
+
+#browse {
+	margin-top: 8px;
+
+	* {
+		display: inline;
+	}
+
+	h2 {
+		font-family: $body-font;
+		font-size: 14px;
+		@include emphasis;
+		margin-right: 8px;
+
+		em {
+			font-size: 20px;
+			line-height: 0;
+			color: $green;
+		}
+	}
+	nav ul {
+		li {
+			margin-right: 8px;
 		}
 	}
 }
@@ -510,26 +510,26 @@ footer {
 			}
 		}
 	}
+}
 
-	#footer-logo a {
-		display: block;
-		width: 42px;
-		height: 40px;
-		background: {
-			position: 0 0;
-			size: 84px 40px;
-			image: url('/static/displaynone-logomark.svg');
-		}
-
-		&:hover {
-			background-position: -42px 0;
-		}
+#footer-logo a {
+	display: block;
+	width: 42px;
+	height: 40px;
+	background: {
+		position: 0 0;
+		size: 84px 40px;
+		image: url('/static/displaynone-logomark.svg');
 	}
 
-	#footer-text, #footer-logo {
-		display: inline-block;
-		vertical-align: middle;
+	&:hover {
+		background-position: -42px 0;
 	}
+}
+
+#footer-text, #footer-logo {
+	display: inline-block;
+	vertical-align: middle;
 }
 
 @import 'series';

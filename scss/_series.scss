@@ -28,142 +28,142 @@
 			font-size: 14px;
 			color: #666;
 		}
-		#series-meta {
-			width: 256px;
-			flex: 0 1 auto;
+	}
 
-			.cover {
-				width: 256px;
-				height: auto;
-				margin-bottom: 32px;
-			}
-			.cover.missing {
-				@include emphasis;
-				background: $grey0;
-				height: 384px;
-				color: #888;
-				line-height: 384px;
-				text-align: center;
-			}
+}
+#series-meta {
+	width: 256px;
+	flex: 0 1 auto;
 
-			p {
-				margin-bottom: 0;
-			}
+	.cover {
+		width: 256px;
+		height: auto;
+		margin-bottom: 32px;
+	}
+	.cover.missing {
+		@include emphasis;
+		background: $grey0;
+		height: 384px;
+		color: #888;
+		line-height: 384px;
+		text-align: center;
+	}
 
-			table {
-				width: 100%;
-				border-collapse: collapse;
-				margin-bottom: 24px;
+	p {
+		margin-bottom: 0;
+	}
 
-				td {
-					padding-bottom: 8px;
-				}
-				td:nth-of-type(2) {
-					padding-left: 8px;
-				}
-			}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		margin-bottom: 24px;
 
-			ul.tags {
-				margin-bottom: 32px;
-
-				li {
-					float: left;
-					margin-right: 8px;
-					font-size: 14px;
-					margin: 4px 8px 4px 0;
-				}
-				li.spoiler {
-					display: none;
-					background: $grey0;
-					padding: 2px 4px;
-					margin: 2px 8px 2px 0;
-				}
-			}
-
-			#show-spoilers {
-				margin: 0 8px 8px 0;
-			}
-			#tags input#show-spoilers:checked ~ ul li.spoiler {
-				display: inline-block;
-			}
+		td {
+			padding-bottom: 8px;
 		}
-		#summary p {
+		td:nth-of-type(2) {
+			padding-left: 8px;
+		}
+	}
+
+	ul.tags {
+		margin-bottom: 32px;
+
+		li {
+			float: left;
+			margin-right: 8px;
 			font-size: 14px;
+			margin: 4px 8px 4px 0;
+		}
+		li.spoiler {
+			display: none;
+			background: $grey0;
+			padding: 2px 4px;
+			margin: 2px 8px 2px 0;
 		}
 	}
 
-	#info {
-		//width: calc(100% - 288px);
-		margin-left: 64px;
-		flex: 1 1 0;
+}
+#show-spoilers {
+	margin: 0 8px 8px 0;
+}
+#tags input#show-spoilers:checked ~ ul li.spoiler {
+	display: inline-block;
+}
+#info {
+	//width: calc(100% - 288px);
+	margin-left: 64px;
+	flex: 1 1 0;
 
-		&>section {
-			margin-bottom: 64px;
-		}
+	&>section {
+		margin-bottom: 64px;
 	}
+}
 
-	#series-releases {
-		table {
-			border-collapse: collapse;
-			width: 100%;
+#series-releases {
+	table {
+		border-collapse: collapse;
+		width: 100%;
 
-			tr {
-				td, th {
-					padding: 2px 8px;
-					font-size: 14px;
-				}
-
-				&:nth-of-type(2n+1) td {
-					background: $grey0;
-				}
-
-				td.tt {
-					text-align: right;
-					font-size: 13px;
-					color: #888;
-				}
+		tr {
+			td, th {
+				padding: 2px 8px;
+				font-size: 14px;
 			}
-		}
-	}
 
-	#reviews {
-		.rating {
-			font-size: 24px;
-			display: inline-block;
-			vertical-align: middle;
-			letter-spacing: -10px;
-			font-weight: 700;
-			margin: 0 8px 8px 0;
-
-			sup {
-				letter-spacing: -8px;
+			&:nth-of-type(2n+1) td {
+				background: $grey0;
 			}
-			sub {
-				letter-spacing: 0;
-			}
-		}
 
-		.byline {
-			display: inline-block;
-			vertical-align: top;
-
-			.by-name {
-				font-size: 18px;
-			}
-			.by-time {
+			td.tt {
+				text-align: right;
 				font-size: 13px;
 				color: #888;
 			}
 		}
+	}
+}
 
-		article.review {
-			margin-bottom: 32px;
+#reviews {
+	.rating {
+		font-size: 24px;
+		display: inline-block;
+		vertical-align: middle;
+		letter-spacing: -10px;
+		font-weight: 700;
+		margin: 0 8px 8px 0;
 
+		sup {
+			letter-spacing: -8px;
 		}
-		.review-body {
-			margin-left: 40px;
+		sub {
+			letter-spacing: 0;
 		}
 	}
+
+	.byline {
+		display: inline-block;
+		vertical-align: top;
+
+		.by-name {
+			font-size: 18px;
+		}
+		.by-time {
+			font-size: 13px;
+			color: #888;
+		}
+	}
+
+	article.review {
+		margin-bottom: 32px;
+
+	}
+	.review-body {
+		margin-left: 40px;
+	}
+}
+#summary p {
+	font-size: 14px;
 }
 
 #tag-info {
