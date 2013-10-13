@@ -1,28 +1,35 @@
 # utilities
 
-$ = (sel, base) ->
-  base = document if not base?
-  base.querySelector sel
+$ = (sel) ->
+  document.body.querySelector sel
 
-$$ = (sel, base) ->
-  base = document if not base?
-  base.querySelectorAll sel
+$$ = (sel) ->
+  document.body.querySelectorAll sel
 
-HTMLElement::on = XMLHttpRequest::on = Window::on = (evt, func, capture) ->
+Element::$ = (sel) ->
+  @querySelector sel
+
+Element::$$ = (sel) ->
+  @querySelectorAll sel
+
+Element::on = XMLHttpRequest::on = Window::on = (events, func, capture) ->
   capture ?= false
 
-  if evt.constructor.name is 'Array'
-    this.addEventListener e, func, capture for e in evt
-  else
+  for evt in events.split(/\s+/)
     # add a touchend event automatically for click events
     if evt is 'click'
-      this.addEventListener 'touchend', func, capture
-    this.addEventListener evt, func, capture
+      @addEventListener 'touchend', func, capture
+    @addEventListener evt, func, capture
+
+# Beginnings of DOMContentLoaded support. Fill in with polyfills later as
+# needed.
+begin = (func) ->
+  window.on 'DOMContentLoaded', func, false
 
 HTMLElement::css = (obj) ->
   @style[key] = val for key, val of obj
 
-HTMLElement::attr = (obj) ->
+Element::attr = (obj) ->
   switch typeof obj
     when 'string'
       @getAttribute obj
@@ -63,6 +70,17 @@ ajax = (opts) ->
   else
     x.send opts.data
 
+dashToCamel = (str) ->
+  str.replace /(?:^|\-+)(.?)/, (m, w) -> w.toUpperCase()
+
+# Create an arbitrary tree of HTML elements
+# opts:
+#   tag        The tag name (blank for text node).
+#   base       The element's intended parent element. Blank for none.
+#   text       innerText.
+#   html       innerHTML.
+#   children   A function with the current element passed in, used to nest
+#              however deep is needed.
 make = (opts) ->
   if not opts.tag?
     elem = document.createTextNode opts.text
@@ -74,9 +92,38 @@ make = (opts) ->
   if opts.base?     then opts.base.appendChild elem
   if opts.attrs?    then elem.attr opts.attrs
   if opts.text?     then elem.attr innerText: opts.text
+  if opts.html?     then elem.attr innerHTML: opts.html
   if opts.children? then elem.appendChild opts.children elem
 
   elem
+
+# Fill in the error pane, creating if needed
+error = (heading, msg) ->
+  pane = $ '#error-pane'
+  if pane?
+    pane.$('h1').innerHTML = heading
+    if msg?
+      pane.$('p').innerHTML = msg
+    else
+      pane.$('p').innnerHTML = ''
+    return
+
+  pane = make
+    tag: 'div'
+    attrs:
+      id: 'error-pane'
+    base: document.body
+    children: (base) ->
+      make
+        tag: 'h1'
+        html: heading
+        base: base
+
+      if msg?
+        make
+          tag: 'p'
+          html: msg
+          base: base
 
 # global handlers
 
@@ -84,8 +131,8 @@ login = (e) ->
   loginButton = e.target
   form = loginButton.parentElement
 
-  user = $ 'input[name=user]', form
-  password = $ 'input[name=pass]', form
+  user = form.$ 'input[name=user]'
+  password = form.$ 'input[name=pass]',
   bad = false
 
   if user.value.length is 0
@@ -115,7 +162,7 @@ login = (e) ->
     data:
       'user': user.value
       'pass': password.value
-      'page': $('body').attr 'id'
+      'page': document.body.attr 'id'
     async: true
     callback: (e) ->
       # get rid of errors that might be left over
@@ -152,9 +199,6 @@ logout = (e) ->
           resp = JSON.parse x.response
           alert resp.msg
 
-pageObjects =
-  'series': Series
-
 THIS = null
 
 main = ->
@@ -168,10 +212,12 @@ main = ->
       el.on 'click', func, false
 
   if (page = document.body.attr 'id').length > 0
-    THIS = new pageObjects[page]()
+    THIS = new window[dashToCamel page]()
 
-window.on 'DOMContentLoaded', main, true
-window.on 'DOMContentLoaded', ->
+begin main
+
+# separate event handler because we want this to happen even if main() fails
+begin ->
   document.head.appendChild make
     tag: 'script'
     attrs:

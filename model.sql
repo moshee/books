@@ -202,10 +202,10 @@ CREATE VIEW recent_releases AS
         r.is_last_release,
         r.extra,
         r.permalink,
-        array_agg(ch.volume)       AS chapter_volumes,
-        array_agg(ch.num)          AS chapter_nums,
-        array_agg(DISTINCT t.id)   AS translator_ids,
-        array_agg(DISTINCT t.name) AS translator_names
+        array_agg(ch.volume)                     chapter_volumes,
+        array_agg(ch.num)                        chapter_nums,
+        array_agg(DISTINCT t.id   ORDER BY t.id) translator_ids,
+        array_agg(DISTINCT t.name ORDER BY t.id) translator_names
     FROM
         releases r,
         book_series s,

@@ -1,4 +1,4 @@
-class Series
+window.Series = class
   constructor: ->
     @tags = $$ '.tags li a'
     tag.on 'click', @showTagInfo, false for tag in @tags
@@ -76,7 +76,7 @@ class Series
 
             # attach the events etc to the NEW link. The contents of li (a)
             # changed up there ↑↑
-            a = $ 'a', li
+            a = li.$ 'a'
             a.on 'click', @showTagInfo
 
             @populateTagInfo a, =>
@@ -116,10 +116,10 @@ class Series
 
         @tagInfo.innerHTML = x.response
 
-        if (upvote = $ 'a#tag-upvote', @tagInfo)?
+        if (upvote = @tagInfo.$ 'a#tag-upvote')?
           upvote.on 'click', @voteTag(a, 'up'), false
 
-        if (downvote = $ 'a#tag-downvote', @tagInfo)?
+        if (downvote = @tagInfo.$ 'a#tag-downvote')?
           downvote.on 'click', @voteTag(a, 'down'), false
 
         callback() if callback?
@@ -139,7 +139,7 @@ class Series
   # sort tag list elements in descending order using value returned by sortBy
   sortTag: (li, sortBy) ->
     ul = li.parentElement
-    lis = $$ 'li', ul
+    lis = ul.$$ 'li'
 
     thisVal = sortBy li
 
