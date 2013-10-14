@@ -1,0 +1,43 @@
+{{ define "signup" }}{{ template "head" }}
+<body id=signup>
+	{{ template "header-bar" }}
+	<aside id=cp>
+		{{ template "user-cp" }}
+	</aside>
+<section id=main>
+	{{ template "%signup" }}
+<hr class=clear>
+</section>
+	{{ template "footer" }}
+</body>
+{{ end }}
+
+{{ define "%signup" }}
+	<section id=preamble>
+		<h1>Sign up for an account</h1>
+		<p>Before you sign up, let’s go over a few things.</p>
+		<ul>
+			<li>Whatever happens to you regarding naked cartoon characters and the like is your fault.</li>
+			<li>No actual content is or will ever be hosted on this site. Read the <a href=/legal>legal info</a> for more on that, if you want.</li>
+			<li>The comments and reviews on this site are interpreted using <a href=http://daringfireball.net/projects/markdown/>Markdown</a>. Implementations differ slightly; read the <a class=js-show-cheatsheet href=#>formatting cheatsheet</a> for the one we’re using here.</li>
+			<li><em>TODO: finish this list</em></li>
+		</ul>
+		<p>Now that that’s out of the way…</p>
+	</section>
+	<form id=signup-form>
+		<label for=username>Pick a username</label>
+		<input type=text id=username name=username placeholder="Desired username">
+		<hr>
+		<label for=email>Enter your e-mail address</label>
+		<input type=text id=email name=email placeholder="you@example.com">
+		<small>You’ll be able to log in with either your username or your e-mail address, but you will always be known as your username on the site.</small>
+		<hr>
+		<label for=password>Pick a password</label>
+		<input type=password id=password name=password placeholder="Password">
+		<hr>
+		<label for=repeat-password>Re-type your password</label>
+		<input type=password id=repeat-password name=repeat-password placeholder="Confirm password">
+		<hr>
+		<button type=button id=submit>Let me in already</button>
+	</form>
+{{ end }}
