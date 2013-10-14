@@ -79,8 +79,8 @@ dashToCamel = (str) ->
 #   base       The element's intended parent element. Blank for none.
 #   text       innerText.
 #   html       innerHTML.
-#   children   A function with the current element passed in, used to nest
-#              however deep is needed.
+#   callback   A function with the current element passed in, used to nest
+#              however deep is needed, or to do whatever with the element.
 make = (opts) ->
   if not opts.tag?
     elem = document.createTextNode opts.text
@@ -91,9 +91,10 @@ make = (opts) ->
 
   if opts.base?     then opts.base.appendChild elem
   if opts.attrs?    then elem.attr opts.attrs
-  if opts.text?     then elem.attr innerText: opts.text
-  if opts.html?     then elem.attr innerHTML: opts.html
-  if opts.children? then elem.appendChild opts.children elem
+  if opts.text?     then elem.innerText = opts.text
+  if opts.html?     then elem.innerHTML = opts.html
+  if opts.data?     then elem.dataset[key] = val for key, val of opts.data
+  if opts.callback? then opts.callback elem
 
   elem
 
@@ -113,7 +114,7 @@ error = (heading, msg) ->
     attrs:
       id: 'error-pane'
     base: document.body
-    children: (base) ->
+    callback: (base) ->
       make
         tag: 'h1'
         html: heading

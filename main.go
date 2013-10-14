@@ -32,8 +32,11 @@ func main() {
 		Get("/login", goHome).
 		Post("/logout", books.Logout).
 		Get("/logout", goHome).
+		Get("/signup", books.Signup).
+		Post("/signup", books.PostSignup).
 		Post("/ajax/tag/info", books.TagInfo).
 		Post("/ajax/tag/vote", books.TagVote).
+		Post("/ajax/validate/username", books.ValidateUsername).
 		Get("/", books.Index)
 
 	gas.InitDB("postgres", "user=postgres dbname=postgres sslmode=disable")

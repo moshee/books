@@ -21,6 +21,11 @@ $grey3: #e5e5e5;
 	vertical-align: middle;
 }
 
+*::selection {
+	background: $green;
+	color: $grey0;
+}
+
 .chap-spec {
 	content: " ";
 	width: 16px;
@@ -127,12 +132,20 @@ a {
 		border-radius: 3px;
 		font-size: 12px;
 	}
+
+	&::selection {
+		color: #fff;
+	}
+
+	&::selection:hover {
+		color: lighten($green, 50%);
+	}
 }
 
 p {
-	line-height: 1.5em;
+	line-height: 1.5;
 	
-	&:not(:last-of-type) {
+	&:not(:last-child) {
 		margin-bottom: 1em;
 	}
 }
@@ -188,11 +201,11 @@ button {
 	background: $grey3;
 	text-align: center;
 
-	&:hover {
+	&:not(:disabled):hover {
 		background: $green;
 		color: #fff;
 	}
-	&:active {
+	&:not(:disabled):active {
 		background: darken($green, 5%);
 	}
 }
@@ -487,6 +500,7 @@ footer {
 	padding: 32px 0;
 	text-align: center;
 	font-size: 0;
+	background: #fafafa;
 
 	#footer-text {
 		text-align: left;
@@ -533,4 +547,5 @@ footer {
 }
 
 @import 'series';
+@import 'signup';
 @import '1280';

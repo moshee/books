@@ -2,8 +2,10 @@ package books
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/moshee/gas"
 	"strconv"
+	"unicode"
 )
 
 type AJAXResponse struct {
@@ -36,6 +38,77 @@ func Logout(g *gas.Gas) {
 	}
 
 	g.Render("books", "user-cp", nil)
+}
+
+var (
+	errUsernameEmpty        = errors.New("I'm sorry, did you type in a username? I don't see it.")
+	errUsernameInvalidChars = errors.New("Let's stick to normal letters, shall we? I'll take _ - ' ` as well.")
+	errUsernameTooLong      = errors.New("How do you expect me to remember a name that long? Let's keep it to 30 characters or less.")
+	errUsernameNoLetters    = errors.New("Is a single letter in there too much to ask?")
+	errUsernameTaken        = "I already know someone called that. Got another name I can use so I don't get confused?"
+	validRanges             = []*unicode.RangeTable{
+		unicode.Letter,
+		unicode.Digit,
+	}
+	validChars = []rune{'_', '-', '\'', '`'}
+)
+
+func validateUsername(name string) error {
+	length := len(name)
+	switch {
+	case length == 0:
+		return errUsernameEmpty
+	case length > 30:
+		return errUsernameTooLong
+	}
+
+	anyLetters := false
+
+	for _, ch := range name {
+		ok := false
+		for _, valid := range validChars {
+			if ch == valid {
+				ok = true
+				break
+			}
+		}
+		if !ok {
+			if !unicode.IsOneOf(validRanges, ch) {
+				return errUsernameInvalidChars
+			}
+			anyLetters = true
+		}
+	}
+
+	if !anyLetters {
+		return errUsernameNoLetters
+	}
+
+	return nil
+}
+
+func ValidateUsername(g *gas.Gas) {
+	name := g.FormValue("username")
+	if err := validateUsername(name); err != nil {
+		g.JSON(&AJAXResponse{false, err.Error()})
+		return
+	}
+
+	id := -1
+	gas.DB.QueryRow("SELECT id FROM books.users WHERE name = $1", name).Scan(&id)
+	if id > 0 {
+		g.JSON(&AJAXResponse{false, errUsernameTaken})
+		return
+	}
+	g.JSON(&AJAXResponse{true, name + ", is it? Nice to meet you."})
+}
+
+func Signup(g *gas.Gas) {
+	g.Render("books", "signup", nil)
+}
+
+func PostSignup(g *gas.Gas) {
+
 }
 
 func TagInfo(g *gas.Gas) {
