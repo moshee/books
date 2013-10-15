@@ -21,8 +21,16 @@ window.Signup = class
     @submitButton = @form.$ '#submit'
     @updateButton()
     @usernameValidateTimeout = null
+
+    window.on 'login', (e) ->
+      window.location = '/'
     
     @form.$('#username').on 'input', (input) =>
+      # make it so the button is disabled while they're typing during the time
+      # it's waiting to make the ajax request
+      @usernameValid = no
+      @updateButton()
+
       if @usernameValidateTimeout?
         window.clearTimeout @usernameValidateTimeout
 
@@ -57,7 +65,7 @@ window.Signup = class
             input.target.attr class: 'good'
           else
             @usernameValid = no
-            @msg '#username', resp.msg
+            @msg '#username', resp.msg.replace('<NAME>', "<strong>#{input.target.value}</strong>")
             input.target.attr class: 'bad'
 
           @updateButton()
@@ -158,12 +166,19 @@ window.Signup = class
       async: on
       callback: (e) =>
         x = e.target
-        if x.status is 200
-          alert 'success'
-          window.location = '/'
-        else
-          resp = JSON.parse e.response
-          error resp.msg
+        switch x.status
+          when 200
+            loc = x.getResponseHeader 'Location'
+            if loc.length isnt 0
+              # a reroute
+              window.location = loc
+              return
+
+            alert 'success'
+            window.location = '/'
+          else
+            resp = JSON.parse e.response
+            error resp.msg
 
   formValid: =>
     valid = @usernameValid and @passwordValid and @emailValid

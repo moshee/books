@@ -174,6 +174,7 @@ login = (e) ->
       switch x.status
         when 200
           $('#cp').innerHTML = x.response
+          window.dispatchEvent new CustomEvent 'login', username: user.value
         else
           throw toString: -> x.response
 
@@ -196,6 +197,7 @@ logout = (e) ->
         when 200
           $('#cp').innerHTML = x.response
           $('#login-button').on 'click', login, false
+          window.dispatchEvent new Event 'logout'
         else
           resp = JSON.parse x.response
           alert resp.msg
@@ -212,7 +214,7 @@ main = ->
     if el?
       el.on 'click', func, false
 
-  if (page = document.body.attr 'id').length > 0
+  if (page = document.body.attr 'id')?
     THIS = new window[dashToCamel page]()
 
 begin main

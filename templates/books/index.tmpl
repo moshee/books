@@ -4,6 +4,12 @@
   <aside id=cp>
     {{ template "user-cp" .User }}
   </aside>
+  {{ with .Banner }}
+  <aside class="{{ .Kind }} banner">
+    <h1>{{ .Title }}</h1>
+    {{ if .Body }}<p>{{ .Body }}</p>{{ end }}
+  </aside>
+  {{ end }}
 	<section id=main>
 	{{ if .User }}
 		{{ with $feeds := .User.Feeds }}

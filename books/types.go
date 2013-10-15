@@ -4,10 +4,30 @@ import (
 	"database/sql"
 	"github.com/moshee/gas"
 	pg "github.com/moshee/pgtypes"
+	"html/template"
 	"strconv"
 	"strings"
 	"time"
 )
+
+// Local types and stuff
+
+// Banner is used for showing notices, etc. on pages
+type Banner struct {
+	Kind  string        `json:"kind"`
+	Title template.HTML `json:"title"`
+	Body  template.HTML `json:"body"`
+}
+
+func newBanner(kind, title, body string) *Banner {
+	return &Banner{
+		Kind:  kind,
+		Title: template.HTML(title),
+		Body:  template.HTML(body),
+	}
+}
+
+// Data models
 
 type (
 	SeriesKind        int

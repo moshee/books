@@ -34,12 +34,24 @@ func Index(g *gas.Gas) {
 		Items: news,
 	}
 
+	var banner *Banner
+
+	if rr := g.RerouteInfo; rr != nil {
+		banner = new(Banner)
+		if err := rr.Recover(banner); err != nil {
+			banner = nil
+			gas.Log(gas.Warning, "books index reroute: %v", err)
+		}
+	}
+
 	g.Render("books", "index", &struct {
-		Feeds []*Feed
-		User  *User
+		Feeds  []*Feed
+		User   *User
+		Banner *Banner
 	}{
 		[]*Feed{releaseFeed, seriesFeed, newsFeed},
 		g.User().(*User),
+		banner,
 	})
 }
 

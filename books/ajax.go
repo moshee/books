@@ -45,7 +45,7 @@ var (
 	errUsernameInvalidChars = errors.New("Let's stick to normal letters, shall we? I'll take _ - ' ` as well.")
 	errUsernameTooLong      = errors.New("How do you expect me to remember a name that long? Let's keep it to 30 characters or less.")
 	errUsernameNoLetters    = errors.New("Is a single letter in there too much to ask?")
-	errUsernameTaken        = "I already know someone called that. Got another name I can use so I don't get confused?"
+	errUsernameTaken        = "I already know someone called <NAME>. Got another name I can use so I don't get confused?"
 	validRanges             = []*unicode.RangeTable{
 		unicode.Letter,
 		unicode.Digit,
@@ -100,10 +100,18 @@ func ValidateUsername(g *gas.Gas) {
 		g.JSON(&AJAXResponse{false, errUsernameTaken})
 		return
 	}
-	g.JSON(&AJAXResponse{true, name + ", is it? Nice to meet you."})
+	if len(name) <= 3 {
+		g.JSON(&AJAXResponse{true, "You sure lucked out with that name, <NAME>."})
+	} else {
+		g.JSON(&AJAXResponse{true, "<NAME>, is it? Nice to meet you."})
+	}
 }
 
 func Signup(g *gas.Gas) {
+	if user := g.User().(*User); user != nil {
+		g.Reroute("/", 302, newBanner("friendly", "You already have an account!", "We're flattered that you like the site so much that you need <strong>another</strong> account, but just one will be enough."))
+		return
+	}
 	g.Render("books", "signup", nil)
 }
 
