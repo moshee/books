@@ -56,16 +56,32 @@ func (DBStore) UpdateSession(id []byte) error {
 
 func (DBStore) DeleteSession(id []byte) error {
 	gas.Log(gas.Debug, "deleting session %x", id)
-	return exec("DELETE FROM books.sessions WHERE id = $1", id)
+	return exec("DELETE FROM books.sessions WHERE id = $1 OR name = $1", id)
 }
 
 func (DBStore) UserAuthData(username string) (pass, salt []byte, err error) {
-	row := gas.DB.QueryRow("SELECT pass, salt FROM books.users WHERE name = $1 OR email = $1", username)
-	err = row.Scan(&pass, &salt)
+	var (
+		id     = 0
+		privs  Privileges
+		active bool
+	)
+	row := gas.DB.QueryRow("SELECT id, pass, salt, rights, active FROM books.users WHERE name = $1 OR email = $1", username)
+	err = row.Scan(&id, &pass, &salt, &privs, &active)
+
+	if id <= 0 {
+		err = ErrBadPassword
+	} else if !active {
+		if privs.Is(Banned) {
+			err = ErrUserBanned
+		} else {
+			err = ErrAccountNotActivated
+		}
+	}
+
 	return
 }
 
-func (DBStore) User(username string) (gas.User, error) {
+func (d DBStore) User(username string) (gas.User, error) {
 	user := new(User)
 	err := gas.QueryRow(user, "SELECT * FROM books.users WHERE name = $1 OR email = $1", username)
 	if err != nil {
@@ -73,7 +89,7 @@ func (DBStore) User(username string) (gas.User, error) {
 		// will allow us to always do a type assertion, which can yield a nil
 		// concrete type. Useful for condensing logic dealing with passing a
 		// user into a template, etc.
-		return gas.User((*User)(nil)), err
+		return d.NilUser(), err
 	}
 	return user, nil
 }

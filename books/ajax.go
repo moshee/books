@@ -15,14 +15,27 @@ type AJAXResponse struct {
 
 func Login(g *gas.Gas) {
 	if err := g.SignIn(); err != nil {
-		g.WriteHeader(400)
-		g.JSON(&AJAXResponse{false, err.Error()})
-		// TODO: gas.Log(gas.Warning, "books: Login: %v", err)
-		// TODO: g.JSON(&AJAXResponse{false, "There was an error creating your session. This error has been logged. Please try again later or complain about it."}
+
+		if booksError, ok := err.(Error); ok {
+			g.WriteHeader(booksError.Code)
+			g.JSON(&AJAXResponse{false, booksError.Message})
+		} else {
+			g.WriteHeader(400)
+			g.JSON(&AJAXResponse{false, err.Error()})
+			// TODO: gas.Log(gas.Warning, "books: Login: %v", err)
+			// TODO: g.JSON(&AJAXResponse{false, "There was an error creating your session. This error has been logged. Please try again later or complain about it."}
+		}
 		return
 	}
 
 	user := g.User().(*User)
+
+	if user == nil {
+		gas.Log(gas.Warning, "books: Login: user is nil")
+		g.WriteHeader(500)
+		g.JSON(&AJAXResponse{false, "There was an error logging you in. This error has been logged. Please try again later or complain on <a href=\"https://github.com/moshee/books/issues\">the issue tracker</a>."})
+		return
+	}
 
 	g.Render("books", "user-cp", user)
 	if page := g.FormValue("page"); len(page) > 0 {

@@ -194,7 +194,9 @@ window.Signup = class
 
             when 500
               console.log resp.msg
-              error "I have bad news.", "The server tripped and fell while trying to sign you up. Try again later."
+              error
+                heading: "I have bad news."
+                msg: "The server tripped and fell while trying to sign you up. Try again later."
 
           @updateButton()
           button.innerText = old

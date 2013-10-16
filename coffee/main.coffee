@@ -64,12 +64,15 @@ ajax = (opts) ->
   if opts.headers?
     x.setRequestHeader header, val for header, val of opts.headers
 
-  if opts.data.constructor.name is 'FormData'
-    x.send opts.data
+  if opts.data?
+    if opts.data.constructor.name is 'FormData'
+      x.send opts.data
+    else
+      fd = new FormData
+      fd.append key, val for key, val of opts.data
+      x.send fd
   else
-    fd = new FormData
-    fd.append key, val for key, val of opts.data
-    x.send fd
+    x.send()
 
 dashToCamel = (str) ->
   str.replace /(?:^|\-+)(.?)/, (m, w) -> w.toUpperCase()
@@ -100,7 +103,8 @@ make = (opts) ->
   elem
 
 # Fill in the error pane, creating if needed
-error = (heading, msg) ->
+# options: heading, body, buttons { class, text, callback }
+error = (opts) ->
   shroud = $ '#shroud'
   if shroud?
     shroud.css display: 'block'
@@ -114,9 +118,9 @@ error = (heading, msg) ->
 
   pane = $ '#error-pane'
   if pane?
-    pane.$('h1').innerHTML = heading
-    if msg?
-      pane.$('p').innerHTML = msg
+    pane.$('h1').innerHTML = opts.heading
+    if opts.msg?
+      pane.$('p').innerHTML = opts.msg
     else
       pane.$('p').innnerHTML = ''
     return
@@ -129,14 +133,37 @@ error = (heading, msg) ->
     callback: (base) ->
       make
         tag: 'h1'
-        html: heading
+        html: opts.heading
         base: base
 
-      if msg?
+      if opts.msg?
         make
           tag: 'p'
-          html: msg
+          html: opts.msg
           base: base
+
+      if opts.buttons?
+        for button in buttons
+          el = make
+            tag: 'button'
+            attrs:
+              type: 'button'
+              class: button.class
+            text: button.text
+            base: base
+
+          el.on 'click', button.callback
+      else
+        el = make
+          tag: 'button'
+          attrs: type: 'button'
+          text: 'Okay'
+          base: base
+        
+        el.on 'click', (e) ->
+          # TODO: animation
+          pane.css display: 'none'
+          shroud.css display: 'none'
 
 # global handlers
 
@@ -187,8 +214,15 @@ login = (e) ->
         when 200
           $('#cp').innerHTML = x.response
           window.dispatchEvent new CustomEvent 'login', username: user.value
+          $('#logout-button').on 'click', logout
         else
-          throw toString: -> x.response
+          try
+            resp = JSON.parse x.response
+            error
+              heading: 'Login failure'
+              msg: resp.msg
+          catch e
+            console.log e
 
       loginButton.innerHTML = old
       loginButton.attr disabled: null
@@ -204,7 +238,8 @@ logout = (e) ->
     path: '/logout'
     async: yes
     callback: (e) ->
-      x = e.srcElement
+      x = e.target
+
       switch x.status
         when 200
           $('#cp').innerHTML = x.response
@@ -213,6 +248,8 @@ logout = (e) ->
         else
           resp = JSON.parse x.response
           alert resp.msg
+          button.attr disabled: no
+          button.innerText = old
 
 THIS = null
 

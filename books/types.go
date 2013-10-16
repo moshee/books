@@ -12,6 +12,21 @@ import (
 
 // Local types and stuff
 
+type Error struct {
+	Code    int // http code
+	Message string
+}
+
+func (e Error) Error() string {
+	return e.Message
+}
+
+var (
+	ErrBadPassword         = Error{401, "Invalid username or password."}
+	ErrUserBanned          = Error{401, "You are banned. Go away."}
+	ErrAccountNotActivated = Error{401, "Your account has not been activated yet. <a id=send-activation href=/activate>Click here</a> to resend the activation e-mail if you need."}
+)
+
 // Banner is used for showing notices, etc. on pages
 type Banner struct {
 	Kind  string        `json:"kind"`
