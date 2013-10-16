@@ -86,7 +86,9 @@ window.Series = class
               @positionTagInfo li
           else
             resp = JSON.parse x.response
-            alert resp.msg
+            error
+              heading: "Uh oh..."
+              msg: resp.msg
 
   # request the tag info popup contents from the server
   populateTagInfo: (a, callback) =>
@@ -102,7 +104,9 @@ window.Series = class
 
         if x.status isnt 200
           resp = JSON.parse x.response
-          alert resp.msg
+          error
+            heading: "Uh oh..."
+            msg: resp.msg
           return false
 
         if @tagInfo?

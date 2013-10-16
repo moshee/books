@@ -160,10 +160,15 @@ error = (opts) ->
           text: 'Okay'
           base: base
         
-        el.on 'click', (e) ->
-          # TODO: animation
-          pane.css display: 'none'
-          shroud.css display: 'none'
+        el.on 'click', unError
+
+# TODO: animation
+unError = (e) ->
+  pane = $ '#error-pane'
+  pane.css display: 'none' if pane?
+
+  shroud = $ '#shroud'
+  shroud.css display: 'none' if shroud?
 
 # global handlers
 
@@ -206,7 +211,6 @@ login = (e) ->
     async: true
     callback: (e) ->
       # get rid of errors that might be left over
-      # TODO: inline errors instead of lazy alert()
       # form.removeChild error for error in $$ '.error', form
 
       x = e.srcElement
@@ -247,7 +251,9 @@ logout = (e) ->
           window.dispatchEvent new Event 'logout'
         else
           resp = JSON.parse x.response
-          alert resp.msg
+          error
+            heading: "Uh oh..."
+            msg: resp.msg
           button.attr disabled: no
           button.innerText = old
 
