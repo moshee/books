@@ -22,6 +22,8 @@ window.Signup = class
     @updateButton()
     @usernameValidateTimeout = null
 
+    @submitButton.on 'click', @submit
+
     window.on 'login', (e) ->
       window.location = '/'
     
@@ -59,13 +61,13 @@ window.Signup = class
 
           resp = JSON.parse e.target.response
 
+          @msg '#username', resp.msg.replace('<NAME>', "<strong>#{input.target.value}</strong>")
+
           if resp.ok
             @usernameValid = yes
-            @msg '#username', "<strong>#{input.target.value}</strong>, is it? Nice to meet you."
             input.target.attr class: 'good'
           else
             @usernameValid = no
-            @msg '#username', resp.msg.replace('<NAME>', "<strong>#{input.target.value}</strong>")
             input.target.attr class: 'bad'
 
           @updateButton()
@@ -155,35 +157,50 @@ window.Signup = class
       input = @form.$ target
       input.parentElement.insertBefore p, input.nextSibling
 
-  submit: =>
+  submit: (e) =>
     if not @formValid()
       return
+
+    button = e.target
+
+    old = @submitButton.innerText
+    button.attr disabled: yes
+    button.innerText = 'Okay, wait a sec...'
     
     ajax
       method: 'post'
       path: '/signup'
-      data: new FormData @form
+      headers: 'X-Ajax-Partial': 'signup'
+      data:
+        username: @formValue '#username'
+        email:    @formValue '#email'
+        password: @formValue '#password'
+        'repeat-password': @formValue '#repeat-password'
       async: on
       callback: (e) =>
         x = e.target
-        switch x.status
-          when 200
-            loc = x.getResponseHeader 'Location'
-            if loc.length isnt 0
-              # a reroute
-              window.location = loc
-              return
+        if x.status is 200
+          $('#main').innerHTML = x.response
 
-            alert 'success'
-            window.location = '/'
-          else
-            resp = JSON.parse e.response
-            error resp.msg
+        else
+          resp = JSON.parse x.response
+
+          switch x.status
+            when 400
+              for elem, msg of resp.errs
+                sel = '#' + elem
+                @form.$(sel).attr class: 'server-bad'
+                @msg sel, msg
+
+            when 500
+              console.log resp.msg
+              error "I have bad news.", "The server tripped and fell while trying to sign you up. Try again later."
+
+          @updateButton()
+          button.innerText = old
 
   formValid: =>
-    valid = @usernameValid and @passwordValid and @emailValid
-    console.log valid
-    valid
+    @usernameValid and @passwordValid and @emailValid
 
   updateButton: =>
     if @formValid()

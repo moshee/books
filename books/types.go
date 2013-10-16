@@ -457,22 +457,22 @@ type Release struct {
 }
 
 type User struct {
-	Id           int `sql:"user_id"`
-	Email        string
-	Name         string `sql:"user_name"`
-	Pass         []byte
-	Salt         []byte
-	Privileges   `sql:"rights"`
-	VoteWeight   int
-	Summary      sql.NullString `sql:"user_summary"`
-	RegisterDate time.Time
-	LastActive   time.Time
-	Avatar       bool
+	Id           int    `json:"id,omitempty" sql:"user_id"`
+	Email        string `json:"email,omitempty"`
+	Name         string `json:"name,omitempty" sql:"user_name"`
+	Pass         []byte `json:"-"`
+	Salt         []byte `json:"-"`
+	Privileges   `json:"privs,omitempty" sql:"rights"`
+	VoteWeight   int            `json:"vote_weight,omitempty"`
+	Summary      sql.NullString `json:"summary,omitempty" sql:"user_summary"`
+	RegisterDate time.Time      `json:"register_date,omitempty"`
+	LastActive   time.Time      `json:"last_active,omitempty"`
+	Avatar       bool           `json:"-"`
 
 	// Not to be confused with Online(), Active indicates whether or not the
 	// user is an activated user on the site (has their activation email been
 	// sent yet, etc.). May be used for other purposes later such as banning.
-	Active bool
+	Active bool `json:"-"`
 }
 
 func (self *User) AvatarFile() string {

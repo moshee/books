@@ -35,8 +35,6 @@ func (DBStore) ReadSession(id []byte) (*gas.Session, error) {
 		username string
 	)
 
-	gas.Log(gas.Debug, "Sessid: %x", id)
-
 	row := gas.DB.QueryRow("SELECT * FROM books.user_sessions WHERE id = $1", id)
 	err := row.Scan(&id, &expires, &username)
 	if err != nil {

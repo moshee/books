@@ -90,12 +90,16 @@ th.tc:before {
 
 html {
 	background: #fafafa;
+	height: 100%;
+	min-height: 100%;
 }
 
 body {
 	color: #444;
 	font-family: $body-font;
 	background: #fff;
+	height: 100%;
+	min-height: 100%;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -158,6 +162,33 @@ hr.clear {
 	clear: both;
 	border-width: 0;
 	margin-bottom: 32px;
+}
+
+#error-pane {
+	position: fixed;
+	top: 128px;
+	width: 512px;
+	left: 50%;
+	margin-left: -256px;
+	background: #fff;
+	border: 1px solid #ddd;
+	box-shadow: 0 0 50px rgba(0,0,0,.15);
+	padding: 32px;
+	z-index: 6;
+
+	h1 {
+		font-size: 28px;
+	}
+}
+
+#shroud {
+	height: 100%;
+	min-height: 100%;
+	width: 100%;
+	position: fixed;
+	top: 0;
+	background: rgba(0,0,0,.2);
+	z-index: 5;
 }
 
 .indicator {

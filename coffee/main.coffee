@@ -44,14 +44,12 @@ Element::attr = (obj) ->
 ajax = (opts) ->
   x = new XMLHttpRequest()
   opts.method ||= 'post'
+
   unless opts.async?
     opts.async = false
 
   if opts.attrs?
     x[name] = attr for name, attr of opts.attrs
-
-  if opts.headers?
-    x.setRequestHeader header, val for header, val of opts.headers
 
   if opts.callback?
     switch typeof opts.callback
@@ -63,12 +61,15 @@ ajax = (opts) ->
 
   x.open opts.method, opts.path, opts.async
 
-  if typeof opts.data is 'object'
+  if opts.headers?
+    x.setRequestHeader header, val for header, val of opts.headers
+
+  if opts.data.constructor.name is 'FormData'
+    x.send opts.data
+  else
     fd = new FormData
     fd.append key, val for key, val of opts.data
     x.send fd
-  else
-    x.send opts.data
 
 dashToCamel = (str) ->
   str.replace /(?:^|\-+)(.?)/, (m, w) -> w.toUpperCase()
@@ -100,6 +101,17 @@ make = (opts) ->
 
 # Fill in the error pane, creating if needed
 error = (heading, msg) ->
+  shroud = $ '#shroud'
+  if shroud?
+    shroud.css display: 'block'
+  else
+    shroud = make
+      tag: 'div'
+      attrs:
+        id: 'shroud'
+        class: 'disabled'
+      base: document.body
+
   pane = $ '#error-pane'
   if pane?
     pane.$('h1').innerHTML = heading

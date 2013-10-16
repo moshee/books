@@ -100,23 +100,74 @@ func ValidateUsername(g *gas.Gas) {
 		g.JSON(&AJAXResponse{false, errUsernameTaken})
 		return
 	}
+
 	if len(name) <= 3 {
-		g.JSON(&AJAXResponse{true, "You sure lucked out with that name, <NAME>."})
+		g.JSON(&AJAXResponse{true, "You sure lucked out with a name like that, <NAME>."})
 	} else {
 		g.JSON(&AJAXResponse{true, "<NAME>, is it? Nice to meet you."})
 	}
 }
 
-func Signup(g *gas.Gas) {
-	if user := g.User().(*User); user != nil {
-		g.Reroute("/", 302, newBanner("friendly", "You already have an account!", "We're flattered that you like the site so much that you need <strong>another</strong> account, but just one will be enough."))
+func PostSignup(g *gas.Gas) {
+	// server-side form validation in addition to  client-side, because who knows
+	errs := make(map[string]string)
+
+	// need this for multiple form values or something?
+	g.ParseMultipartForm(0)
+
+	name := g.FormValue("username")
+	if err := validateUsername(name); err != nil {
+		errs["username"] = err.Error()
+	}
+
+	email := g.FormValue("email")
+	if len(email) == 0 {
+		errs["email"] = "Ahem. You forgot your e-mail address."
+	}
+
+	pass := g.FormValue("password")
+	repeatPass := g.FormValue("repeat-password")
+
+	if len(pass) == 0 {
+		errs["password"] = "You're gonna need a password."
+	}
+
+	if pass != repeatPass {
+		errs["repeat-password"] = "If YOU don't know your own password, how am I supposed to know?"
+	}
+
+	if len(errs) > 0 {
+		g.WriteHeader(400)
+		g.JSON(map[string]interface{}{"ok": false, "errs": errs})
 		return
 	}
-	g.Render("books", "signup", nil)
-}
 
-func PostSignup(g *gas.Gas) {
+	hash, salt, err := gas.NewHash([]byte(pass))
+	if err != nil {
+		g.WriteHeader(500)
+		g.JSON(&AJAXResponse{false, err.Error()})
+		return
+	}
 
+	id := 0
+
+	err = gas.DB.QueryRow(`
+		INSERT INTO books.users
+		( name, email, pass, salt )
+		VALUES
+		( $1, $2, $3, $4 )
+		RETURNING id
+		`, name, email, hash, salt).Scan(&id)
+
+	if err != nil {
+		g.WriteHeader(500)
+		g.JSON(&AJAXResponse{false, err.Error()})
+		return
+	}
+
+	sendActivationEmail(id, name, email)
+
+	g.Render("books", "signup-almostdone", nil)
 }
 
 func TagInfo(g *gas.Gas) {

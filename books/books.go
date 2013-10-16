@@ -55,6 +55,14 @@ func Index(g *gas.Gas) {
 	})
 }
 
+func Signup(g *gas.Gas) {
+	if user := g.User().(*User); user != nil {
+		g.Reroute("/", 302, newBanner("friendly", "You already have an account!", "We're flattered that you like the site so much that you need <strong>another</strong> account, but just one will be enough."))
+		return
+	}
+	g.Render("books", "signup", nil)
+}
+
 func SeriesIndex(g *gas.Gas) {
 
 }

@@ -247,6 +247,14 @@ CREATE TABLE users (
     active        boolean     NOT NULL DEFAULT false
 );
 
+CREATE TABLE user_activations (
+    id          serial      PRIMARY KEY,
+    hash        text        NOT NULL,
+    user_id     integer     NOT NULL REFERENCES users,
+    expire_date timestamptz NOT NULL DEFAULT now() + '24 hours',
+    expired     boolean     NOT NULL DEFAULT false
+);
+
 CREATE TABLE sessions (
     id          bytea       NOT NULL,
     user_id     integer     NOT NULL REFERENCES users,

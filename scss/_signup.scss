@@ -47,11 +47,16 @@
 			margin: -1px -1px 7px -1px;
 		}
 
-		&.bad {
+		&.bad, &.server-bad {
 			margin: -1px -1px 7px -1px;
 			border: 1px solid #800;
 			background: #fee;
 			color: #800;
+		}
+
+		&.server-bad + p.field-feedback {
+			color: #800;
+			font-weight: 700;
 		}
 	}
 
@@ -71,3 +76,8 @@
 	}
 }
 
+#almostdone {
+	text-align: center;
+	width: 768px;
+	margin: 0 auto;
+}

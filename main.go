@@ -37,6 +37,7 @@ func main() {
 		Post("/ajax/tag/info", books.TagInfo).
 		Post("/ajax/tag/vote", books.TagVote).
 		Post("/ajax/validate/username", books.ValidateUsername).
+		Get("/robots.txt", robots).
 		Get("/", books.Index)
 
 	gas.InitDB("postgres", "user=postgres dbname=postgres sslmode=disable")
@@ -52,6 +53,10 @@ func main() {
 func StaticHandler(g *gas.Gas) {
 	name := filepath.Join("./static", g.Args["path"])
 	http.ServeFile(g.ResponseWriter, g.Request, name)
+}
+
+func robots(g *gas.Gas) {
+	http.ServeFile(g.ResponseWriter, g.Request, "./static/robots.txt")
 }
 
 func goHome(g *gas.Gas) {
