@@ -16,7 +16,7 @@ SET search_path TO books,public;
 CREATE EXTENSION intarray;
 
 -- schema version (increment whenever it changes)
-CREATE TABLE schema_version ( revision integer NOT NULL );
+CREATE TABLE schema_version ( revision int NOT NULL );
 INSERT INTO schema_version VALUES (0);
 
 --
@@ -33,10 +33,10 @@ CREATE TABLE publishers (
 CREATE TABLE magazines (
     id           serial      PRIMARY KEY,
     title        text        NOT NULL,
-    publisher_id integer     NOT NULL REFERENCES publishers,
+    publisher_id int         NOT NULL REFERENCES publishers,
     language     text        NOT NULL,
     date_added   timestamptz NOT NULL DEFAULT now(),
-    demographic  integer,
+    demographic  int,
     summary      text
 );
 
@@ -45,27 +45,27 @@ CREATE TABLE book_series (
     title        text        NOT NULL,
     native_title text        NOT NULL,
     other_titles text[],
-    kind         integer     NOT NULL DEFAULT 0,
+    kind         int         NOT NULL DEFAULT 0,
     summary      text,
-    vintage      integer     NOT NULL, -- year
+    vintage      int         NOT NULL, -- year
     date_added   timestamptz NOT NULL,
     last_updated timestamptz NOT NULL,
     finished     boolean     NOT NULL DEFAULT false,
     nsfw         boolean     NOT NULL DEFAULT false,
     avg_rating   real, -- NULL means not rated (as opposed to a zero rating)
-    rating_count integer     NOT NULL DEFAULT 0,
-    demographic  integer     NOT NULL,
-    magazine_id  integer     REFERENCES magazines,
+    rating_count int         NOT NULL DEFAULT 0,
+    demographic  int         NOT NULL,
+    magazine_id  int         REFERENCES magazines,
     has_cover    boolean     NOT NULL DEFAULT false
 );
 
 -- This table glues book_series and publishers to indicate if a series is
 -- officially licensed in countries outside of the original
 CREATE TABLE series_licenses (
-    id            serial  PRIMARY KEY,
-    series_id     integer NOT NULL REFERENCES book_series,
-    publisher_id  integer NOT NULL REFERENCES publishers,
-    country       text    NOT NULL,
+    id            serial PRIMARY KEY,
+    series_id     int    NOT NULL REFERENCES book_series,
+    publisher_id  int    NOT NULL REFERENCES publishers,
+    country       text   NOT NULL,
     date_licensed date
 );
 
@@ -78,16 +78,16 @@ CREATE TABLE authors (
     picture     boolean NOT NULL DEFAULT false,
     birthday    date,
     bio         text,
-    sex         integer
+    sex         int
 );
 
 CREATE TABLE production_credits (
-    series_id integer NOT NULL REFERENCES book_series,
-    author_id integer NOT NULL REFERENCES authors,
+    series_id int NOT NULL REFERENCES book_series,
+    author_id int NOT NULL REFERENCES authors,
 
     -- 0001 : art
     -- 0010 : scenario
-    credit    integer NOT NULL
+    credit    int NOT NULL
 );
 
 CREATE VIEW series_credits AS
@@ -106,10 +106,10 @@ CREATE VIEW series_credits AS
     ORDER BY pc.credit, a.surname;
 
 CREATE TABLE related_series (
-    id                serial  PRIMARY KEY,
-    series_id         integer NOT NULL REFERENCES book_series,
-    related_series_id integer NOT NULL REFERENCES book_series,
-    relation          integer NOT NULL
+    id                serial PRIMARY KEY,
+    series_id         int    NOT NULL REFERENCES book_series,
+    related_series_id int    NOT NULL REFERENCES book_series,
+    relation          int    NOT NULL
 );
 
 CREATE VIEW related_series_view AS
@@ -130,26 +130,26 @@ CREATE VIEW related_series_view AS
 --
 
 CREATE TABLE translation_groups (
-    id               serial  PRIMARY KEY,
-    name             text    NOT NULL,
+    id               serial PRIMARY KEY,
+    name             text   NOT NULL UNIQUE,
     summary          text,
     avg_rating       real,
-    rating_count     integer NOT NULL DEFAULT 0,
+    rating_count     int    NOT NULL DEFAULT 0,
     avg_release_rate bigint -- seconds
 );
 
 CREATE TABLE chapters (
     id           serial      PRIMARY KEY,
     release_date timestamptz NOT NULL DEFAULT 'epoch'::timestamptz,
-    series_id    integer     NOT NULL REFERENCES book_series,
-    num          integer     NOT NULL,
-    volume       integer,
+    series_id    int         NOT NULL REFERENCES book_series,
+    num          int         NOT NULL,
+    volume       int,
     notes        text
 );
 
 CREATE TABLE releases (
     id              serial      PRIMARY KEY,
-    series_id       integer     NOT NULL REFERENCES book_series,
+    series_id       int         NOT NULL REFERENCES book_series,
     language        text        NOT NULL DEFAULT 'en',
     release_date    timestamptz NOT NULL DEFAULT now(),
     notes           text,
@@ -160,16 +160,16 @@ CREATE TABLE releases (
 
 CREATE TABLE releases_translators (
     id            serial PRIMARY KEY,
-    release_id    integer NOT NULL REFERENCES releases,
-    translator_id integer NOT NULL REFERENCES translation_groups
+    release_id    int    NOT NULL REFERENCES releases,
+    translator_id int    NOT NULL REFERENCES translation_groups
 );
 
 -- Keeps track of which releases a chapter is included in
 -- (may be multiple releases for a given chapter)
 CREATE TABLE releases_chapters (
-    id         serial  PRIMARY KEY,
-    release_id integer NOT NULL REFERENCES releases,
-    chapter_id integer NOT NULL REFERENCES chapters
+    id         serial PRIMARY KEY,
+    release_id int    NOT NULL REFERENCES releases,
+    chapter_id int    NOT NULL REFERENCES chapters
 );
 
 --CREATE VIEW series_releases AS
@@ -238,8 +238,8 @@ CREATE TABLE users (
     name          text        NOT NULL UNIQUE,
     pass          bytea       NOT NULL,
     salt          bytea       NOT NULL,
-    rights        integer     NOT NULL DEFAULT 0,
-    vote_weight   integer     NOT NULL DEFAULT 1,
+    rights        int         NOT NULL DEFAULT 0,
+    vote_weight   int         NOT NULL DEFAULT 1,
     summary       text,
     register_date timestamptz NOT NULL DEFAULT now(),
     last_active   timestamptz NOT NULL DEFAULT 'epoch'::timestamptz,
@@ -250,14 +250,14 @@ CREATE TABLE users (
 CREATE TABLE user_activations (
     id          serial      PRIMARY KEY,
     hash        text        NOT NULL,
-    user_id     integer     NOT NULL REFERENCES users,
+    user_id     int         NOT NULL REFERENCES users,
     expire_date timestamptz NOT NULL DEFAULT now() + '24 hours',
     expired     boolean     NOT NULL DEFAULT false
 );
 
 CREATE TABLE sessions (
     id          bytea       NOT NULL,
-    user_id     integer     NOT NULL REFERENCES users,
+    user_id     int         NOT NULL REFERENCES users,
     expire_date timestamptz NOT NULL DEFAULT 'epoch'::timestamptz
 );
 
@@ -274,26 +274,26 @@ CREATE VIEW user_sessions AS
 -- keeps track of which chapters a user has read/owns
 CREATE TABLE user_chapters (
     id         serial      PRIMARY KEY,
-    user_id    integer     NOT NULL REFERENCES users,
-    chapter_id integer     NOT NULL REFERENCES chapters,
-    status     integer     NOT NULL,
+    user_id    int         NOT NULL REFERENCES users,
+    chapter_id int         NOT NULL REFERENCES chapters,
+    status     int         NOT NULL,
     date_read  timestamptz NOT NULL DEFAULT now()
 );
 
 -- keeps track of which releases a user owns
 CREATE TABLE user_releases (
     id         serial      PRIMARY KEY,
-    user_id    integer     NOT NULL REFERENCES users,
-    release_id integer     NOT NULL REFERENCES releases,
-    status     integer     NOT NULL,
+    user_id    int         NOT NULL REFERENCES users,
+    release_id int         NOT NULL REFERENCES releases,
+    status     int         NOT NULL,
     date_owned timestamptz NOT NULL DEFAULT now()
 );
 
 -- keeps track of users belonging to translator groups
 CREATE TABLE translator_members (
-    id            serial  PRIMARY KEY,
-    user_id       integer NOT NULL REFERENCES users,
-    translator_id integer NOT NULL REFERENCES translation_groups
+    id            serial PRIMARY KEY,
+    user_id       int    NOT NULL REFERENCES users,
+    translator_id int    NOT NULL REFERENCES translation_groups
 );
 
 --
@@ -307,22 +307,22 @@ CREATE TABLE characters (
     aliases     text[],
     nationality text,
     birthday    date, -- the year is ignored
-    sex         integer,
+    sex         int,
     weight      real,
     height      real,
     sizes       text,
-    blood_type  integer,
+    blood_type  int,
     description text,
     picture     boolean NOT NULL DEFAULT false
 );
 
 CREATE TABLE characters_roles (
-    id           serial  PRIMARY KEY,
-    character_id integer NOT NULL REFERENCES characters,
-    series_id    integer NOT NULL REFERENCES book_series,
-    type         integer NOT NULL,
-    role         integer,
-    appearances  integer[] --           REFERENCES chapters
+    id           serial PRIMARY KEY,
+    character_id int    NOT NULL REFERENCES characters,
+    series_id    int    NOT NULL REFERENCES book_series,
+    type         int    NOT NULL,
+    role         int,
+    appearances  int[] --           REFERENCES chapters
 );
 
 CREATE VIEW series_characters AS
@@ -347,10 +347,10 @@ cREATE TABLE characters_relation_kinds (
 );
 
 CREATE TABLE related_characters (
-    id                   serial  PRIMARY KEY,
-    character_id         integer NOT NULL REFERENCES characters,
-    related_character_id integer NOT NULL REFERENCES characters,
-    relation             integer NOT NULL REFERENCES characters_relation_kinds
+    id                   serial PRIMARY KEY,
+    character_id         int    NOT NULL REFERENCES characters,
+    related_character_id int    NOT NULL REFERENCES characters,
+    relation             int    NOT NULL REFERENCES characters_relation_kinds
 );
 
 --
@@ -369,18 +369,18 @@ CREATE TABLE book_tag_names (
 
 CREATE TABLE book_tags (
     id        serial  PRIMARY KEY,
-    series_id integer NOT NULL REFERENCES book_series,
-    tag_id    integer NOT NULL REFERENCES book_tag_names,
+    series_id int     NOT NULL REFERENCES book_series,
+    tag_id    int     NOT NULL REFERENCES book_tag_names,
     spoiler   boolean NOT NULL,
-    weight    integer NOT NULL,
+    weight    int     NOT NULL,
     visible   boolean NOT NULL DEFAULT true
 );
 
 CREATE TABLE book_tag_consensus (
     id          serial      PRIMARY KEY,
-    user_id     integer     NOT NULL REFERENCES users,
-    book_tag_id integer     NOT NULL REFERENCES book_tags,
-    vote        integer     NOT NULL,
+    user_id     int         NOT NULL REFERENCES users,
+    book_tag_id int         NOT NULL REFERENCES book_tags,
+    vote        int         NOT NULL,
     vote_date   timestamptz NOT NULL DEFAULT now()
 );
 
@@ -472,18 +472,18 @@ CREATE TABLE character_tag_names (
 
 CREATE TABLE character_tags (
     id           serial  PRIMARY KEY,
-    character_id integer NOT NULL REFERENCES characters,
-    tag_id       integer NOT NULL REFERENCES character_tag_names,
+    character_id int     NOT NULL REFERENCES characters,
+    tag_id       int     NOT NULL REFERENCES character_tag_names,
     spoiler      boolean NOT NULL,
-    weight       integer NOT NULL,
+    weight       int     NOT NULL,
     visible      boolean NOT NULL DEFAULT true
 );
 
 CREATE TABLE character_tag_consensus (
-    id               serial  PRIMARY KEY,
-    user_id          integer NOT NULL REFERENCES users,
-    character_tag_id integer NOT NULL REFERENCES character_tags,
-    vote             integer NOT NULL,
+    id               serial      PRIMARY KEY,
+    user_id          int         NOT NULL REFERENCES users,
+    character_tag_id int         NOT NULL REFERENCES character_tags,
+    vote             int         NOT NULL,
     vote_date        timestamptz NOT NULL
 );
 
@@ -492,39 +492,39 @@ CREATE TABLE character_tag_consensus (
 --
 
 CREATE TABLE favorite_authors (
-    id        serial  PRIMARY KEY,
-    user_id   integer NOT NULL REFERENCES users,
-    author_id integer NOT NULL REFERENCES authors
+    id        serial PRIMARY KEY,
+    user_id   int    NOT NULL REFERENCES users,
+    author_id int    NOT NULL REFERENCES authors
 );
 
 CREATE TABLE favorite_series (
-    id        serial  PRIMARY KEY,
-    user_id   integer NOT NULL REFERENCES users,
-    series_id integer NOT NULL REFERENCES book_series
+    id        serial PRIMARY KEY,
+    user_id   int    NOT NULL REFERENCES users,
+    series_id int    NOT NULL REFERENCES book_series
 );
 
 CREATE TABLE favorite_translators (
-    id            serial  PRIMARY KEY,
-    user_id       integer NOT NULL REFERENCES users,
-    translator_id integer NOT NULL REFERENCES translation_groups
+    id            serial PRIMARY KEY,
+    user_id       int    NOT NULL REFERENCES users,
+    translator_id int    NOT NULL REFERENCES translation_groups
 );
 
 CREATE TABLE favorite_magazines (
-    id          serial  PRIMARY KEY,
-    user_id     integer NOT NULL REFERENCES users,
-    magazine_id integer NOT NULL REFERENCES magazines
+    id          serial PRIMARY KEY,
+    user_id     int    NOT NULL REFERENCES users,
+    magazine_id int    NOT NULL REFERENCES magazines
 );
 
 CREATE TABLE favorite_book_tags (
-    id      serial  PRIMARY KEY,
-    user_id integer NOT NULL REFERENCES users,
-    tag_id  integer NOT NULL REFERENCES book_tag_names
+    id      serial PRIMARY KEY,
+    user_id int    NOT NULL REFERENCES users,
+    tag_id  int    NOT NULL REFERENCES book_tag_names
 );
 
 CREATE TABLE favorite_character_tags (
-    id      serial  PRIMARY KEY,
-    user_id integer NOT NULL REFERENCES users,
-    tag_id  integer NOT NULL REFERENCES character_tag_names
+    id      serial PRIMARY KEY,
+    user_id int    NOT NULL REFERENCES users,
+    tag_id  int    NOT NULL REFERENCES character_tag_names
 );
 
 --
@@ -532,27 +532,27 @@ CREATE TABLE favorite_character_tags (
 --
 
 CREATE TABLE filtered_groups (
-    id       serial  PRIMARY KEY,
-    user_id  integer NOT NULL REFERENCES users,
-    group_id integer NOT NULL REFERENCES translation_groups
+    id       serial PRIMARY KEY,
+    user_id  int    NOT NULL REFERENCES users,
+    group_id int    NOT NULL REFERENCES translation_groups
 );
 
 CREATE TABLE filtered_languages (
-    id       serial  PRIMARY KEY,
-    user_id  integer NOT NULL REFERENCES users,
-    language text    NOT NULL
+    id       serial PRIMARY KEY,
+    user_id  int    NOT NULL REFERENCES users,
+    language text   NOT NULL
 );
 
 CREATE TABLE filtered_book_tags (
-    id      serial  PRIMARY KEY,
-    user_id integer NOT NULL REFERENCES users,
-    tag_id  integer NOT NULL REFERENCES book_tag_names
+    id      serial PRIMARY KEY,
+    user_id int    NOT NULL REFERENCES users,
+    tag_id  int    NOT NULL REFERENCES book_tag_names
 );
 
 CREATE TABLE filtered_character_tags (
-    id      serial  PRIMARY KEY,
-    user_id integer NOT NULL REFERENCES users,
-    tag_id  integer NOT NULL REFERENCES character_tag_names
+    id      serial PRIMARY KEY,
+    user_id int    NOT NULL REFERENCES users,
+    tag_id  int    NOT NULL REFERENCES character_tag_names
 );
 
 --
@@ -561,9 +561,9 @@ CREATE TABLE filtered_character_tags (
 
 CREATE TABLE book_ratings (
     id        serial      PRIMARY KEY,
-    user_id   integer     NOT NULL REFERENCES users,
-    series_id integer     NOT NULL REFERENCES book_series,
-    rating    integer     NOT NULL,
+    user_id   int         NOT NULL REFERENCES users,
+    series_id int         NOT NULL REFERENCES book_series,
+    rating    int         NOT NULL,
     review    text,
     rate_date timestamptz NOT NULL
 );
@@ -588,9 +588,9 @@ CREATE VIEW series_book_ratings AS
 
 CREATE TABLE translator_ratings (
     id            serial      PRIMARY KEY,
-    user_id       integer     NOT NULL REFERENCES users,
-    translator_id integer     NOT NULL REFERENCES translation_groups,
-    rating        integer     NOT NULL,
+    user_id       int         NOT NULL REFERENCES users,
+    translator_id int         NOT NULL REFERENCES translation_groups,
+    rating        int         NOT NULL,
     review        text,
     rate_date     timestamptz NOT NULL
 );
@@ -606,30 +606,30 @@ CREATE TABLE link_kinds (
 );
 
 CREATE TABLE publisher_links (
-    id           serial  PRIMARY KEY,
-    publisher_id integer NOT NULL REFERENCES publishers,
-    link_kind    integer NOT NULL REFERENCES link_kinds,
-    url          text    NOT NULL
+    id           serial PRIMARY KEY,
+    publisher_id int    NOT NULL REFERENCES publishers,
+    link_kind    int    NOT NULL REFERENCES link_kinds,
+    url          text   NOT NULL
 );
 
 CREATE TABLE magazine_links (
-    id          serial  PRIMARY KEY,
-    magazine_id integer NOT NULL REFERENCES magazines,
-    link_kind   integer NOT NULL REFERENCES link_kinds,
-    url         text    NOT NULL
+    id          serial PRIMARY KEY,
+    magazine_id int    NOT NULL REFERENCES magazines,
+    link_kind   int    NOT NULL REFERENCES link_kinds,
+    url         text   NOT NULL
 );
 CREATE TABLE author_links (
-    id        serial  PRIMARY KEY,
-    author_id integer NOT NULL REFERENCES authors,
-    link_kind integer NOT NULL REFERENCES link_kinds,
-    url       text    NOT NULL
+    id        serial PRIMARY KEY,
+    author_id int    NOT NULL REFERENCES authors,
+    link_kind int    NOT NULL REFERENCES link_kinds,
+    url       text   NOT NULL
 );
 
 CREATE TABLE translator_links (
-    id            serial  PRIMARY KEY,
-    translator_id integer NOT NULL REFERENCES translation_groups,
-    link_kind     integer NOT NULL REFERENCES link_kinds,
-    url           text    NOT NULL
+    id            serial PRIMARY KEY,
+    translator_id int    NOT NULL REFERENCES translation_groups,
+    link_kind     int    NOT NULL REFERENCES link_kinds,
+    url           text   NOT NULL
 );
 
 --
@@ -643,8 +643,8 @@ CREATE TABLE news_categories (
 
 CREATE TABLE news_posts (
     id          serial      PRIMARY KEY,
-    user_id     integer     NOT NULL REFERENCES users,
-    category_id integer     NOT NULL REFERENCES news_categories,
+    user_id     int         NOT NULL REFERENCES users,
+    category_id int         NOT NULL REFERENCES news_categories,
     date_posted timestamptz NOT NULL DEFAULT now(),
     title       text        NOT NULL,
     body        text        NOT NULL
@@ -673,10 +673,13 @@ CREATE VIEW latest_news AS
 
 CREATE TABLE feeds (
     id           serial      PRIMARY KEY,
+    input_kind   int         NOT NULL,
+    output_kind  int         NOT NULL,
     kind         text        NOT NULL,        -- Release, series, article, etc. Display format.
-    hash         bytea       NOT NULL UNIQUE, -- A random string of bytes that identifies this feed (don't use the id)
-    feedspec     text        NOT NULL,        -- Description of feed contents.
-    creator      integer     REFERENCES users,
+    ref          text        NOT NULL UNIQUE, -- A random string of bytes that identifies this feed (don't use the id)
+    include      int[]       NOT NULL,
+    exclude      int[]       NOT NULL DEFAULT '{}',
+    creator      int         REFERENCES users,
     title        text        NOT NULL,
     description  text        NOT NULL DEFAULT '',
     date_created timestamptz NOT NULL DEFAULT now()
@@ -684,16 +687,16 @@ CREATE TABLE feeds (
 
 CREATE TABLE feed_permissions (
     id         serial      PRIMARY KEY,
-    feed_id    integer     NOT NULL REFERENCES feeds,
-    user_id    integer     NOT NULL REFERENCES users,
-    action     integer     NOT NULL, -- allow, disallow, ...
+    feed_id    int         NOT NULL REFERENCES feeds,
+    user_id    int         NOT NULL REFERENCES users,
+    action     int         NOT NULL, -- allow, disallow, ...
     date_given timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE feed_subscriptions (
     id          serial      PRIMARY KEY,
-    feed_id     integer     NOT NULL REFERENCES feeds,
-    user_id     integer     NOT NULL REFERENCES users,
+    feed_id     int         NOT NULL REFERENCES feeds,
+    user_id     int         NOT NULL REFERENCES users,
     private     boolean     NOT NULL DEFAULT false,
     date_subbed timestamptz NOT NULL DEFAULT now()
 );
@@ -812,7 +815,7 @@ CREATE TRIGGER update_book_tags
 CREATE FUNCTION do_update_character_tags() RETURNS trigger AS $$
     DECLARE
         rec        RECORD;
-        --new_weight integer;
+        --new_weight int;
     BEGIN
         IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
             rec := NEW;
@@ -864,7 +867,7 @@ CREATE TRIGGER update_user_chapters
 -- update the object of a series relation
 CREATE FUNCTION do_update_series_relations() RETURNS trigger AS $$
     DECLARE
-        related_relation integer;
+        related_relation int;
     BEGIN
         IF (TG_OP = 'INSERT' OR TG_OP = 'UPDATE') THEN
             CASE NEW.relation
