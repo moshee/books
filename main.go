@@ -22,23 +22,38 @@ func main() {
 		return t.Format("2006-02-01T15:04:05Z0700")
 	})
 
-	gas.New().
-		Get("/static/{path}", StaticHandler).
-		Get("/img/u/t/{img}", placeholdit(48, 48)).
-		Get("/img/c/{img}", placeholdit(256, 384)).
-		Get("/img/char/t/{img}", placeholdit(64, 64)).
-		Get("/series/{id}", books.SeriesPage).
-		Post("/login", books.Login).
-		Get("/login", goHome).
-		Post("/logout", books.Logout).
-		Get("/logout", goHome).
-		Get("/signup", books.Signup).
-		Post("/signup", books.PostSignup).
-		Post("/ajax/tag/info", books.TagInfo).
-		Post("/ajax/tag/vote", books.TagVote).
-		Post("/ajax/validate/username", books.ValidateUsername).
-		Get("/robots.txt", robots).
-		Get("/", books.Index)
+	r := gas.New()
+
+	// assets
+	r.Get("/static/{path}", StaticHandler)
+	r.Get("/img/u/t/{img}", placeholdit(48, 48))
+	r.Get("/img/c/{img}", placeholdit(256, 384))
+	r.Get("/img/char/t/{img}", placeholdit(64, 64))
+	r.Get("/robots.txt", robots)
+
+	// system
+	r.Post("/login", books.PostLogin)
+	r.Get("/login", books.Login)
+	r.Post("/logout", books.Logout)
+	r.Get("/logout", redirect("/", 303))
+	r.Get("/signup", books.Signup)
+	r.Post("/signup", books.PostSignup)
+
+	r.Post("/ajax/tag/info", books.TagInfo)
+	r.Post("/ajax/tag/vote", books.TagVote)
+	r.Post("/ajax/validate/username", books.ValidateUsername)
+
+	// User
+	r.Get("/settings", redirect("/settings/profile", 303))
+	r.Get("/settings/profile", requireLogin(books.SettingsProfile))
+	r.Get("/settings/feeds", requireLogin(books.SettingsFeeds))
+	r.Get("/settings/account", requireLogin(books.SettingsAccount))
+	r.Get("/user/{id}", books.UserProfile)
+
+	// Series
+	r.Get("/series/{id}", books.SeriesPage)
+
+	r.Get("/", books.Index)
 
 	gas.InitDB("postgres", "user=postgres dbname=postgres sslmode=disable")
 
@@ -59,8 +74,20 @@ func robots(g *gas.Gas) {
 	http.ServeFile(g.ResponseWriter, g.Request, "./static/robots.txt")
 }
 
-func goHome(g *gas.Gas) {
-	g.Redirect("/", 303)
+func redirect(path string, code int) gas.Handler {
+	return func(g *gas.Gas) {
+		g.Redirect(path, code)
+	}
+}
+
+func requireLogin(handler gas.Handler) gas.Handler {
+	return func(g *gas.Gas) {
+		if g.User().(*books.User) == nil {
+			g.Reroute("/login", 302, map[string]string{"location": g.URL.Path})
+			return
+		}
+		handler(g)
+	}
 }
 
 func slugify(in string) string {

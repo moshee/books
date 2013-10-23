@@ -75,7 +75,7 @@ ajax = (opts) ->
     x.send()
 
 dashToCamel = (str) ->
-  str.replace /(?:^|\-+)(.?)/, (m, w) -> w.toUpperCase()
+  str.replace /(?:^|\-+)(.?)/g, (m, w) -> w.toUpperCase()
 
 # Create an arbitrary tree of HTML elements
 # opts:
@@ -270,7 +270,9 @@ main = ->
       el.on 'click', func, false
 
   if (page = document.body.attr 'id')?
-    THIS = new window[dashToCamel page]()
+    obj = window[dashToCamel page]
+    if obj?
+      THIS = new obj()
 
 begin main
 

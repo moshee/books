@@ -4,9 +4,9 @@
 }
 
 $body-font: source sans pro, meiryo, sans-serif;
-$heading-font: magra, sans-serif;
+$heading-font: gudea, sans-serif;
 $green: #5a1;
-$grey0: #f5f5f5;
+$grey0: #fafafa;
 $grey1: #f0f0f0;
 $grey2: #eaeaea;
 $grey3: #e5e5e5;
@@ -365,15 +365,14 @@ header {
 
 #cp {
 	position: fixed;
-	left: 32px;
-	top: 232px;
-	width: 64px;
-	padding: 0 8px;
+	right: 16px;
+	top: 16px;
 
 	a.profile-link {
-		display: block;
+		display: inline-block;
 		position: relative;
 		overflow: visible;
+		vertical-align: middle;
 
 		img {
 			height: 48px;
@@ -436,10 +435,6 @@ header {
 
 #main {
 	margin: 0 128px 64px;
-
-	h1 {
-		font-size: 30px;
-	}
 }
 
 .feed {
@@ -576,6 +571,100 @@ footer {
 	vertical-align: middle;
 }
 
+form#login {
+	display: block;
+	width: 384px;
+	margin: 0 auto;
+
+	input {
+		display: block;
+		width: 100%;
+		margin-bottom: 16px;
+	}
+
+	button {
+		float: right;
+	}
+}
+
+.vcard {
+	width: 256px;
+	float: left;
+	margin-right: 64px;
+
+	img {
+		width: 256px;
+		height: 256px;
+	}
+
+	h1 {
+		font-size: 32px;
+	}
+	h2 {
+		font-size: 20px;
+	}
+
+	// TODO: icons (developer = hammer, donor = heart or cash, etc)
+	.Developer {
+		color: #080;
+	}
+
+	.Banned {
+		color: #c00;
+	}
+
+	.summary {
+		margin-top: 16px;
+	}
+}
+
+.right-content {
+	float: right;
+	width: -webkit-calc(100% - 320px);
+
+	h1 {
+		margin-bottom: 32px;
+		font-size: 24px;
+	}
+}
+
+.flex {
+	display: flex;
+
+	.left-sidebar {
+		flex: 0 1 auto;
+	}
+	.right-content {
+		flex: 1 1 auto;
+	}
+}
+
+.tab-stack {
+	width: 100%;
+
+	li {
+		display: block;
+		margin-bottom: 4px;
+
+		a {
+			background: $grey0;
+			padding: 8px 16px;
+			display: block;
+
+			&:hover {
+			}
+		}
+
+		&.selected {
+			padding: 8px 16px;
+			font-weight: 700;
+			background: $green;
+			color: #fff;
+		}
+	}
+}
+
 @import 'series';
 @import 'signup';
+@import 'settings';
 @import '1280';

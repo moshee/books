@@ -1,0 +1,143 @@
+{{ define "user-profile" }}{{ template "head" }}
+<body id=user-profile>
+  {{ template "header-bar" }}
+  <aside id=cp>
+    {{ template "user-cp" .User }}
+  </aside>
+  <section id=main>
+{{ template "%user-profile" . }}
+  </section>
+{{ template "footer" }}
+</body>
+{{ end }}
+
+{{ define "%user-profile" }}
+{{ with .Them }}
+<aside class="left-sidebar vcard">
+  {{ if .Avatar }}
+  <img src=/img/{{ .Avatar }}.jpg>
+  {{ end }}
+  <h1>{{ .Name }}</h1>
+  {{ with .Privileges }}
+  <h2 class={{ . }}>{{ . }}</h2>
+  {{ end }}
+  {{ with .Summary }}
+  <section class=summary>
+  {{ smarkdown . }}
+  </section>
+  {{ end }}
+</aside>
+{{ end }}
+<section class=right-content>
+  {{ with .Reviews }}
+  <section id=user-ratings>
+    <h1>{{ $.User.Name }}’s opinions</h1>
+    {{ range . }}
+    <article class=review>
+      <div class=rating><sup>{{ .Rating }}</sup>╱<sub>5</sub></div>
+      <div class=byline>
+        <div class=by-name>Review: <a href=/series/{{ .BookSeries.Id }}>{{ .BookSeries.Title }}</a></div>
+        <div class=by-time>Written on <time datetime="{{ .RateDate.Format "2006-01-02T15:04:05Z0700" }}">{{ .RateDate.Format "2 Jan 2006" }}</time></div>
+      </div>
+      <div class=review-body>
+        {{ smarkdown .Review.String }}
+      </div>
+    </article>
+    {{ end }}
+  </section>
+  {{ end }}
+</section>
+<hr class=clear>
+{{ end }}
+
+{{ define "cp-user-profile" }}{{ end }}
+
+{{ define "_user-settings-sidebar" }}
+{{ end }}
+
+{{/* TODO: eliminate this ugly copypasta */}}
+{{ define "user-settings-profile" }}{{ template "head" }}
+<body id=user-settings>
+  {{ template "header-bar" }}
+  <aside id=cp>
+    {{ template "user-cp" .User }}
+  </aside>
+  <section id=main class=flex>
+    <aside class=left-sidebar>
+      <h1>Settings</h1>
+      <ul class=tab-stack>
+        <li class=selected>Profile</li>
+        <li><a href=/settings/feeds>Feeds</a></li>
+        <li><a href=/settings/account>Account</a></li>
+      </ul>
+    </aside>
+{{ template "%user-settings-profile" . }}
+  </section>
+{{ template "footer" }}
+</body>
+{{ end }}
+
+{{ define "%user-settings-profile" }}
+<section id=settings>
+  <h1>Profile settings</h1>
+  <p>TODO: this</p>
+</section>
+{{ end }}
+
+{{ define "user-settings-feeds" }}{{ template "head" }}
+<body id=user-settings>
+  {{ template "header-bar" }}
+  <aside id=cp>
+    {{ template "user-cp" .User }}
+  </aside>
+  <section id=main class=flex>
+    <aside class=left-sidebar>
+      <h1>Settings</h1>
+      <ul class=tab-stack>
+        <li><a href=/settings/profile>Profile</a></li>
+        <li class=selected>Feeds</li>
+        <li><a href=/settings/account>Account</a></li>
+      </ul>
+    </aside>
+{{ template "%user-settings-feeds" . }}
+  </section>
+{{ template "footer" }}
+</body>
+{{ end }}
+
+{{ define "%user-settings-feeds" }}
+<section id=settings>
+  <h1>Feeds</h1>
+  <p>TODO: this</p>
+</section>
+{{ end }}
+
+{{ define "user-settings-account" }}{{ template "head" }}
+<body id=user-settings>
+  {{ template "header-bar" }}
+  <aside id=cp>
+    {{ template "user-cp" .User }}
+  </aside>
+  <section id=main class=flex>
+    <aside class=left-sidebar>
+      <h1>Settings</h1>
+      <ul class=tab-stack>
+        <li><a href=/settings/profile>Profile</a></li>
+        <li><a href=/settings/feeds>Feeds</a></li>
+        <li class=selected>Account</li>
+      </ul>
+    </aside>
+{{ template "%user-settings-account" . }}
+  </section>
+{{ template "footer" }}
+</body>
+{{ end }}
+
+{{ define "%user-settings-account" }}
+<section id=settings>
+  <h1>Account settings</h1>
+  <p>TODO: this</p>
+</section>
+{{ end }}
+
+{{ define "cp-user-settings" }}{{ end }}

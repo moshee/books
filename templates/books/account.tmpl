@@ -1,9 +1,6 @@
 {{ define "signup" }}{{ template "head" }}
 <body id=signup>
 	{{ template "header-bar" }}
-	<aside id=cp>
-		{{ template "user-cp" }}
-	</aside>
 <section id=main>
 	{{ template "%signup" }}
 <hr class=clear>
@@ -48,4 +45,17 @@
 	<p>Check your e-mail inbox. You’ve been sent a link to activate your account before you can use it.</p>
 	<p>Once your account is activated, you can get to creating feeds, writing reviews, and the like.</p>
 </section>
+{{ end }}
+
+{{ define "login" }}{{ template "head" }}
+<body id=login>
+  {{ template "header-bar" }}
+  <section id=main>
+    <form id=login {{ if . }}data-location="{{ . }}"{{ end }}>
+      <input type=text id=username placeholder="Username or e-mail">
+      <input type=password id=password placeholder="Password">
+      <button type=button id=submit>Let me in!</button>
+    </form>
+  </section>
+</body>
 {{ end }}

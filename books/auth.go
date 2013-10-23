@@ -25,8 +25,18 @@ func exec(query string, args ...interface{}) error {
 }
 
 func (DBStore) CreateSession(id []byte, expires time.Time, username string) error {
-	return exec(`INSERT INTO books.sessions VALUES
-		( $1, (SELECT id FROM books.users WHERE name = $2 OR email = $2), $3 )`, id, username, expires)
+	return exec(`
+		INSERT INTO
+			books.sessions
+		VALUES (
+			$1,
+			( SELECT id
+			  FROM   books.users
+		 	  WHERE  name  = $2
+				 OR  email = $2 ),
+			$3
+		)
+		`, id, username, expires)
 }
 
 func (DBStore) ReadSession(id []byte) (*gas.Session, error) {
@@ -65,7 +75,18 @@ func (DBStore) UserAuthData(username string) (pass, salt []byte, err error) {
 		privs  Privileges
 		active bool
 	)
-	row := gas.DB.QueryRow("SELECT id, pass, salt, rights, active FROM books.users WHERE name = $1 OR email = $1", username)
+	row := gas.DB.QueryRow(`
+		SELECT
+			id,
+			pass,
+			salt,
+			rights,
+			active
+		FROM
+			books.users
+		WHERE name  = $1
+		   OR email = $1
+		`, username)
 	err = row.Scan(&id, &pass, &salt, &privs, &active)
 
 	if id <= 0 {

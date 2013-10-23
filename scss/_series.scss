@@ -124,7 +124,9 @@
 	}
 }
 
-#reviews {
+.review {
+	margin-bottom: 32px;
+
 	.rating {
 		font-size: 24px;
 		display: inline-block;
@@ -154,10 +156,6 @@
 		}
 	}
 
-	article.review {
-		margin-bottom: 32px;
-
-	}
 	.review-body {
 		margin-left: 40px;
 	}

@@ -3,7 +3,7 @@
 	<meta charset=utf-8>
 	<meta name=viewport content="initial-scale=1.0">
 	<meta name=description content="A place to discover and opinionate on Japanese print-based entertainment.">
-	<link rel=stylesheet href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Magra&subset=latin,latin-ext">
+	<link rel=stylesheet href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Gudea:700&subset=latin,latin-ext">
 	<title>True story</title>
 	<link rel=stylesheet href=/static/style.css>
 	<script src="/static/books.js"></script>
@@ -60,7 +60,6 @@
 		{{ end }}
 	</a>
 	<button id=logout-button>Log out</button>
-	<hr>
 {{ else }}
 	<form>
 		<input tabindex=2 name=user type=text placeholder="Username or email">
@@ -118,4 +117,15 @@
 	<h4><a href=/character/{{ .Id }}>{{ .Name }}</a></h4>
 	<p>{{ .CharacterType }}{{ if ne .CharacterRole 0 }} — {{ .CharacterRole }}{{ end }}</p>
 </li>
+{{ end }}
+
+{{ define "review" }}
+<div class=rating><sup>{{ .Rating }}</sup>╱<sub>5</sub></div>
+<div class=byline>
+	<div class=by-name><a href=/user/{{ .User.Id }}>{{ .User.Name }}</a></div>
+	<div class=by-time><time datetime="{{ .RateDate.Format "2006-01-02T15:04:05Z0700" }}">{{ .RateDate.Format "2 Jan 2006" }}</time></div>
+</div>
+<div class=review-body>
+	{{ smarkdown .Review.String }}
+</div>
 {{ end }}

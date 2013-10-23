@@ -13,7 +13,7 @@ type AJAXResponse struct {
 	Message string `json:"msg"`
 }
 
-func Login(g *gas.Gas) {
+func PostLogin(g *gas.Gas) {
 	if err := g.SignIn(); err != nil {
 
 		if booksError, ok := err.(Error); ok {
@@ -36,6 +36,8 @@ func Login(g *gas.Gas) {
 		g.JSON(&AJAXResponse{false, "There was an error logging you in. This error has been logged. Please try again later or complain on <a href=\"https://github.com/moshee/books/issues\">the issue tracker</a>."})
 		return
 	}
+
+	gas.DB.Exec("UPDATE books.users SET last_active = now() WHERE id = $1", user.Id)
 
 	g.Render("books", "user-cp", user)
 	if page := g.FormValue("page"); len(page) > 0 {

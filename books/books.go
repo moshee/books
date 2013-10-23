@@ -1,6 +1,7 @@
 package books
 
 import (
+	//"fmt"
 	"github.com/moshee/gas"
 	//"github.com/argusdusty/Ferret"
 	"strconv"
@@ -11,27 +12,18 @@ func Index(g *gas.Gas) {
 	g.Populate(&releases, "SELECT * FROM books.recent_releases LIMIT 15")
 
 	releaseFeed := &Feed{
-		Kind:  "release",
-		Title: "Latest Releases",
-		Items: releases,
+		OutputKind: ReleaseOutput,
+		Title:      "Latest Releases",
+		Items:      releases,
 	}
 
 	series := make([]BookSeries, 0, 15)
 	g.Populate(&series, "SELECT * FROM books.latest_series LIMIT 15")
 
 	seriesFeed := &Feed{
-		Kind:  "series",
-		Title: "New Titles",
-		Items: series,
-	}
-
-	news := make([]NewsPost, 0, 3)
-	g.Populate(&news, "SELECT * FROM books.latest_news LIMIT 3")
-
-	newsFeed := &Feed{
-		Kind:  "news",
-		Title: "Site News",
-		Items: news,
+		OutputKind: SeriesOutput,
+		Title:      "New Titles",
+		Items:      series,
 	}
 
 	var banner *Banner
@@ -49,7 +41,7 @@ func Index(g *gas.Gas) {
 		User   *User
 		Banner *Banner
 	}{
-		[]*Feed{releaseFeed, seriesFeed, newsFeed},
+		[]*Feed{releaseFeed, seriesFeed},
 		g.User().(*User),
 		banner,
 	})
@@ -61,6 +53,91 @@ func Signup(g *gas.Gas) {
 		return
 	}
 	g.Render("books", "signup", nil)
+}
+
+func Login(g *gas.Gas) {
+	if user := g.User().(*User); user != nil {
+		g.Reroute("/", 302, newBanner("friendly", "You're already logged in!", ""))
+		return
+	}
+
+	var data map[string]string
+
+	if rr := g.RerouteInfo; rr != nil {
+		if err := rr.Recover(&data); err != nil {
+			gas.Log(gas.Warning, "books login reroute: %v", err)
+		}
+	}
+
+	g.Render("books", "login", data["location"])
+}
+
+func UserProfile(g *gas.Gas) {
+	id, err := strconv.Atoi(g.Args["id"])
+	if err != nil {
+		g.Error(400, err)
+		return
+	}
+
+	me := g.User().(*User)
+
+	them := new(User)
+	g.Populate(them, "SELECT * FROM books.users WHERE id = $1", id)
+
+	reviews := make([]BookRating, 0, 3)
+
+	g.Populate(&reviews, `
+		SELECT
+			r.id,
+			r.user_id,
+			r.series_id,
+			s.title,
+			r.rating,
+			r.review,
+			r.rate_date
+		FROM
+			books.book_ratings r,
+			books.book_series s
+		WHERE r.user_id = $1
+		  AND s.id = r.series_id
+		  AND r.review IS NOT NULL
+		ORDER BY r.rate_date DESC
+		LIMIT 3
+		`, them.Id)
+
+	g.Render("books", "user-profile", &struct {
+		User    *User
+		Them    *User
+		Reviews []BookRating
+	}{
+		me,
+		them,
+		reviews,
+	})
+}
+
+func SettingsProfile(g *gas.Gas) {
+	g.Render("books", "user-settings-profile", &struct {
+		User *User
+	}{
+		g.User().(*User),
+	})
+}
+
+func SettingsFeeds(g *gas.Gas) {
+	g.Render("books", "user-settings-feeds", &struct {
+		User *User
+	}{
+		g.User().(*User),
+	})
+}
+
+func SettingsAccount(g *gas.Gas) {
+	g.Render("books", "user-settings-account", &struct {
+		User *User
+	}{
+		g.User().(*User),
+	})
 }
 
 func SeriesIndex(g *gas.Gas) {

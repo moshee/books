@@ -24,7 +24,7 @@ func (e Error) Error() string {
 var (
 	ErrBadPassword         = Error{401, "Invalid username or password."}
 	ErrUserBanned          = Error{401, "You are banned. Go away."}
-	ErrAccountNotActivated = Error{401, "Your account has not been activated yet. <a id=send-activation href=/activate>Click here</a> to resend the activation e-mail if you need."}
+	ErrAccountNotActivated = Error{401, "Your account has not been activated yet. <a id=send-activation href=/activate>Click here</a> to resend the activation e-mail if you need to."}
 )
 
 // Banner is used for showing notices, etc. on pages
@@ -482,20 +482,12 @@ type User struct {
 	Summary      sql.NullString `json:"summary,omitempty" sql:"user_summary"`
 	RegisterDate time.Time      `json:"register_date,omitempty"`
 	LastActive   time.Time      `json:"last_active,omitempty"`
-	Avatar       bool           `json:"-"`
+	Avatar       string         `json:"avatar,omitempty"`
 
 	// Not to be confused with Online(), Active indicates whether or not the
 	// user is an activated user on the site (has their activation email been
 	// sent yet, etc.). May be used for other purposes later such as banning.
 	Active bool `json:"-"`
-}
-
-func (self *User) AvatarFile() string {
-	if self.Avatar {
-		return "u" + strconv.Itoa(self.Id) + ".jpg"
-	} else {
-		return ""
-	}
 }
 
 // for templates, since they can't refer to constants defined in code here

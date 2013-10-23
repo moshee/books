@@ -6,7 +6,7 @@ INSERT INTO users VALUES
 	( DEFAULT, 'moshee@displaynone.us', 'moshee', '\x8c83c69a7cdc85a1ed602e443621aec8badb18c7ba03df09a0e20859acda4afb', '\x9cd6009f8b52575f07a12944dcec3e49', 30, 10, 'ザー・会長', <%= tstz %>, 'now'::timestamptz, true, true),
 	( DEFAULT, 'deu@pomf.eu', 'deu', <%= bytea %>, <%= bytea %>, 30, 10, 'hi my name is deu and I have bad taste', <%= tstz %>, 'now'::timestamptz, true, true),
 	( DEFAULT, 'franz@gj-bu.com', 'franz', <%= bytea %>, <%= bytea %>, 30, 10, 'constantly eating foods', <%= tstz %>, 'now'::timestamptz, true, true),
-	<%= rec(100) { ['DEFAULT', email, text(/[:first_name:]\d{0,4}/.gen), bytea, bytea, (if rand > 0.05 then 1 else 0 end), rand(0..10), (null or longstring(1..7)), tstz, tstz, bool, bool(0.9)] } %>
+	<%= rec(100) { ['DEFAULT', email, text(/[:first_name:]\d{0,4}/.gen), bytea, bytea, (if rand < 0.05 then 1 else 0 end), rand(0..10), (null or longstring(1..7)), tstz, tstz, bool, (null(0.2) or /[a-f0-9]{32}/.gen)] } %>
 
 INSERT INTO publishers VALUES
 	( DEFAULT, 'Kodansha', <%= tstz %>, NULL ),

@@ -174,14 +174,7 @@
         {{ with .Reviews }}
           {{ range . }}
         <article class=review>
-          <div class=rating><sup>{{ .Rating }}</sup>╱<sub>5</sub></div>
-          <div class=byline>
-            <div class=by-name><a href=/user/{{ .User.Id }}>{{ .User.Name }}</a></div>
-            <div class=by-time><time datetime="{{ .RateDate.Format "2006-01-02T15:04:05Z0700" }}">{{ .RateDate.Format "2 Jan 2006" }}</time></div>
-          </div>
-          <div class=review-body>
-            {{ smarkdown .Review.String }}
-          </div>
+          {{ template "review" . }}
         </article>
           {{ end }}
           {{ $l := len . }}

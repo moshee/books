@@ -243,16 +243,14 @@ CREATE TABLE users (
     summary       text,
     register_date timestamptz NOT NULL DEFAULT now(),
     last_active   timestamptz NOT NULL DEFAULT 'epoch'::timestamptz,
-    avatar        boolean     NOT NULL DEFAULT false,
+    avatar        text, -- avatar filename (sha256 hash)
     active        boolean     NOT NULL DEFAULT false
-);
 
-CREATE TABLE user_activations (
-    id          serial      PRIMARY KEY,
-    hash        text        NOT NULL,
-    user_id     int         NOT NULL REFERENCES users,
-    expire_date timestamptz NOT NULL DEFAULT now() + '24 hours',
-    expired     boolean     NOT NULL DEFAULT false
+    -- a unique hash for this user, used like an API key
+    hash          text        NOT NULL, 
+
+    -- deadline for clicking on the activation link
+    activate_by   timestamptz NOT NULL DEFAULT now() + '24 hours'
 );
 
 CREATE TABLE sessions (
