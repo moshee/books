@@ -51,10 +51,12 @@
 <body id=login>
   {{ template "header-bar" }}
   <section id=main>
+    <h1>Hold on!</h1>
+    <p>You need to log in before going there.</p>
     <form id=login {{ if . }}data-location="{{ . }}"{{ end }}>
-      <input type=text id=username placeholder="Username or e-mail">
-      <input type=password id=password placeholder="Password">
-      <button type=button id=submit>Let me in!</button>
+      <input type=text id=username name=user placeholder="Username or e-mail">
+      <input type=password id=password name=pass placeholder="Password">
+      <button id=submit>Let me in!</button>
     </form>
   </section>
 </body>

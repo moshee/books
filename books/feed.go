@@ -2,9 +2,11 @@ package books
 
 import (
 	"bytes"
+	"encoding/json"
 	"github.com/moshee/gas"
 	pg "github.com/moshee/pgtypes"
 	"html/template"
+	"io"
 	"time"
 )
 
@@ -19,6 +21,18 @@ const (
 	PublisherInput
 	GroupInput
 )
+
+func (i FeedInputKind) String() string {
+	return []string{
+		"series",
+		"authors",
+		"demographics",
+		"tags",
+		"magazines",
+		"publishers",
+		"groups",
+	}[i]
+}
 
 type FeedOutputKind int
 
@@ -47,68 +61,85 @@ func (self FeedOutput) MakeQuery(in FeedInputKind) string {
 }
 
 var FeedOutputs = []FeedOutput{
-	ReleaseOutput: FeedOutput{
+	ReleaseOutput: {
 		Head: `
-			SELECT releases.*
+			WITH release AS (
+				SELECT * FROM books.recent_releases
+			)
+			SELECT release.*
 			FROM
-				books.recent_releases releases,
-				books.feeds,`,
+				release,
+				books.feeds feed`,
 
 		Body: []string{
-			SeriesInput: `
+			SeriesInput: `,
 				books.book_series series
 			WHERE series.id = releases.series_id
-			  AND series.id = ANY ( feeds.include )
-			  AND series.id != ALL ( feeds.exclude )
+			  AND series.id = ANY ( feed.include )
+			  AND series.id != ALL ( feed.exclude )
 			`,
 
-			AuthorInput: `
-				books.authors,
-				books.production_credits credits,
+			AuthorInput: `,
+				books.authors author,
+				books.production_credits credit,
 				books.book_series series
-			WHERE series.id = releases.series_id 
-			  AND series.id = credits.series_id
-			  AND author.id = credits.author_id
-			  AND author.id = ANY ( feeds.include )
-			  AND author.id != ALL ( feeds.exclude )`,
+			WHERE series.id = release.series_id 
+			  AND series.id = credit.series_id
+			  AND author.id = credit.author_id
+			  AND author.id = ANY ( feed.include )
+			  AND author.id != ALL ( feed.exclude )`,
 
-			DemographicInput: `
+			DemographicInput: `,
 				
 			`,
 
-			TagInput: `
+			TagInput: `,
+				books.book_tags      tag,
+				books.book_tag_names tag_name,
+				books.book_series    series
+			WHERE series.id    = tag.series_id
+			  AND series.id    = release.series_id
+			  AND tag_name.id  = tag.tag_id
+			  AND release.tag && feed.include
+			  AND NOT release.tag && feed.exclude
+			`,
+
+			MagazineInput: `,
 				
 			`,
 
-			MagazineInput: `
+			PublisherInput: `,
 				
 			`,
 
-			PublisherInput: `
-				
-			`,
-
-			GroupInput: `
+			GroupInput: `,
 				
 			`,
 		},
 
 		Tail: `
-			  AND feeds.id = $1
-			ORDER BY releases.release_date DESC`,
+			  AND feed.id = $1
+			ORDER BY release.release_date DESC
+			`,
 
 		Items: func() interface{} {
 			var items []Release
 			return &items
 		},
 	},
-	SeriesOutput: FeedOutput{
+	SeriesOutput: {
 		Head: `
-			SELECT DISTINCT ON (series.id)
-				series.id,
-				series.name,
+			WITH series AS (
+				SELECT
+					id,
+					title
+				FROM
+					books.book_series
+				ORDER BY date_added DESC
+			)
+			SELECT
+				series.*
 			FROM
-				books.book_series series,
 				books.feeds`,
 
 		Body: []string{
@@ -133,11 +164,11 @@ var FeedOutputs = []FeedOutput{
 
 			TagInput: `,
 				books.book_tags      tags,
-				books.book_tag_names tag_names
+				books.book_tag_names tag_names,
 			WHERE series.id    = tags.series_id
 			  AND tag_names.id = tags.tag_id
-			  AND tag_names.id = ANY ( feeds.include )
-			  AND tag_names.id != ALL ( feeds.exclude )
+			  AND series.tags && feeds.include
+			  AND NOT series.tags && feeds.exclude
 			`,
 
 			MagazineInput: `,
@@ -174,17 +205,17 @@ var FeedOutputs = []FeedOutput{
 
 type Feed struct {
 	Id          int
-	InputKind   FeedInputKind
-	OutputKind  FeedOutputKind
-	Ref         string
-	Include     pg.IntArray
-	Exclude     pg.IntArray
+	InputKind   FeedInputKind  `json:"input"`
+	OutputKind  FeedOutputKind `json:"output"`
+	Ref         string         `json:"ref,omitempty"`
+	Include     pg.IntArray    `json:"include"`
+	Exclude     pg.IntArray    `json:"exclude"`
 	Creator     *User
-	Title       string
-	Description string
-	DateCreated time.Time
+	Title       string    `json:"name"`
+	Description string    `json:"description"`
+	DateCreated time.Time `json:"dateCreated"`
 
-	Items interface{}
+	Items interface{} `json:"items"`
 }
 
 // Execute the feed's associated template and return the output as safe HTML
@@ -195,10 +226,19 @@ func (self *Feed) Render() template.HTML {
 			"': no template found for '" + self.OutputKind.String() + "'")
 	}
 
+	if self.Items == nil {
+		err := self.Populate()
+		if err != nil {
+			return template.HTML("Error rendering feed '" + self.Title +
+				"': " + err.Error())
+		}
+	}
+
 	buf := new(bytes.Buffer)
 	err := t.Execute(buf, self.Items)
 	if err != nil {
-		return template.HTML("Error rendering for feed '" + self.Title + "': " + err.Error())
+		return template.HTML("Error rendering feed '" + self.Title +
+			"': " + err.Error())
 	}
 
 	return template.HTML(buf.Bytes())
@@ -212,4 +252,31 @@ func (self *Feed) Populate() error {
 	self.Items = output.Items()
 
 	return gas.Query(self.Items, query, self.Id)
+}
+
+// Controllers
+
+func PreviewFeed(g *gas.Gas) {
+	buf := new(bytes.Buffer)
+	defer g.Body.Close()
+	io.Copy(buf, g.Body)
+
+	feed := new(Feed)
+
+	if err := json.Unmarshal(buf.Bytes(), feed); err != nil {
+		g.WriteHeader(500)
+		g.JSON(&AJAXResponse{false, err.Error()})
+		return
+	}
+
+	feed.DateCreated = time.Now()
+	feed.Creator = g.User().(*User)
+
+	if err := feed.Populate(); err != nil {
+		g.WriteHeader(500)
+		g.JSON(&AJAXResponse{false, err.Error()})
+		return
+	}
+
+	g.Render("books", "feed-"+feed.OutputKind.String(), feed)
 }

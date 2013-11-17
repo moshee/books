@@ -204,8 +204,8 @@ CREATE VIEW recent_releases AS
         r.permalink,
         array_agg(ch.volume)                     chapter_volumes,
         array_agg(ch.num)                        chapter_nums,
-        array_agg(DISTINCT t.id   ORDER BY t.id) translator_ids,
-        array_agg(DISTINCT t.name ORDER BY t.id) translator_names
+        array_agg(DISTINCT t.id ORDER BY t.id) translator_ids,
+        array_agg(t.name        ORDER BY t.id) translator_names
     FROM
         releases r,
         book_series s,
@@ -244,7 +244,7 @@ CREATE TABLE users (
     register_date timestamptz NOT NULL DEFAULT now(),
     last_active   timestamptz NOT NULL DEFAULT 'epoch'::timestamptz,
     avatar        text, -- avatar filename (sha256 hash)
-    active        boolean     NOT NULL DEFAULT false
+    active        boolean     NOT NULL DEFAULT false,
 
     -- a unique hash for this user, used like an API key
     hash          text        NOT NULL, 
@@ -673,7 +673,6 @@ CREATE TABLE feeds (
     id           serial      PRIMARY KEY,
     input_kind   int         NOT NULL,
     output_kind  int         NOT NULL,
-    kind         text        NOT NULL,        -- Release, series, article, etc. Display format.
     ref          text        NOT NULL UNIQUE, -- A random string of bytes that identifies this feed (don't use the id)
     include      int[]       NOT NULL,
     exclude      int[]       NOT NULL DEFAULT '{}',

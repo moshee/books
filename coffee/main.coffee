@@ -21,6 +21,10 @@ Element::on = XMLHttpRequest::on = Window::on = (events, func, capture) ->
       @addEventListener 'touchend', func, capture
     @addEventListener evt, func, capture
 
+Element::clear = ->
+  while @hasChildNodes()
+    @removeChild @firstChild
+
 # Beginnings of DOMContentLoaded support. Fill in with polyfills later as
 # needed.
 begin = (func) ->
@@ -67,10 +71,12 @@ ajax = (opts) ->
   if opts.data?
     if opts.data.constructor.name is 'FormData'
       x.send opts.data
-    else
+    else if typeof opts.data is 'object'
       fd = new FormData
       fd.append key, val for key, val of opts.data
       x.send fd
+    else
+      x.send opts.data
   else
     x.send()
 
@@ -172,7 +178,7 @@ unError = (e) ->
 
 # global handlers
 
-login = (e) ->
+doLogin = (e, callback) ->
   loginButton = e.target
   form = loginButton.parentElement
 
@@ -210,26 +216,35 @@ login = (e) ->
       'page': document.body.attr 'id'
     async: true
     callback: (e) ->
-      # get rid of errors that might be left over
-      # form.removeChild error for error in $$ '.error', form
+      try
+        callback e
+      catch err
+        heading = 'Login failure'
+        if err.name?
+          heading += ': ' + err.name
 
-      x = e.srcElement
-      switch x.status
-        when 200
-          $('#cp').innerHTML = x.response
-          window.dispatchEvent new CustomEvent 'login', username: user.value
-          $('#logout-button').on 'click', logout
-        else
-          try
-            resp = JSON.parse x.response
-            error
-              heading: 'Login failure'
-              msg: resp.msg
-          catch e
-            console.log e
+        error
+          heading: heading
+          msg: err.message
 
-      loginButton.innerHTML = old
-      loginButton.attr disabled: null
+
+login = (e) ->
+  doLogin e, (e) ->
+    # get rid of errors that might be left over
+    # form.removeChild error for error in $$ '.error', form
+
+    x = e.target
+    switch x.status
+      when 200
+        $('#cp').innerHTML = x.response
+        window.dispatchEvent new CustomEvent 'login'
+        $('#logout-button').on 'click', logout
+      else
+        resp = JSON.parse x.response
+        throw message: resp.msg
+
+    loginButton.innerHTML = old
+    loginButton.attr disabled: null
 
 logout = (e) ->
   button = e.target
@@ -257,6 +272,19 @@ logout = (e) ->
           button.attr disabled: no
           button.innerText = old
 
+reveal = (e) ->
+  button = e.target
+  target = $ button.dataset.reveal
+  if not target?
+    return
+
+  target.classList.toggle 'folded'
+
+  if button.dataset.revealText?
+    oldText = button.innerText
+    button.innerText = button.dataset.revealText
+    button.dataset.revealText = oldText
+
 THIS = null
 
 main = ->
@@ -268,6 +296,9 @@ main = ->
     el = $ name
     if el?
       el.on 'click', func, false
+
+  for revealButton in $$ '[data-reveal]'
+    revealButton.on 'click', reveal
 
   if (page = document.body.attr 'id')?
     obj = window[dashToCamel page]

@@ -13,7 +13,7 @@
 	<li>
 		<h3><a href=/series/{{ .BookSeries.Id }}>{{ .Title }}</a>{{ if .Permalink }}<a class=feed-permalink href="{{ .Permalink }}"></a>{{ end }}</h3>
 		<div class=feed-item>
-			{{ if index .Chapters.Volumes 0 }}<div class="volume"><span class=hidden>v. </span>{{ collapse_range .Chapters.Volumes }}</div>{{ end }}
+			{{ if .Chapters.Volumes }}<div class="volume"><span class=hidden>v. </span>{{ collapse_range .Chapters.Volumes }}</div>{{ end }}
 			<div class="chapter"><span class=hidden>c. </span>{{ collapse_range .Chapters.Nums }}</div>
 			<div class="group-names">by {{ template "group-list" .TranslationGroups }}</div>
 			<time datetime="{{ .ReleaseDate | datetime }}">{{ ago .ReleaseDate }}</time>

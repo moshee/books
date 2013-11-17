@@ -45,9 +45,9 @@ func main() {
 
 	// User
 	r.Get("/settings", redirect("/settings/profile", 303))
-	r.Get("/settings/profile", requireLogin(books.SettingsProfile))
-	r.Get("/settings/feeds", requireLogin(books.SettingsFeeds))
-	r.Get("/settings/account", requireLogin(books.SettingsAccount))
+	r.Get("/settings/profile", requireLogin, books.SettingsProfile)
+	r.Get("/settings/feeds", requireLogin, books.SettingsFeeds)
+	r.Get("/settings/account", requireLogin, books.SettingsAccount)
 	r.Get("/user/{id}", books.UserProfile)
 
 	// Series
@@ -66,7 +66,7 @@ func main() {
 }
 
 func StaticHandler(g *gas.Gas) {
-	name := filepath.Join("./static", g.Args["path"])
+	name := filepath.Join("./static", g.Arg("path"))
 	http.ServeFile(g.ResponseWriter, g.Request, name)
 }
 
@@ -80,13 +80,9 @@ func redirect(path string, code int) gas.Handler {
 	}
 }
 
-func requireLogin(handler gas.Handler) gas.Handler {
-	return func(g *gas.Gas) {
-		if g.User().(*books.User) == nil {
-			g.Reroute("/login", 302, map[string]string{"location": g.URL.Path})
-			return
-		}
-		handler(g)
+func requireLogin(g *gas.Gas) {
+	if g.User().(*books.User) == nil {
+		g.Reroute("/login", 302, map[string]string{"location": g.URL.Path})
 	}
 }
 

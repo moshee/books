@@ -647,7 +647,6 @@ form#login {
 		margin-bottom: 4px;
 
 		a {
-			background: $grey0;
 			padding: 8px 16px;
 			display: block;
 
@@ -662,6 +661,10 @@ form#login {
 			color: #fff;
 		}
 	}
+}
+
+.folded {
+	display: none;
 }
 
 @import 'series';

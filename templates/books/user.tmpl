@@ -1,12 +1,12 @@
 {{ define "user-profile" }}{{ template "head" }}
 <body id=user-profile>
-  {{ template "header-bar" }}
-  <aside id=cp>
-    {{ template "user-cp" .User }}
-  </aside>
-  <section id=main>
+	{{ template "header-bar" }}
+	<aside id=cp>
+		{{ template "user-cp" .User }}
+	</aside>
+	<section id=main>
 {{ template "%user-profile" . }}
-  </section>
+	</section>
 {{ template "footer" }}
 </body>
 {{ end }}
@@ -14,38 +14,38 @@
 {{ define "%user-profile" }}
 {{ with .Them }}
 <aside class="left-sidebar vcard">
-  {{ if .Avatar }}
-  <img src=/img/{{ .Avatar }}.jpg>
-  {{ end }}
-  <h1>{{ .Name }}</h1>
-  {{ with .Privileges }}
-  <h2 class={{ . }}>{{ . }}</h2>
-  {{ end }}
-  {{ with .Summary }}
-  <section class=summary>
-  {{ smarkdown . }}
-  </section>
-  {{ end }}
+	{{ if .Avatar }}
+	<img src=/img/{{ .Avatar }}.jpg>
+	{{ end }}
+	<h1>{{ .Name }}</h1>
+	{{ with .Privileges }}
+	<h2 class={{ . }}>{{ . }}</h2>
+	{{ end }}
+	{{ with .Summary }}
+	<section class=summary>
+	{{ smarkdown . }}
+	</section>
+	{{ end }}
 </aside>
 {{ end }}
 <section class=right-content>
-  {{ with .Reviews }}
-  <section id=user-ratings>
-    <h1>{{ $.User.Name }}’s opinions</h1>
-    {{ range . }}
-    <article class=review>
-      <div class=rating><sup>{{ .Rating }}</sup>╱<sub>5</sub></div>
-      <div class=byline>
-        <div class=by-name>Review: <a href=/series/{{ .BookSeries.Id }}>{{ .BookSeries.Title }}</a></div>
-        <div class=by-time>Written on <time datetime="{{ .RateDate.Format "2006-01-02T15:04:05Z0700" }}">{{ .RateDate.Format "2 Jan 2006" }}</time></div>
-      </div>
-      <div class=review-body>
-        {{ smarkdown .Review.String }}
-      </div>
-    </article>
-    {{ end }}
-  </section>
-  {{ end }}
+	{{ with .Reviews }}
+	<section id=user-ratings>
+		<h1>{{ $.User.Name }}’s opinions</h1>
+		{{ range . }}
+		<article class=review>
+			<div class=rating><sup>{{ .Rating }}</sup>╱<sub>5</sub></div>
+			<div class=byline>
+				<div class=by-name>Review: <a href=/series/{{ .BookSeries.Id }}>{{ .BookSeries.Title }}</a></div>
+				<div class=by-time>Written on <time datetime="{{ .RateDate.Format "2006-01-02T15:04:05Z0700" }}">{{ .RateDate.Format "2 Jan 2006" }}</time></div>
+			</div>
+			<div class=review-body>
+				{{ smarkdown .Review.String }}
+			</div>
+		</article>
+		{{ end }}
+	</section>
+	{{ end }}
 </section>
 <hr class=clear>
 {{ end }}
@@ -58,85 +58,140 @@
 {{/* TODO: eliminate this ugly copypasta */}}
 {{ define "user-settings-profile" }}{{ template "head" }}
 <body id=user-settings>
-  {{ template "header-bar" }}
-  <aside id=cp>
-    {{ template "user-cp" .User }}
-  </aside>
-  <section id=main class=flex>
-    <aside class=left-sidebar>
-      <h1>Settings</h1>
-      <ul class=tab-stack>
-        <li class=selected>Profile</li>
-        <li><a href=/settings/feeds>Feeds</a></li>
-        <li><a href=/settings/account>Account</a></li>
-      </ul>
-    </aside>
+	{{ template "header-bar" }}
+	<aside id=cp>
+		{{ template "user-cp" .User }}
+	</aside>
+	<section id=main class=flex>
+		<aside class=left-sidebar>
+			<h1>Settings</h1>
+			<ul class=tab-stack>
+				<li class=selected>Profile</li>
+				<li><a href=/settings/feeds>Feeds</a></li>
+				<li><a href=/settings/account>Account</a></li>
+			</ul>
+		</aside>
 {{ template "%user-settings-profile" . }}
-  </section>
+	</section>
 {{ template "footer" }}
 </body>
 {{ end }}
 
 {{ define "%user-settings-profile" }}
 <section id=settings>
-  <h1>Profile settings</h1>
-  <p>TODO: this</p>
+	<h1>Profile settings</h1>
+	<p>TODO: this</p>
 </section>
 {{ end }}
 
 {{ define "user-settings-feeds" }}{{ template "head" }}
 <body id=user-settings>
-  {{ template "header-bar" }}
-  <aside id=cp>
-    {{ template "user-cp" .User }}
-  </aside>
-  <section id=main class=flex>
-    <aside class=left-sidebar>
-      <h1>Settings</h1>
-      <ul class=tab-stack>
-        <li><a href=/settings/profile>Profile</a></li>
-        <li class=selected>Feeds</li>
-        <li><a href=/settings/account>Account</a></li>
-      </ul>
-    </aside>
+	{{ template "header-bar" }}
+	<aside id=cp>
+		{{ template "user-cp" .User }}
+	</aside>
+	<section id=main class=flex>
+		<aside class=left-sidebar>
+			<h1>Settings</h1>
+			<ul class=tab-stack>
+				<li><a href=/settings/profile>Profile</a></li>
+				<li class=selected>Feeds</li>
+				<li><a href=/settings/account>Account</a></li>
+			</ul>
+		</aside>
 {{ template "%user-settings-feeds" . }}
-  </section>
+	</section>
 {{ template "footer" }}
 </body>
 {{ end }}
 
 {{ define "%user-settings-feeds" }}
-<section id=settings>
-  <h1>Feeds</h1>
-  <p>TODO: this</p>
+<section class=settings id=feed-settings>
+	<h1>Feeds</h1>
+	<div id=feed-list>
+		{{ with .Feeds }}
+		<ul>
+			{{ range . }}
+			<li>
+				<div class=feed-ref>{{ .Ref }}</div>
+				<table class=feed-info>
+					<tr><th>Title</th><td>{{ .Title }}</td></tr>
+					<tr><th>Description</th><td>{{ .Description }}</td></tr>
+					<tr><th>Output kind</th><td>{{ .OutputKind }}</td></tr>
+					<tr><th>Input kind</th><td>{{ .InputKind }}</td></tr>
+					<tr><th>Including</th><td>{{ .Include }}</td></tr>
+					<tr><th>Excluding</th><td>{{ .Exclude }}</td></tr>
+				</table>
+				{{ .Render }}
+			</li>
+			{{ end }}
+		</ul>
+		{{ else }}
+		<p>No feeds.</p>
+		{{ end }}
+		<button type=button data-reveal=#add-feed data-reveal-text="↑ Done">↓ Add a feed...</button>
+		<div id=add-feed class=folded>
+			<form>
+				<input type=text name=name placeholder="Feed name">
+				<input type=text name=description placeholder="Feed description">
+				<hr class=clear>
+				<label for=input-type>Input type</label>
+				<select name=input-type id=input-type>
+					<option value=0>Series</option>
+					<option value=1>Author</option>
+					<option value=2>Demographic</option>
+					<option value=3>Tag</option>
+					<option value=4>Magazine</option>
+					<option value=5>Publisher</option>
+					<option value=6>Group</option>
+				</select>
+				<input type=text name=input-type-search placeholder="Search...">
+				<button type=button id=add-feed-include>✓ Include it</button>
+				<button type=button id=add-feed-exclude>✗ Exclude it</button>
+				<div id=input-type-filter-list></div>
+				<hr class=clear>
+				<label for=output-type-release>Release output</label>
+				<input type=radio name=output-type id=output-type-release value=0>
+				<label for=output-type-series>Series output</label>
+				<input type=radio name=output-type id=output-type-series value=1>
+				<button type=button id=submit-add-feed>Add it</button>
+			</form>
+			<div id=feed-preview>
+				<h3>Preview</h3>
+				<div class=feed>
+					<p>Fill out at least the input and output types to see a preview</p>
+				</div>
+			</div>
+		</div>
+	</div>
 </section>
 {{ end }}
 
 {{ define "user-settings-account" }}{{ template "head" }}
 <body id=user-settings>
-  {{ template "header-bar" }}
-  <aside id=cp>
-    {{ template "user-cp" .User }}
-  </aside>
-  <section id=main class=flex>
-    <aside class=left-sidebar>
-      <h1>Settings</h1>
-      <ul class=tab-stack>
-        <li><a href=/settings/profile>Profile</a></li>
-        <li><a href=/settings/feeds>Feeds</a></li>
-        <li class=selected>Account</li>
-      </ul>
-    </aside>
+	{{ template "header-bar" }}
+	<aside id=cp>
+		{{ template "user-cp" .User }}
+	</aside>
+	<section id=main class=flex>
+		<aside class=left-sidebar>
+			<h1>Settings</h1>
+			<ul class=tab-stack>
+				<li><a href=/settings/profile>Profile</a></li>
+				<li><a href=/settings/feeds>Feeds</a></li>
+				<li class=selected>Account</li>
+			</ul>
+		</aside>
 {{ template "%user-settings-account" . }}
-  </section>
+	</section>
 {{ template "footer" }}
 </body>
 {{ end }}
 
 {{ define "%user-settings-account" }}
 <section id=settings>
-  <h1>Account settings</h1>
-  <p>TODO: this</p>
+	<h1>Account settings</h1>
+	<p>TODO: this</p>
 </section>
 {{ end }}
 

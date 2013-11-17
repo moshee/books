@@ -24,6 +24,9 @@ class Randgen
     n = opts[:length]
     n.times.map { rand(CJK.sample).chr(Encoding::UTF_8) }.join('')
   end
+  def self.hash(opts={})
+    Array.new(opts[:length]).map { rand(255).to_s(16) }.join
+  end
 end
 
 def cjk_name
@@ -41,7 +44,8 @@ $files[:countries].map! { |s| s.split(',').first }
 
 def sample(sym)
   p = $files[sym.intern].sample.sub('[', '').sub(']', '').tr('[]', '()').gsub('( )', ' ').gsub('|)', ')').gsub('(|', '(').gsub('||', '|')
-  text Regexp.new(p).gen end
+  s = Regexp.new(p).gen + " #{rand 100}"
+  text s end
 
 =begin
 
