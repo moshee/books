@@ -287,7 +287,7 @@ reveal = (e) ->
 
 THIS = null
 
-main = ->
+begin ->
   pairs =
     '#login-button': login
     '#logout-button': logout
@@ -305,9 +305,7 @@ main = ->
     if obj?
       THIS = new obj()
 
-begin main
-
-# separate event handler because we want this to happen even if main() fails
+# separate event handler because we want this to happen even if the other fails
 begin ->
   document.head.appendChild make
     tag: 'script'

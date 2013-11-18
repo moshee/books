@@ -1,10 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/moshee/books/books"
 	"github.com/moshee/gas"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -14,6 +17,22 @@ import (
 )
 
 func main() {
+	config := make(map[string]string)
+
+	configFile, err := os.Open("config.json")
+	if err != nil {
+		gas.Log(gas.Fatal, "read config: %v", err)
+	}
+
+	configContents, err := ioutil.ReadAll(configFile)
+	if err != nil {
+		gas.Log(gas.Fatal, "read config: %v", err)
+	}
+
+	if err = json.Unmarshal(configContents, &config); err != nil {
+		gas.Log(gas.Fatal, "read config: %v", err)
+	}
+
 	gas.TemplateFunc("books", "slugify", slugify)
 	gas.TemplateFunc("books", "ago", ago)
 	gas.TemplateFunc("books", "collapse_range", collapse_range)
@@ -55,7 +74,7 @@ func main() {
 
 	r.Get("/", books.Index)
 
-	gas.InitDB("postgres", "user=postgres dbname=postgres sslmode=disable")
+	gas.InitDB("postgres", buildPgArgs(config))
 
 	// set to 9 because the apple tv is a piece of shit
 	// don't forget to remove this line in production
@@ -63,6 +82,15 @@ func main() {
 	gas.UseCookies(books.DBStore{})
 
 	gas.Ignition()
+}
+
+func buildPgArgs(config map[string]string) string {
+	keys := []string{"user", "dbname", "sslmode"}
+	for i, key := range keys {
+		keys[i] += "=" + config[key]
+	}
+
+	return strings.Join(keys, " ")
 }
 
 func StaticHandler(g *gas.Gas) {

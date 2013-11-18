@@ -8,3 +8,4 @@ datagen/test*
 .sass-cache
 static/*.css
 static/*.js
+.DS_Store
