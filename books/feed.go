@@ -227,7 +227,7 @@ func (self *Feed) Render() template.HTML {
 	}
 
 	if self.Items == nil {
-		err := self.Populate()
+		err := self.Populate(20)
 		if err != nil {
 			return template.HTML("Error rendering feed '" + self.Title +
 				"': " + err.Error())
@@ -245,11 +245,16 @@ func (self *Feed) Render() template.HTML {
 }
 
 // Generate and execute the query, populating Items so that it can be used in
-// Render.
-func (self *Feed) Populate() error {
+// Render. If limit is >= 0, a LIMIT clause will be added to the query.
+func (self *Feed) Populate(limit int) error {
 	output := FeedOutputs[self.OutputKind]
 	query := output.MakeQuery(self.InputKind)
 	self.Items = output.Items()
+
+	if limit >= 0 {
+		query += " LIMIT $2"
+		return gas.Query(self.Items, query, self.Id, limit)
+	}
 
 	return gas.Query(self.Items, query, self.Id)
 }
@@ -272,7 +277,7 @@ func PreviewFeed(g *gas.Gas) {
 	feed.DateCreated = time.Now()
 	feed.Creator = g.User().(*User)
 
-	if err := feed.Populate(); err != nil {
+	if err := feed.Populate(10); err != nil {
 		g.WriteHeader(500)
 		g.JSON(&AJAXResponse{false, err.Error()})
 		return

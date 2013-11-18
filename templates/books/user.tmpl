@@ -122,7 +122,9 @@
 					<tr><th>Including</th><td>{{ .Include }}</td></tr>
 					<tr><th>Excluding</th><td>{{ .Exclude }}</td></tr>
 				</table>
-				{{ .Render }}
+        <div class=feed>
+          {{ .Render }}
+        </div>
 			</li>
 			{{ end }}
 		</ul>

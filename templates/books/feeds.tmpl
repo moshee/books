@@ -8,7 +8,7 @@
 {{ end }}
 
 {{ define "feed-release" }}
-<ul>
+<ul class="release-feed">
 	{{ range . }}
 	<li>
 		<h3><a href=/series/{{ .BookSeries.Id }}>{{ .Title }}</a>{{ if .Permalink }}<a class=feed-permalink href="{{ .Permalink }}"></a>{{ end }}</h3>
@@ -36,7 +36,7 @@
 {{ end }}
 
 {{ define "feed-series" }}
-<ul>
+<ul class="series-feed">
 	{{ range . }}
 	<li>
 		<h3><a href=/series/{{ .Id }}>{{ .Title }}</a></h3>
